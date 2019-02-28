@@ -1043,6 +1043,11 @@ MonoBehaviour:
   cameraMatA: {fileID: 2100000, guid: 2f4fa8012a8bd4948966506ca2b372f9, type: 2}
   cameraB: {fileID: 892760304}
   cameraMatB: {fileID: 2100000, guid: a414c566273479a4795e5c554b0a1b03, type: 2}
+  cameraData:
+  - camera: {fileID: 1764413243}
+    material: {fileID: 2100000, guid: 2f4fa8012a8bd4948966506ca2b372f9, type: 2}
+  - camera: {fileID: 892760304}
+    material: {fileID: 2100000, guid: a414c566273479a4795e5c554b0a1b03, type: 2}
 --- !u!4 &508318238
 Transform:
   m_ObjectHideFlags: 0
