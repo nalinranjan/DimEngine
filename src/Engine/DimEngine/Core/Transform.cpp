@@ -261,7 +261,7 @@ __inline void DimEngine::Transform::Translate(XMVECTOR translation, Space space)
 
 
 		case SELF:
-			localPosition = XMVectorAdd(localPosition, translation);
+			localPosition = XMVectorAdd(localPosition, XMVector3Rotate(translation, GetRotation()));
 			break;
 		}
 
