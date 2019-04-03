@@ -71,6 +71,7 @@ namespace DimEngine
 			void SortRenderables();
 			void PerformZPrepass(SimpleVertexShader* shader, ID3D11DeviceContext* context);
 			void DrawForward(ID3D11DeviceContext* context);
+			void DrawForward(ID3D11DeviceContext* context, Camera* camera);
 		};
 	}
 }

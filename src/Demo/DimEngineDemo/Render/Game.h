@@ -42,26 +42,39 @@ private:
 	SimpleVertexShader* vsZPrepass;
 	SimpleVertexShader* vertexShader;
 	SimplePixelShader* pixelShader;
+	SimplePixelShader* psPortal;
 
 	//XMFLOAT4X4 worldMatrix;
 	//XMFLOAT4X4 viewMatrix;
 	//XMFLOAT4X4 projectionMatrix;
 
-	Mesh* mesh;
-	Mesh* mesh1;
+	Mesh* sphereMesh;
+	Mesh* cubeMesh;
 
 	//CollisionManager* physics;
 
 	//std::vector<Entity*> entityVector;
 
 	Material* simpleMaterial;
+	Material* portalMaterial;
 
-	DirectionalLight* directionalLight;
 	GameObject* camera;
-	GameObject* go1;
-	GameObject* go2;
+	DirectionalLight* directionalLight;
+	Camera* portalCamera;
+
+	GameObject* floor;
+	GameObject* portal;
+
+	GameObject* cube;
+	GameObject* sphere;
 
 	ID3D11DepthStencilState* zPrepassDepthStencilState;
+
+	ID3D11SamplerState* portalSampler;
+
+	ID3D11DepthStencilView* portalDSV;
+	ID3D11ShaderResourceView* portalRSV;
+	ID3D11RenderTargetView* portalRTV;
 
 	//PointLight pointLight;
 };

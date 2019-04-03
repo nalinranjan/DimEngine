@@ -255,8 +255,13 @@ void DimEngine::Rendering::RenderingEngine::PerformZPrepass(SimpleVertexShader* 
 
 void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* context)
 {
-	Viewer& viewer = viewerAllocator[cameraList->viewer];
-	
+	DrawForward(context, cameraList);
+}
+
+void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* context, Camera* camera)
+{
+	Viewer& viewer = viewerAllocator[camera->viewer];
+
 	XMMATRIX viewMatrix = viewer.viewMatrix;
 	XMMATRIX projectionMatrix = viewer.projectionMatrix;
 	XMMATRIX viewProjectionMatrix = XMMatrixMultiply(projectionMatrix, viewMatrix);
@@ -272,6 +277,11 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 
 		pixelShader->SetData("light", lightSourceAllocator.GetMemoryAddress(), sizeof(LightSource));
 		pixelShader->SetFloat4("cameraPosition", cameraPosition);
+		if (material->getTexture())
+		{
+			pixelShader->SetShaderResourceView("TexAlbedo", material->getTexture());
+			pixelShader->SetSamplerState("Sampler", material->getSampler());
+		}
 
 		pixelShader->CopyAllBufferData();
 		pixelShader->SetShader();

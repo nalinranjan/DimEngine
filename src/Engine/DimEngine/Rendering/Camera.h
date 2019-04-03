@@ -17,10 +17,14 @@ namespace DimEngine
 
 
 	private:
+		ID3D11RenderTargetView* renderTarget;
+
 		f32 fov;
 		f32 nearZ;
 		f32 farZ;
+		
 		i32 viewer;
+
 		Camera* next;
 		Camera* previous;
 
@@ -28,6 +32,13 @@ namespace DimEngine
 	public:
 		Camera();
 		~Camera();
+
+		void SetRenderTarget(ID3D11RenderTargetView* renderTarget);
+		void SetFov(f32 value);
+		void SetNearZ(f32 value);
+		void SetFarZ(f32 value);
+
+		void RenderToRenderTarget(ID3D11DeviceContext* context, ID3D11DepthStencilView* depthStencilView);
 	};
 }
 #endif // !CAMERA_H

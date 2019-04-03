@@ -81,6 +81,9 @@ void Game::LoadShaders()
 	pixelShader = new SimplePixelShader(device, context);
 	pixelShader->LoadShaderFile(pixel);
 
+	psPortal = new SimplePixelShader(device, context);
+	psPortal->LoadShaderFile((wpath + std::wstring(L"/ps_portal")).c_str());
+
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
 	depthStencilDesc.DepthEnable = true;
 	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
@@ -109,159 +112,181 @@ void Game::CreateMatrces()
 
 void Game::CreateBasicGeometry()
 {
-	//simpleMaterial = new Material(vertexShader, pixelShader, 0, 0);
 	char* filename = (char*)"../Assets/Models/sphere.obj";
 	char* cubefile = (char*)"../Assets/Models/cube.obj";
-	mesh = new Mesh(device, filename);
-	mesh1 = new Mesh(device, cubefile);
-	//Entity* temp = new Entity(mesh, simpleMaterial);
-	//Entity* temp1 = new Entity(mesh1, simpleMaterial);
-	//Entity* temp2 = new Entity(mesh1, simpleMaterial);
-	//Entity* temp3 = new Entity(mesh, simpleMaterial);
-	//Entity* temp4 = new Entity(mesh, simpleMaterial);
-	//Entity* temp5 = new Entity(mesh, simpleMaterial);
-	//Entity* terrain = new Entity(mesh1, simpleMaterial);
-	//entityVector[0] = temp;
-	//entityVector[1] = temp1;
-	//entityVector[2] = temp2;
-	//entityVector[3] = temp3;
-	//entityVector[4] = temp4;
-	//entityVector[5] = temp5;
-	//entityVector[6] = terrain;
-	//temp->SetTranslation(-2, 0, 0);
-	//temp1->SetTranslation(2.5, 1.5, 0);
-	//temp2->SetTranslation(-2.5, 1, 0);
-	//temp3->SetTranslation(0.0, 1, 0);
-	//temp4->SetTranslation(-1, -1, 0);
-	//temp5->SetTranslation(2, 0, 0);
-	////temp1->SetRotation(0.5f, 0.0f, 0.0f);
-	//terrain->SetTranslation(0, -10, 0);
-	//terrain->SetScale(100, 1, 100);
-	//Collider* collider = physics->addSphereCollider(temp, 0.5f, 0.5f, true, false);
-	//Collider* collider1 = physics->addBoxCollider(temp1, XMFLOAT3{ 1,1,1 }, 0.7f, true, false);
-	//Collider* collider2 = physics->addBoxCollider(temp2, XMFLOAT3{ 1,1,1 }, 0.4f, true, false);
-	//Collider* collider3 = physics->addSphereCollider(temp3, 0.5f, 0.7f, true, false);
-	//Collider* collider4 = physics->addSphereCollider(temp4, 0.5f, 0.5f, true, false);
-	//Collider* collider5 = physics->addSphereCollider(temp5, 0.5f, 0.7f, true, false);
-	//Collider* collider6 = physics->addBoxCollider(terrain,XMFLOAT3{100,1,100}, 1.0f, false, true);
-	//collider->ApplyForce({ 0.5f,0,0.1f });
-	//collider1->ApplyForce({ -1.5f,0,0.0f });
-	////collider1->ApplyAngularForce({ -0.5f,0.0f,0.0f });
-	//collider2->ApplyForce({ 1.5f,0,0.0f });
-	//collider3->ApplyForce({ -0.9f,0,0.1f });
-	//collider4->ApplyForce({ 1.0f,0,-0.1f });
-	//collider5->ApplyForce({ -1.4f,0,0.1f });
+	sphereMesh = new Mesh(device, filename);
+	cubeMesh = new Mesh(device, cubefile);
+
+	// D3D resources
+	ID3D11Texture2D* texture;
+
+	// Create texture
+	D3D11_TEXTURE2D_DESC textureDesc = {};
+	textureDesc.Height = 512;
+	textureDesc.Width = 512;
+	textureDesc.MipLevels = 1;
+	textureDesc.ArraySize = 1;
+	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.MiscFlags = 0;
+
+	device->CreateTexture2D(&textureDesc, nullptr, &texture);
+
+	// Create Render Target View to bind the texture as a render target
+	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
+	rtvDesc.Format = textureDesc.Format;
+	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	rtvDesc.Texture2D.MipSlice = 0;
+
+	device->CreateRenderTargetView(texture, &rtvDesc, &portalRTV);
+
+	// Create Shader Resource View to bind the texture as a shader resource
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	srvDesc.Format = textureDesc.Format;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = 1;
+
+	device->CreateShaderResourceView(texture, &srvDesc, &portalRSV);
+
+	// Release reference to the texture buffer as it's no longer required
+	texture->Release();
+
+	//ID3D11SamplerState* basicSampler;
+	D3D11_SAMPLER_DESC samplerDesc = {};
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	device->CreateSamplerState(&samplerDesc, &portalSampler);
+
+	// Create Depth Stencil View for Render Targets
+	D3D11_TEXTURE2D_DESC depthStencilDesc;
+	depthStencilDesc.Width = 512;
+	depthStencilDesc.Height = 512;
+	depthStencilDesc.MipLevels = 1;
+	depthStencilDesc.ArraySize = 1;
+	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthStencilDesc.CPUAccessFlags = 0;
+	depthStencilDesc.MiscFlags = 0;
+	depthStencilDesc.SampleDesc.Count = 1;
+	depthStencilDesc.SampleDesc.Quality = 0;
+
+	// Create the depth buffer and its view, then 
+	// release our reference to the texture
+	ID3D11Texture2D* depthBufferTexture;
+	device->CreateTexture2D(&depthStencilDesc, 0, &depthBufferTexture);
+	device->CreateDepthStencilView(depthBufferTexture, 0, &portalDSV);
+	depthBufferTexture->Release();
 
 	simpleMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr);
+	portalMaterial = new Material(vertexShader, psPortal, portalRSV, portalSampler);
 	
 	camera = new GameObject();
+	camera->SetLocalRotation(0, -180, 0);
 	camera->AddComponent<Camera>();
 
+	portalCamera = (new GameObject())->AddComponent<Camera>();
+	portalCamera->SetRenderTarget(portalRTV);
+
 	GameObject* directionalLightObject = new GameObject();
-	directionalLightObject->SetRotation(-90, 0, 0);
+	directionalLightObject->SetRotation(90, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
 	
-	go1 = new GameObject();
-	go1->SetPosition(0, 0, 10);
-	go1->SetLocalRotation(45, 0, 0);
-	go1->SetLocalScale(1, 2, 1);
-	go1->AddComponent<Renderer>(simpleMaterial, mesh1);
+	floor = new GameObject();
+	floor->SetPosition(0, -2, 0);
+	floor->SetLocalScale(100, 0.1f, 100);
+	floor->AddComponent<Renderer>(simpleMaterial, cubeMesh);
 
-	go2 = new GameObject();
-	go2->SetParent(go1);
-	go2->SetLocalPosition(0, 4, 0);
-	go2->AddComponent<Renderer>(simpleMaterial, mesh1);
+	portal = new GameObject();
+	portal->SetLocalPosition(0, 0, 10);
+	portal->SetLocalScale(2, 5, 0.1f);
+	portal->AddComponent<Renderer>(portalMaterial, cubeMesh);
 
-	GameObject* go3 = new GameObject();
-	go3->SetParent(go2);
-	go3->SetLocalPosition(0, 2, 0);
-	go3->AddComponent<Renderer>(simpleMaterial, mesh);
+	cube = new GameObject();
+	cube->SetLocalPosition(0, 0, 15);
+	cube->AddComponent<Renderer>(simpleMaterial, cubeMesh);
 
-	GameObject* go4 = new GameObject();
+	sphere = new GameObject();
+	sphere->SetLocalPosition(0, 0, -5);
+	sphere->AddComponent<Renderer>(simpleMaterial, sphereMesh);
 }
 
 void Game::OnResize()
 {
-	// Handle base-level DX resize stuff
 	DXCore::OnResize();
 
 	Global::SetScreenRatio((float)width / height);
-
-	//XMMATRIX projection = camera->UpdateProjection((float)width / height);
-	//XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(projection));
 }
 
 void Game::Update(float deltaTime, float totalTime)
 {
-	//physics->CollisionsDetection(0, physics->NumCoolidersHandled, deltaTime, totalTime);
-	
-	if (GetAsyncKeyState(VK_ESCAPE)) Quit();
-
-	//XMMATRIX view = camera->Update();
-	//
-	//XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(view));
+	if (GetAsyncKeyState(VK_ESCAPE))
+		Quit();
 
 	if (GetAsyncKeyState('W') & 0x8000)
-		camera->Translate(0.0f, 0.0f, deltaTime, SELF);
+		camera->Translate(0.0f, 0.0f, deltaTime);
 
 	if (GetAsyncKeyState('A') & 0x8000)
-		camera->Translate(-deltaTime, 0.0f, 0.0f, SELF);
+		camera->Translate(-deltaTime, 0.0f, 0.0f);
 
 	if (GetAsyncKeyState('S') & 0x8000)
-		camera->Translate(0.0f, 0.0f, -deltaTime, SELF);
+		camera->Translate(0.0f, 0.0f, -deltaTime);
 
 	if (GetAsyncKeyState('D') & 0x8000)
-		camera->Translate(deltaTime, 0.0f, 0.0f, SELF);
+		camera->Translate(deltaTime, 0.0f, 0.0f);
 
 	if (GetAsyncKeyState(VK_SPACE) & 0x8000)
-		camera->Translate(0.0f, deltaTime, 0.0f, SELF);
+		camera->Translate(0.0f, deltaTime, 0.0f);
 
 	if (GetAsyncKeyState('X') & 0x8000)
-		camera->Translate(0.0f, -deltaTime, 0.0f, SELF);
+		camera->Translate(0.0f, -deltaTime, 0.0f);
 
-	go1->Rotate(0, 0, 20 * deltaTime);
-	go2->Rotate(0, 0, -50 * deltaTime);
+	XMVECTOR v = camera->GetPosition();
+	printf("( %f, %f, %f, %f )\n", v.m128_f32[0], v.m128_f32[1], v.m128_f32[2], v.m128_f32[3]);
 }
 
 void Game::Draw(float deltaTime, float totalTime)
 {
-	//backgroud color
-	const float color[4] = { 0, 0, 0, 0 };
-
-	//-set backgroud color
-	//-clear depth buffer
-	context->ClearRenderTargetView(backBufferRTV, color);
-	context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-	//
-	////-------------------------------------
-
-	//for (int countOfEntity = 0; countOfEntity < entityVector.size(); countOfEntity++) {
-	//	entityVector[countOfEntity]->SetWorldMatrix();
-	//	entityVector[countOfEntity]->PrepareMatrix(viewMatrix, projectionMatrix);
-	//	entityVector[countOfEntity]->SetPointLight(pointLight, "pointLight");
-	//	entityVector[countOfEntity]->SetLight(directionalLight, "light");
-	//	entityVector[countOfEntity]->CopyAllBufferData();
-	//	entityVector[countOfEntity]->SetShader();
-	//	//set vertex buffer and index buffer inside entity class
-	//	entityVector[countOfEntity]->Draw(context);
-	//}
-
-	////-------------------------------------
-
 	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
 	renderingEngine->UpdateRenderables();
 	renderingEngine->UpdateViewers();
 	renderingEngine->UpdateLightSources();
 	renderingEngine->SortRenderables();
 
-	context->OMSetDepthStencilState(nullptr, 0);
+
+	//context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	//context->OMSetDepthStencilState(nullptr, 0);
+
+	//portalCamera->RenderToRenderTarget(context, depthStencilView);
+
+	//D3D11_VIEWPORT viewport = {};
+	//viewport.TopLeftX = 0;
+	//viewport.TopLeftY = 0;
+	//viewport.Width = (float)width;
+	//viewport.Height = (float)height;
+	//viewport.MinDepth = 0.0f;
+	//viewport.MaxDepth = 1.0f;
+	//context->RSSetViewports(1, &viewport);
+
+
+	const float color[4] = { 0.4f, 1, 1, 0 };
+
+	context->ClearRenderTargetView(backBufferRTV, color);
+	context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
+
 	renderingEngine->PerformZPrepass(vsZPrepass, context);
 	
 	context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
 	renderingEngine->DrawForward(context);
 
-	//End of rendering one frame
 	swapChain->Present(0, 0);
 }
 

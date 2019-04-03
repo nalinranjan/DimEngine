@@ -3,6 +3,8 @@
 
 DimEngine::Camera::Camera()
 {
+	renderTarget = nullptr;
+
 	fov = 0.25f * 3.1415926535f;
 	nearZ = 0.1f;
 	farZ = 100;
@@ -18,6 +20,58 @@ DimEngine::Camera::~Camera()
 		RenderingEngine::GetSingleton()->DestroyViewer(viewer);
 
 	RenderingEngine::GetSingleton()->RemoveCamera(this);
+}
+
+void DimEngine::Camera::SetRenderTarget(ID3D11RenderTargetView * renderTarget)
+{
+	this->renderTarget = renderTarget;
+}
+
+void DimEngine::Camera::SetFov(f32 value)
+{
+	fov = value;
+}
+
+void DimEngine::Camera::SetNearZ(f32 value)
+{
+	nearZ = value;
+}
+
+void DimEngine::Camera::SetFarZ(f32 value)
+{
+	farZ = value;
+}
+
+void DimEngine::Camera::RenderToRenderTarget(ID3D11DeviceContext* context, ID3D11DepthStencilView* depthStencilView)
+{
+	if (renderTarget)
+	{
+		D3D11_VIEWPORT rtViewport = {};
+		rtViewport.TopLeftX = 0;
+		rtViewport.TopLeftY = 0;
+		rtViewport.Width = 512;
+		rtViewport.Height = 512;
+		rtViewport.MinDepth = 0.0f;
+		rtViewport.MaxDepth = 1.0f;
+		context->RSSetViewports(1, &rtViewport);
+
+		const float color[4] = { 0.69f, 0.88f, 0.9f, 0.0f };
+
+
+
+		// Render to textures
+
+		context->ClearRenderTargetView(renderTarget, color);
+		context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+		context->OMSetRenderTargets(1, &renderTarget, depthStencilView);
+
+		RenderingEngine::GetSingleton()->DrawForward(context, this);
+
+		// Set the viewport back to its original state
+		//rtViewport.Width = (float)width;
+		//rtViewport.Height = (float)height;
+		//context->RSSetViewports(1, &rtViewport);
+	}
 }
 
 //void Camera::SetRotationX(float _rotationX) {

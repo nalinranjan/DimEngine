@@ -55,7 +55,7 @@ namespace DimEngine
 			DynamicPoolAllocator(i32 capacity)
 			{
 				if (capacity == 0)
-					memory == nullptr;
+					memory = nullptr;
 				else
 				{
 					memory = reinterpret_cast<T*>(_aligned_malloc(capacity * sizeof(T), 16));
