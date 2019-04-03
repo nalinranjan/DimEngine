@@ -15,23 +15,35 @@ namespace DimEngine
 {
 	namespace Physics
 	{
-		class PhysicsEngine : IDynamicBVHQueryCallback
+		class __declspec(dllexport) PhysicsEngine : IDynamicBVHQueryCallback
 		{
-		private:
-			static PhysicsEngine* singleton;
+			friend class Collider;
 
-			static const PhysicsEngine* GetSingleton();
+
+		public:
+			static PhysicsEngine* singleton;
 			static void Initialize();
+			static PhysicsEngine* GetSingleton();
+			void CollisionsDetection(float deltaTime, float totalTime);
+
+		private:
+			
 
 			DynamicBVH<Collider> hierarchy;
 			Stack<int> movedObjects;
+			Collider* colliderList;
 			Collision* collisionList;
 
 			PhysicsEngine();
 
+			
+			void AddCollider(Collider* collider);
 			void AddCollision(i32 node1, i32 node2);
 
+			void RemoveCollider(Collider* collider);
+
 			void SolveCollision();
+			
 			bool DynamicBVHTestOverlapCallback(i32 node1, i32 node2);
 		};
 	}

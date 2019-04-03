@@ -2,7 +2,7 @@
 
 DimEngine::Physics::PhysicsEngine* DimEngine::Physics::PhysicsEngine::singleton = nullptr;
 
-const DimEngine::Physics::PhysicsEngine* DimEngine::Physics::PhysicsEngine::GetSingleton()
+DimEngine::Physics::PhysicsEngine* DimEngine::Physics::PhysicsEngine::GetSingleton()
 {
 	if (!singleton)
 		Initialize();
@@ -12,10 +12,23 @@ const DimEngine::Physics::PhysicsEngine* DimEngine::Physics::PhysicsEngine::GetS
 
 void DimEngine::Physics::PhysicsEngine::Initialize()
 {
+	singleton = new PhysicsEngine();
 }
 
 DimEngine::Physics::PhysicsEngine::PhysicsEngine()
 {
+	colliderList = nullptr;
+}
+
+void DimEngine::Physics::PhysicsEngine::AddCollider(Collider* collider)
+{
+	collider->next = colliderList;
+	collider->previous = nullptr;
+
+	if (colliderList)
+		colliderList->previous = collider;
+
+	colliderList = collider;
 }
 
 void DimEngine::Physics::PhysicsEngine::AddCollision(i32 node1, i32 node2)
@@ -33,11 +46,60 @@ void DimEngine::Physics::PhysicsEngine::AddCollision(i32 node1, i32 node2)
 	}
 }
 
+void DimEngine::Physics::PhysicsEngine::RemoveCollider(Collider* collider)
+{
+	if (!colliderList)
+		return;
+
+	Collider* next = collider->next;
+	Collider* previous = collider->previous;
+
+	if (previous)
+		previous->next = next;
+
+	if (next)
+		next = previous;
+
+	if (collider == colliderList)
+		colliderList = next;
+}
+
 void DimEngine::Physics::PhysicsEngine::SolveCollision()
 {
 	for (int i = 0; i < movedObjects.GetSize(); ++i)
 		hierarchy.IsOverlappingWith(movedObjects[i], this);
 }
+
+void DimEngine::Physics::PhysicsEngine::CollisionsDetection(float deltaTime, float totalTime)
+{
+	for (Collider* a = colliderList; a; a = a->next)
+	{
+		//collider->ApplyGravity(deltaTime);
+		if (a->next == nullptr) continue;
+		for (Collider* b = b -> next; b; b = b->next)
+
+		{
+			// in the future, if the collider belongs to the subObject of current checking one, it should has the option to ignore it.
+
+			if (a != b){
+
+				bool collied = a->IsOverlappingWith(b, totalTime);
+				if (collied) {
+					a->PreventOverlaps();
+					b->PreventOverlaps();
+					a->LogCollision(b, totalTime);
+					b->LogCollision(a, totalTime);
+				}
+				else if (a->CollidedWith[b] != 0 && !collied) {
+					a->CollidedWith[b] = 0.0f;
+					b->CollidedWith[a] = 0.0f;
+				}
+			}
+		}
+		a->Update(deltaTime);
+	}
+}
+
 
 bool DimEngine::Physics::PhysicsEngine::DynamicBVHTestOverlapCallback(i32 node1, i32 node2)
 {

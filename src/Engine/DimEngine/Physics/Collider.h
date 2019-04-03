@@ -24,16 +24,30 @@ namespace DimEngine
 
 		class __declspec(dllexport) Collider : public GameComponent
 		{
+			friend class PhysicsEngine;
+
+
 		protected:
+			std::unordered_map<Collider*, float> CollidedWith;
 			BoundingVolumeType type;
 			BoundingVolume* boundingVolume;
 
+			Collider* next;
+			Collider* previous;
 
-		public:
+			XMVECTOR previousPos;
+
+			Collider();
+			~Collider();
+
 			BoundingVolumeType GetType();
 			BoundingVolume* GetBoundingVolume();
+			bool IsTrigger;
 
+			void LogCollision(Collider* other, float currentTime);
+			void PreventOverlaps();
 			bool IsOverlappingWith(Collider* other, float currentTime);
+			void Update(float deltaTime);
 		};
 
 		//bool GetSeparatingPlane(XMVECTOR RPos, XMVECTOR Plane, BoxCollider* a, BoxCollider* b);
