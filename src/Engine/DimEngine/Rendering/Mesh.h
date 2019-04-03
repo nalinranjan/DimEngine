@@ -28,7 +28,7 @@ namespace DimEngine
 
 		public:
 			Mesh(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber, ID3D11Device* device);
-			Mesh(ID3D11Device* device, char* filename);
+			Mesh(ID3D11Device* device, const char* filename);
 			~Mesh();
 
 			void* operator new(size_t size);

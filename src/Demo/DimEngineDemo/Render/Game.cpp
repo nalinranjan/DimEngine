@@ -16,22 +16,6 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	vertexShader = nullptr;
 	pixelShader = nullptr;
 
-	//entityVector.resize(7);
-	//for (int countOfVector = 0; countOfVector < entityVector.size(); countOfVector++)
-	//	entityVector[countOfVector] = NULL;
-
-	//camera = new Camera();
-	//physics = new CollisionManager(200);
-	//simpleMaterial = NULL;
-
-	//directionalLight.AmbientColor = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	//directionalLight.DiffuseColor = XMFLOAT4(0, 0, 0.5, 1);
-	//directionalLight.Direction = XMFLOAT3(1, -1, 0);
-
-	//pointLight.AmbientColor = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f);
-	//pointLight.DiffuseColor = XMFLOAT4(0.0f, 0.0f, 0.7f, 1.0f);
-	//pointLight.Position = XMFLOAT3(0, 2.0f, -1.0f);
-
 	Global::SetScreenRatio(1280.0f / 720.0f);
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -54,6 +38,8 @@ Game::~Game()
 
 void Game::Init()
 {
+	rm = ResourceManager::GetSingleton();
+	rm->Initialize(device, context);
 	LoadShaders();
 	CreateMatrces();
 	CreateBasicGeometry();
@@ -110,10 +96,8 @@ void Game::CreateMatrces()
 void Game::CreateBasicGeometry()
 {
 	//simpleMaterial = new Material(vertexShader, pixelShader, 0, 0);
-	char* filename = (char*)"../Assets/Models/sphere.obj";
-	char* cubefile = (char*)"../Assets/Models/cube.obj";
-	mesh = new Mesh(device, filename);
-	mesh1 = new Mesh(device, cubefile);
+	Mesh* sphereMesh = rm->CreateMesh("sphere", "../Assets/Models/sphere.obj");
+	Mesh* cubeMesh = rm->CreateMesh("cube", "../Assets/Models/cube.obj");
 	//Entity* temp = new Entity(mesh, simpleMaterial);
 	//Entity* temp1 = new Entity(mesh1, simpleMaterial);
 	//Entity* temp2 = new Entity(mesh1, simpleMaterial);
@@ -165,17 +149,17 @@ void Game::CreateBasicGeometry()
 	go1->SetPosition(0, 0, 10);
 	go1->SetLocalRotation(45, 0, 0);
 	go1->SetLocalScale(1, 2, 1);
-	go1->AddComponent<Renderer>(simpleMaterial, mesh1);
+	go1->AddComponent<Renderer>(simpleMaterial, cubeMesh);
 
 	go2 = new GameObject();
 	go2->SetParent(go1);
 	go2->SetLocalPosition(0, 4, 0);
-	go2->AddComponent<Renderer>(simpleMaterial, mesh1);
+	go2->AddComponent<Renderer>(simpleMaterial, cubeMesh);
 
 	GameObject* go3 = new GameObject();
 	go3->SetParent(go2);
 	go3->SetLocalPosition(0, 2, 0);
-	go3->AddComponent<Renderer>(simpleMaterial, mesh);
+	go3->AddComponent<Renderer>(simpleMaterial, sphereMesh);
 
 	GameObject* go4 = new GameObject();
 }

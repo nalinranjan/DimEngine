@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SimpleShader.h"
+#include "Texture.h"
 
 namespace DimEngine
 {
@@ -14,6 +15,12 @@ namespace DimEngine
 				SimplePixelShader* _pixelShader,
 				ID3D11ShaderResourceView* _texture,
 				ID3D11SamplerState* _sampler
+			);
+
+			Material(
+				SimpleVertexShader* _vertexShader,
+				SimplePixelShader* _pixelShader,
+				Texture* texture
 			);
 
 			SimpleVertexShader* GetVertexShader();

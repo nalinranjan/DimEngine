@@ -11,6 +11,8 @@
 #include "Rendering/SimpleShader.h"
 #include "Rendering/Vertex.h"
 
+#include "Core/ResourceManager.h"
+
 #include "DXCore.h"
 
 //using namespace Colliders;
@@ -47,8 +49,7 @@ private:
 	//XMFLOAT4X4 viewMatrix;
 	//XMFLOAT4X4 projectionMatrix;
 
-	Mesh* mesh;
-	Mesh* mesh1;
+	ResourceManager* rm;
 
 	//CollisionManager* physics;
 

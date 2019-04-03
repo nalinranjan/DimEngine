@@ -8,7 +8,7 @@ DimEngine::Rendering::Mesh::Mesh(Vertex* vertices, int verticesNumber, unsigned 
 
 DimEngine::Rendering::Mesh::Mesh(
 	ID3D11Device* device,
-	char* filename) {
+	const char* filename) {
 	// File input object
 	std::ifstream obj(filename);
 
