@@ -1,10 +1,25 @@
 #include <cstdlib>
 
 #include "Collider.h"
+#include "PhysicsEngine.h"
 
 using namespace DirectX;
 
-f32 collisionCheckBack = 0.00f;
+f32 collisionCheckBack = 0.05f;
+
+void DimEngine::Physics::Collider::LogCollision(Collider * other, float currentTime)
+{
+	CollidedWith[other] = currentTime;
+}
+
+void DimEngine::Physics::Collider::PreventOverlaps()
+{
+	if (!gameObject->IsStatic()) {
+		// revert the pos to previous frame
+		gameObject->SetPosition(previousPos);
+	}
+    //previousPos = gameObject->GetPosition();
+}
 
 bool DimEngine::Physics::Collider::IsOverlappingWith(Collider* other, float currentTime)
 {
@@ -53,6 +68,22 @@ bool DimEngine::Physics::Collider::IsOverlappingWith(Collider* other, float curr
 	}
 
 	throw "NOT IMPLEMENTED";
+}
+
+void DimEngine::Physics::Collider::Update(float deltaTime)
+{
+	previousPos = gameObject->GetPosition();
+}
+
+DimEngine::Physics::Collider::Collider()
+{
+	IsTrigger = false;
+	PhysicsEngine::GetSingleton()->AddCollider(this);
+}
+
+DimEngine::Physics::Collider::~Collider()
+{
+	PhysicsEngine::GetSingleton()->RemoveCollider(this);
 }
 
 DimEngine::Physics::BoundingVolumeType DimEngine::Physics::Collider::GetType()

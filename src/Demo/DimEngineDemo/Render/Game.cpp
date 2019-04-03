@@ -7,9 +7,12 @@
 #include "Rendering/RenderingEngine.h"
 #include "Rendering/Mesh.h"
 
+#include "Physics/PhysicsEngine.h"
+
 using namespace DirectX;
 using namespace DimEngine;
 using namespace DimEngine::Rendering;
+using namespace DimEngine::Physics;
 
 Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720, true)
 {
@@ -57,6 +60,7 @@ void Game::Init()
 	LoadShaders();
 	CreateMatrces();
 	CreateBasicGeometry();
+	DimEngine::Physics::PhysicsEngine::Initialize();
 }
 
 void Game::LoadShaders()
@@ -178,6 +182,7 @@ void Game::CreateBasicGeometry()
 	go3->AddComponent<Renderer>(simpleMaterial, mesh);
 
 	GameObject* go4 = new GameObject();
+
 }
 
 void Game::OnResize()
@@ -221,6 +226,8 @@ void Game::Update(float deltaTime, float totalTime)
 
 	go1->Rotate(0, 0, 20 * deltaTime);
 	go2->Rotate(0, 0, -50 * deltaTime);
+
+	DimEngine::Physics::PhysicsEngine::GetSingleton()->CollisionsDetection(deltaTime,totalTime);
 }
 
 void Game::Draw(float deltaTime, float totalTime)

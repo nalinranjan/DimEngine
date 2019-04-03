@@ -24,7 +24,7 @@ namespace DimEngine
 
 			f32 mass;
 			bool isAffectedByGravity;
-
+			bool isKinematic;
 
 		public:
 			RigidBody();
