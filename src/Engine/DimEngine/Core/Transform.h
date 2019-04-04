@@ -12,7 +12,7 @@
 
 using namespace DirectX;
 using namespace DimEngine::Rendering;
-
+using namespace std;
 
 namespace DimEngine
 {
@@ -34,7 +34,7 @@ namespace DimEngine
 
 		Transform* parent;
 		size_t index;
-		std::vector<Transform*> children;
+		vector<Transform*> children;
 
 
 	public:

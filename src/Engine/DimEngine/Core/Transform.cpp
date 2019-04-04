@@ -67,7 +67,7 @@ __inline XMVECTOR DimEngine::Transform::GetLocalRotation()
 
 __inline XMVECTOR DimEngine::Transform::GetRotation()
 {
-	return parent ? XMQuaternionMultiply(localRotation, parent->GetRotation()) : localRotation;
+	return parent ? XMQuaternionNormalizeEst(XMQuaternionMultiply(localRotation, parent->GetRotation())) : localRotation;
 }
 
 __inline XMVECTOR DimEngine::Transform::GetLocalScale()
@@ -157,17 +157,17 @@ __inline void DimEngine::Transform::SetLocalRotation(XMVECTOR rotation)
 
 __inline void DimEngine::Transform::SetRotation(f32 x, f32 y, f32 z)
 {
-	SetLocalRotation(parent ? XMQuaternionMultiply(XMQuaternionRotationRollPitchYaw(XMConvertToRadians(x), XMConvertToRadians(y), XMConvertToRadians(z)), XMQuaternionInverse(parent->GetRotation())) : XMQuaternionRotationRollPitchYaw(XMConvertToRadians(x), XMConvertToRadians(y), XMConvertToRadians(z)));
+	SetLocalRotation(parent ? XMQuaternionNormalizeEst(XMQuaternionMultiply(XMQuaternionRotationRollPitchYaw(XMConvertToRadians(x), XMConvertToRadians(y), XMConvertToRadians(z)), XMQuaternionInverse(parent->GetRotation()))) : XMQuaternionRotationRollPitchYaw(XMConvertToRadians(x), XMConvertToRadians(y), XMConvertToRadians(z)));
 }
 
 __inline void DimEngine::Transform::SetRotation(XMFLOAT4 rotation)
 {
-	SetLocalRotation(parent ? XMQuaternionMultiply(XMLoadFloat4(&rotation), XMQuaternionInverse(parent->GetRotation())) : XMLoadFloat4(&rotation));
+	SetLocalRotation(parent ? XMQuaternionNormalizeEst(XMQuaternionMultiply(XMLoadFloat4(&rotation), XMQuaternionInverse(parent->GetRotation()))) : XMLoadFloat4(&rotation));
 }
 
 __inline void DimEngine::Transform::SetRotation(XMVECTOR rotation)
 {
-	SetLocalRotation(parent ? XMQuaternionMultiply(rotation, XMQuaternionInverse(parent->GetRotation())) : rotation);
+	SetLocalRotation(parent ? XMQuaternionNormalizeEst(XMQuaternionMultiply(rotation, XMQuaternionInverse(parent->GetRotation()))) : rotation);
 }
 
 __inline void DimEngine::Transform::SetLocalScale(f32 x, f32 y, f32 z)
@@ -223,7 +223,7 @@ void DimEngine::Transform::SetParent(Transform* parent)
 		index = parent->__AddChild(this);
 
 		SetLocalPosition(XMVector3Transform(position, XMMatrixInverse(nullptr, parent->GetWorldMatrix())));
-		SetLocalRotation(XMQuaternionMultiply(rotation, XMQuaternionInverse(parent->GetRotation())));
+		SetLocalRotation(XMQuaternionNormalizeEst(XMQuaternionMultiply(rotation, XMQuaternionInverse(parent->GetRotation()))));
 		SetLocalScale(XMVectorDivide(scale, parent->GetScale()));
 	}
 	else
@@ -312,15 +312,15 @@ __inline void DimEngine::Transform::Rotate(XMVECTOR rotation, Space space)
 			if (parent)
 			{
 				XMVECTOR parentRotation = parent->GetRotation();
-				localRotation = XMQuaternionMultiply(localRotation, XMQuaternionMultiply(parentRotation, XMQuaternionMultiply(rotation, XMQuaternionInverse(parentRotation))));
+				localRotation = XMQuaternionNormalizeEst(XMQuaternionMultiply(localRotation, XMQuaternionMultiply(parentRotation, XMQuaternionMultiply(rotation, XMQuaternionInverse(parentRotation)))));
 			}
 			else
-				localRotation = XMQuaternionMultiply(rotation, localRotation);
+				localRotation = XMQuaternionNormalizeEst(XMQuaternionMultiply(rotation, localRotation));
 			break;
 
 
 		case SELF:
-			localRotation = XMQuaternionMultiply(rotation, localRotation);
+			localRotation = XMQuaternionNormalizeEst(XMQuaternionMultiply(rotation, localRotation));
 			break;
 		}
 
