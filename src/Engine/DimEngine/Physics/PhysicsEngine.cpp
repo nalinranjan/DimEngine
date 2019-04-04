@@ -106,10 +106,19 @@ void DimEngine::Physics::PhysicsEngine::CollisionsDetection(float deltaTime, flo
 				else if (a->CollidedWith[b] != 0 && !collied) {
 					a->CollidedWith[b] = 0.0f;
 					b->CollidedWith[a] = 0.0f;
+
+					if (a->IsTrigger || b->IsTrigger) {
+						a->gameObject->IsTriggerExit(b->gameObject);
+						b->gameObject->IsTriggerExit(a->gameObject);
+					}
+					else {
+						a->gameObject->IsCollisionExit(b->gameObject);
+						b->gameObject->IsCollisionExit(a->gameObject);
+					}
 				}
 			}
 		}
-		a->Update(deltaTime);
+		a->Update(deltaTime,totalTime);
 	}
 }
 

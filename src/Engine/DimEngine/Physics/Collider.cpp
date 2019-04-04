@@ -70,8 +70,35 @@ bool DimEngine::Physics::Collider::IsOverlappingWith(Collider* other, float curr
 	throw "NOT IMPLEMENTED";
 }
 
-void DimEngine::Physics::Collider::Update(float deltaTime)
+void DimEngine::Physics::Collider::Update(float deltaTime,float totalTime)
 {
+
+
+	std::unordered_map<Collider*, float>::iterator it = CollidedWith.begin();
+	while (it != CollidedWith.end())
+
+	{
+
+		if (it->second + collisionCheckBack < totalTime && abs(it->second) > 0.01f) {
+
+			it->second = 0.0f;
+
+		}
+		else {
+
+			if (IsTrigger) {
+				gameObject->IsTriggerStay(it->first->gameObject);
+			}
+			else {
+				gameObject->IsCollisionStay(it->first->gameObject);
+			}
+
+		}
+
+		it++;
+
+	}
+
 	previousPos = gameObject->GetPosition();
 }
 
