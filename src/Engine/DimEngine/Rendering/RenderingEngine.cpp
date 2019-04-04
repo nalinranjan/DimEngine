@@ -255,7 +255,7 @@ void DimEngine::Rendering::RenderingEngine::PerformZPrepass(SimpleVertexShader* 
 
 void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* context)
 {
-	DrawForward(context, cameraList);
+	DrawForward(context, cameraList->next);
 }
 
 void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* context, Camera* camera)

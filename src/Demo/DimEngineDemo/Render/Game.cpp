@@ -112,10 +112,8 @@ void Game::CreateMatrces()
 
 void Game::CreateBasicGeometry()
 {
-	char* filename = (char*)"../Assets/Models/sphere.obj";
-	char* cubefile = (char*)"../Assets/Models/cube.obj";
-	sphereMesh = new Mesh(device, filename);
-	cubeMesh = new Mesh(device, cubefile);
+	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
+	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
 
 	// D3D resources
 	ID3D11Texture2D* texture;
@@ -184,12 +182,11 @@ void Game::CreateBasicGeometry()
 	device->CreateTexture2D(&depthStencilDesc, 0, &depthBufferTexture);
 	device->CreateDepthStencilView(depthBufferTexture, 0, &portalDSV);
 	depthBufferTexture->Release();
-
 	simpleMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr);
 	portalMaterial = new Material(vertexShader, psPortal, portalRSV, portalSampler);
 	
 	camera = new GameObject();
-	camera->SetLocalRotation(0, -180, 0);
+	camera->SetLocalRotation(0, 180, 0);
 	camera->AddComponent<Camera>();
 
 	portalCamera = (new GameObject())->AddComponent<Camera>();
@@ -205,24 +202,28 @@ void Game::CreateBasicGeometry()
 	floor->AddComponent<Renderer>(simpleMaterial, cubeMesh);
 
 	portal = new GameObject();
-	portal->SetLocalPosition(0, 0, 10);
+	portal->SetLocalPosition(0, 0, -10);
 	portal->SetLocalScale(2, 5, 0.1f);
-	portal->AddComponent<Renderer>(portalMaterial, cubeMesh);
+	portal->AddComponent<Renderer>(simpleMaterial, cubeMesh);
 
 	cube = new GameObject();
-	cube->SetLocalPosition(0, 0, 15);
+	cube->SetLocalPosition(0, 0, -15);
 	cube->AddComponent<Renderer>(simpleMaterial, cubeMesh);
 
 	sphere = new GameObject();
-	sphere->SetLocalPosition(0, 0, -5);
+	sphere->SetLocalPosition(0, 0, 5);
 	sphere->AddComponent<Renderer>(simpleMaterial, sphereMesh);
 }
 
 void Game::OnResize()
 {
+	// Handle base-level DX resize stuff
 	DXCore::OnResize();
 
 	Global::SetScreenRatio((float)width / height);
+
+	//XMMATRIX projection = camera->UpdateProjection((float)width / height);
+	//XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(projection));
 }
 
 void Game::Update(float deltaTime, float totalTime)
@@ -231,25 +232,22 @@ void Game::Update(float deltaTime, float totalTime)
 		Quit();
 
 	if (GetAsyncKeyState('W') & 0x8000)
-		camera->Translate(0.0f, 0.0f, deltaTime);
+		camera->Translate(0.0f, 0.0f, deltaTime, SELF);
 
 	if (GetAsyncKeyState('A') & 0x8000)
-		camera->Translate(-deltaTime, 0.0f, 0.0f);
+		camera->Translate(-deltaTime, 0.0f, 0.0f, SELF);
 
 	if (GetAsyncKeyState('S') & 0x8000)
-		camera->Translate(0.0f, 0.0f, -deltaTime);
+		camera->Translate(0.0f, 0.0f, -deltaTime, SELF);
 
 	if (GetAsyncKeyState('D') & 0x8000)
-		camera->Translate(deltaTime, 0.0f, 0.0f);
+		camera->Translate(deltaTime, 0.0f, 0.0f, SELF);
 
 	if (GetAsyncKeyState(VK_SPACE) & 0x8000)
-		camera->Translate(0.0f, deltaTime, 0.0f);
+		camera->Translate(0.0f, deltaTime, 0.0f, SELF);
 
 	if (GetAsyncKeyState('X') & 0x8000)
-		camera->Translate(0.0f, -deltaTime, 0.0f);
-
-	XMVECTOR v = camera->GetPosition();
-	printf("( %f, %f, %f, %f )\n", v.m128_f32[0], v.m128_f32[1], v.m128_f32[2], v.m128_f32[3]);
+		camera->Translate(0.0f, -deltaTime, 0.0f, SELF);
 }
 
 void Game::Draw(float deltaTime, float totalTime)
@@ -261,19 +259,19 @@ void Game::Draw(float deltaTime, float totalTime)
 	renderingEngine->SortRenderables();
 
 
-	//context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	//context->OMSetDepthStencilState(nullptr, 0);
+	context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	context->OMSetDepthStencilState(nullptr, 0);
 
-	//portalCamera->RenderToRenderTarget(context, depthStencilView);
+	portalCamera->RenderToRenderTarget(context, depthStencilView);
 
-	//D3D11_VIEWPORT viewport = {};
-	//viewport.TopLeftX = 0;
-	//viewport.TopLeftY = 0;
-	//viewport.Width = (float)width;
-	//viewport.Height = (float)height;
-	//viewport.MinDepth = 0.0f;
-	//viewport.MaxDepth = 1.0f;
-	//context->RSSetViewports(1, &viewport);
+	D3D11_VIEWPORT viewport = {};
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = (float)width;
+	viewport.Height = (float)height;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	context->RSSetViewports(1, &viewport);
 
 
 	const float color[4] = { 0.4f, 1, 1, 0 };
@@ -286,6 +284,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	
 	context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
 	renderingEngine->DrawForward(context);
+
 
 	swapChain->Present(0, 0);
 }
