@@ -299,6 +299,9 @@ namespace DimEngine
 
 							//ForceCalculation(a, b, aNormal, bNormal, collisionPoint, totalTime);
 
+
+							/* assign collision into the log*/
+							
 							return true;
 						}
 					}

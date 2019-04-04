@@ -11,6 +11,8 @@
 #include "Rendering/SimpleShader.h"
 #include "Rendering/Vertex.h"
 
+#include "Core/ResourceManager.h"
+
 #include "DXCore.h"
 
 //using namespace Colliders;
@@ -44,16 +46,10 @@ private:
 	SimplePixelShader* pixelShader;
 	SimplePixelShader* psPortal;
 
-	//XMFLOAT4X4 worldMatrix;
-	//XMFLOAT4X4 viewMatrix;
-	//XMFLOAT4X4 projectionMatrix;
+	ResourceManager* rm;
 
 	Mesh* sphereMesh;
 	Mesh* cubeMesh;
-
-	//CollisionManager* physics;
-
-	//std::vector<Entity*> entityVector;
 
 	Material* simpleMaterial;
 	Material* portalMaterial;
@@ -63,7 +59,10 @@ private:
 	Camera* portalCamera;
 
 	GameObject* floor;
+
 	GameObject* portal;
+	GameObject* pillar1;
+	GameObject* pillar2;
 
 	GameObject* cube;
 	GameObject* sphere;
@@ -75,6 +74,4 @@ private:
 	ID3D11DepthStencilView* portalDSV;
 	ID3D11ShaderResourceView* portalRSV;
 	ID3D11RenderTargetView* portalRTV;
-
-	//PointLight pointLight;
 };

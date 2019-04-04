@@ -7,6 +7,7 @@ DimEngine::Physics::RigidBody::RigidBody()
 
 	mass = 1;
 	isAffectedByGravity = true;
+	isKinematic = false;
 }
 
 DimEngine::Physics::RigidBody::RigidBody(XMVECTOR velocity, XMVECTOR angularVelocity)
@@ -16,17 +17,18 @@ DimEngine::Physics::RigidBody::RigidBody(XMVECTOR velocity, XMVECTOR angularVelo
 
 	mass = 1;
 	isAffectedByGravity = true;
+	isKinematic = false;
 }
 
 void DimEngine::Physics::RigidBody::ApplyForce(XMVECTOR force)
 {
-	if (!gameObject->IsStatic())
+	if (!gameObject->IsStatic() && !isKinematic)
 		XMVectorAdd(velocity, XMVectorScale(force, 1 / mass));
 }
 
 void DimEngine::Physics::RigidBody::ApplyAngularForce(XMVECTOR force)
 {
-	if (!gameObject->IsStatic())
+	if (!gameObject->IsStatic() && !isKinematic)
 		XMVectorAdd(velocity, XMVectorScale(force, 1 / mass));
 }
 

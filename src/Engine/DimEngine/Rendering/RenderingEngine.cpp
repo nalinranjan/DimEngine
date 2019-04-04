@@ -180,7 +180,7 @@ void DimEngine::Rendering::RenderingEngine::UpdateViewers()
 
 			viewer.position = gameObject->GetPosition();
 			viewer.viewMatrix = XMMatrixTranspose(XMMatrixLookToLH(viewer.position, XMVector3Transform({ 0, 0, 1 }, rotationMatrix), { 0, 1, 0 }));
-			viewer.projectionMatrix = XMMatrixTranspose(XMMatrixPerspectiveFovLH(camera->fov, screenRatio, camera->nearZ, camera->farZ));
+			viewer.projectionMatrix = XMMatrixTranspose(XMMatrixPerspectiveFovLH(camera->fov, camera->ratio == 0 ? screenRatio : camera->ratio, camera->nearZ, camera->farZ));
 		}
 		else
 			RenderingEngine::GetSingleton()->DestroyViewer(camera->viewer);
@@ -268,12 +268,15 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 	XMVECTOR cameraPosition = viewer.position;
 
 	i32 j = 0;
+	i32 J = renderableAllocator.GetNumAllocated();
 
-	while (j < renderableAllocator.GetNumAllocated())
+	while (j < J)
 	{
 		Material* material = renderableAllocator[j].material;
 		SimpleVertexShader* vertexShader = material->GetVertexShader();
 		SimplePixelShader* pixelShader = material->GetPixelShader();
+
+		pixelShader->SetShader();
 
 		pixelShader->SetData("light", lightSourceAllocator.GetMemoryAddress(), sizeof(LightSource));
 		pixelShader->SetFloat4("cameraPosition", cameraPosition);
@@ -284,8 +287,7 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 		}
 
 		pixelShader->CopyAllBufferData();
-		pixelShader->SetShader();
-
+		
 		u32 stride = sizeof(Vertex);
 		u32 offset = 0;
 		u32 indexCount = 0;
@@ -294,13 +296,14 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 		{
 			Renderable& renderable = renderableAllocator[j];
 
+			vertexShader->SetShader();
+
 			vertexShader->SetMatrix4x4("view", viewMatrix);
 			vertexShader->SetMatrix4x4("projection", projectionMatrix);
 			vertexShader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
 			vertexShader->SetMatrix4x4("world", renderable.worldMatrix);
 
 			vertexShader->CopyAllBufferData();
-			vertexShader->SetShader();
 
 			Mesh* mesh = renderable.mesh;
 
@@ -316,8 +319,6 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 			indexCount += mesh->GetIndexCount();
 
 			++j;
-		} while (j < renderableAllocator.GetNumAllocated() && renderableAllocator[j].material == material);
-
-		++j;
+		} while (j < J && renderableAllocator[j].material == material);
 	}
 }

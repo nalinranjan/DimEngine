@@ -40,17 +40,22 @@ namespace DimEngine
 
 			PoolAllocator<sizeof(Material)> materialAllocator;
 			PoolAllocator<sizeof(Mesh)> meshAllocator;
+
 			DynamicStackAllocator<Renderable> renderableAllocator;
 			DynamicPoolAllocator<Viewer> viewerAllocator;
 			DynamicStackAllocator<LightSource> lightSourceAllocator;
+
 			Renderer* rendererList;
 			Camera* cameraList;
 			Light* lightList;
+
 			SimpleVertexShader* vsZPrepass;
 			ID3D11DepthStencilState* zPrepassDepthState;
 
+
 			RenderingEngine(i32 maxNumMaterials, i32 maxNumMeshes, i32 defaultNumRenderables, i32 defaultNumCameraProxies);
 			~RenderingEngine();
+
 
 			void AddRenderer(Renderer* renderer);
 			void AddCamera(Camera* camera);
@@ -61,6 +66,7 @@ namespace DimEngine
 			void RemoveLight(Light* light);
 			void DestroyRenderable(i32 id);
 			void DestroyViewer(i32 id);
+
 
 		public:
 			static RenderingEngine* GetSingleton();

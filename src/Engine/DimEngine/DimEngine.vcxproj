@@ -164,6 +164,7 @@
     <ClInclude Include="Core\GameObject.h" />
     <ClInclude Include="Core\Global.h" />
     <ClInclude Include="Core\IUpdatable.h" />
+    <ClInclude Include="Core\ResourceManager.h" />
     <ClInclude Include="Core\Scene.h" />
     <ClInclude Include="Core\Space.h" />
     <ClInclude Include="Core\Transform.h" />
@@ -186,6 +187,7 @@
     <ClInclude Include="Physics\SphereCollider.h" />
     <ClInclude Include="Rendering\Camera.h" />
     <ClInclude Include="Rendering\LightSource.h" />
+    <ClInclude Include="Rendering\Texture.h" />
     <ClInclude Include="Rendering\Viewer.h" />
     <ClInclude Include="Rendering\Renderable.h" />
     <ClInclude Include="Rendering\Renderer.h" />
@@ -202,6 +204,7 @@
     <ClCompile Include="Core\GameComponent.cpp" />
     <ClCompile Include="Core\GameObject.cpp" />
     <ClCompile Include="Core\Global.cpp" />
+    <ClCompile Include="Core\ResourceManager.cpp" />
     <ClCompile Include="Core\Scene.cpp" />
     <ClCompile Include="Core\Transform.cpp" />
     <ClCompile Include="DimEngine.cpp" />
@@ -222,6 +225,7 @@
     <ClCompile Include="Rendering\Mesh.cpp" />
     <ClCompile Include="Rendering\RenderingEngine.cpp" />
     <ClCompile Include="Rendering\SimpleShader.cpp" />
+    <ClCompile Include="Rendering\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Rendering\Shaders\PixelShader.hlsl">
@@ -250,7 +254,17 @@
   <ItemGroup>
     <ResourceCompile Include="DimEngine.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\..\Demo\packages\directxtk_desktop_2015.2019.2.7.1\build\native\directxtk_desktop_2015.targets" Condition="Exists('..\..\Demo\packages\directxtk_desktop_2015.2019.2.7.1\build\native\directxtk_desktop_2015.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\Demo\packages\directxtk_desktop_2015.2019.2.7.1\build\native\directxtk_desktop_2015.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\Demo\packages\directxtk_desktop_2015.2019.2.7.1\build\native\directxtk_desktop_2015.targets'))" />
+  </Target>
 </Project>

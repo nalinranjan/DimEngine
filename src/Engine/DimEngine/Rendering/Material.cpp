@@ -12,6 +12,17 @@ DimEngine::Rendering::Material::Material(
 	sampler = _sampler;
 }
 
+DimEngine::Rendering::Material::Material(
+	SimpleVertexShader* _vertexShader,
+	SimplePixelShader* _pixelShader,
+	Texture* texture
+) {
+	vertexShader = _vertexShader;
+	pixelShader = _pixelShader;
+	this->texture = texture->GetResourceView();
+	this->sampler = texture->GetSamplerState();
+}
+
 SimpleVertexShader* DimEngine::Rendering::Material::GetVertexShader() {
 	return vertexShader;
 }
