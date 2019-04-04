@@ -43,9 +43,19 @@ namespace DimEngine
 		void SendMessageDown(const Message& message, u32 level = UINT_MAX);
 
 
+
+
 	protected:
 		void Update(f32 deltaTime, f32 currentTime);
 		void LateUpdate(f32 deltaTime, f32 currentTime);
+
+		void IsTriggerEnter(GameObject* other);
+		void IsTriggerStay(GameObject* other);
+		void IsTriggerExit(GameObject* other);
+
+		void IsCollisionEnter(GameObject* other);
+		void IsCollisionStay(GameObject* other);
+		void IsCollisionExit(GameObject* other);
 
 
 	private:

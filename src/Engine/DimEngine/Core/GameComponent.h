@@ -32,6 +32,16 @@ namespace DimEngine
 		virtual void Update(f32 deltaTime, f32 currentTime) { };
 		virtual void LateUpdate(f32 deltaTime, f32 currentTime) { };
 
+
+		virtual void IsTriggerEnter(GameObject* other) { };
+		virtual void IsTriggerStay(GameObject* other) { };
+		virtual void IsTriggerExit(GameObject* other) { };
+
+		virtual void IsCollisionEnter(GameObject* other) { };
+		virtual void IsCollisionStay(GameObject* other) { };
+		virtual void IsCollisionExit(GameObject* other) { };
+
+
 		virtual void HandleMessage(const Message& message) { }
 	};
 }

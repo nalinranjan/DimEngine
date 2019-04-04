@@ -123,3 +123,66 @@ __inline void DimEngine::GameObject::LateUpdate(f32 deltaTime, f32 currentTime)
 			component->LateUpdate(deltaTime, currentTime);
 	}
 }
+
+
+__inline void DimEngine::GameObject::IsTriggerEnter(GameObject* other)
+{
+	for (auto it = components.begin(); it != components.end(); it++)
+	{
+		GameComponent* component = (*it).second;
+		if (component->isActive)
+			component->IsTriggerEnter(other);
+	}
+}
+
+__inline void DimEngine::GameObject::IsTriggerStay(GameObject* other)
+{
+	for (auto it = components.begin(); it != components.end(); it++)
+	{
+		GameComponent* component = (*it).second;
+		if (component->isActive)
+			component->IsTriggerStay(other);
+	}
+}
+
+__inline void DimEngine::GameObject::IsTriggerExit(GameObject* other)
+{
+	for (auto it = components.begin(); it != components.end(); it++)
+	{
+		GameComponent* component = (*it).second;
+		if (component->isActive)
+			component->IsTriggerExit(other);
+	}
+}
+
+__inline void DimEngine::GameObject::IsCollisionEnter(GameObject * other)
+{
+	for (auto it = components.begin(); it != components.end(); it++)
+	{
+		GameComponent* component = (*it).second;
+		if (component->isActive)
+			component->IsCollisionEnter(other);
+	}
+}
+
+__inline void DimEngine::GameObject::IsCollisionStay(GameObject * other)
+{
+	for (auto it = components.begin(); it != components.end(); it++)
+	{
+		GameComponent* component = (*it).second;
+		if (component->isActive)
+			component->IsCollisionStay(other);
+	}
+}
+
+__inline void DimEngine::GameObject::IsCollisionExit(GameObject * other)
+{
+	for (auto it = components.begin(); it != components.end(); it++)
+	{
+		GameComponent* component = (*it).second;
+		if (component->isActive)
+			component->IsCollisionExit(other);
+	}
+}
+
+

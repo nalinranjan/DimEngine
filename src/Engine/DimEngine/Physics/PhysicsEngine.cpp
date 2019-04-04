@@ -80,15 +80,28 @@ void DimEngine::Physics::PhysicsEngine::CollisionsDetection(float deltaTime, flo
 
 		{
 			// in the future, if the collider belongs to the subObject of current checking one, it should has the option to ignore it.
-
 			if (a != b){
 
 				bool collied = a->IsOverlappingWith(b, totalTime);
 				if (collied) {
-					a->PreventOverlaps();
-					b->PreventOverlaps();
+					
 					a->LogCollision(b, totalTime);
 					b->LogCollision(a, totalTime);
+					if (a->IsTrigger || b->IsTrigger) {
+						// Trigger the collision event
+						a->gameObject->IsTriggerEnter(b->gameObject);
+						b->gameObject->IsTriggerEnter(a->gameObject);
+					}
+					else {
+						// Trigger the collision event
+						a->gameObject->IsCollisionEnter(b->gameObject);
+						b->gameObject->IsCollisionEnter(a->gameObject);
+
+
+						// Push back the object
+						a->PreventOverlaps();
+						b->PreventOverlaps();
+					}
 				}
 				else if (a->CollidedWith[b] != 0 && !collied) {
 					a->CollidedWith[b] = 0.0f;
