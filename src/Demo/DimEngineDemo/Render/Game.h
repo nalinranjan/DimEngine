@@ -3,6 +3,8 @@
 #include <DirectXMath.h>
 #include <vector>
 
+#include "../Portal.h"
+
 #include "Core/GameObject.h"
 #include "Rendering/Camera.h"
 #include "Rendering/Light.h"
@@ -34,10 +36,13 @@ public:
 	void OnMouseMove(WPARAM buttonState, int x, int y);
 	void OnMouseWheel(float wheelDelta, int x, int y);
 
+
 private:
 	void LoadShaders();
 	void CreateMatrces();
 	void CreateBasicGeometry();
+
+	Portal* _create_portal(Material* material, f32 x, f32 y, f32 z, XMVECTOR q);
 
 	POINT prevMousePos;
 
@@ -52,26 +57,23 @@ private:
 	Mesh* cubeMesh;
 
 	Material* simpleMaterial;
-	Material* portalMaterial;
+	Material* portalMaterial1;
+	Material* portalMaterial2;
 
-	GameObject* camera;
 	DirectionalLight* directionalLight;
-	Camera* portalCamera;
+
+	GameObject* cameraObject;
+	Camera* camera;
+
+	Camera* portalCamera1;
+	Camera* portalCamera2;
+
+	Portal* portal1;
+	Portal* portal2;
 
 	GameObject* floor;
-
-	GameObject* portal;
-	GameObject* pillar1;
-	GameObject* pillar2;
-
 	GameObject* cube;
 	GameObject* sphere;
 
 	ID3D11DepthStencilState* zPrepassDepthStencilState;
-
-	ID3D11SamplerState* portalSampler;
-
-	ID3D11DepthStencilView* portalDSV;
-	ID3D11ShaderResourceView* portalRSV;
-	ID3D11RenderTargetView* portalRTV;
 };

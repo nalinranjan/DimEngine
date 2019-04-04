@@ -1,14 +1,18 @@
 ﻿#include <string>
 
-#include "Game.h"
+#include "../CameraController.h"
+#include "../Portal.h"
 
 #include "Core/Global.h"
+#include "Core/Scene.h"
 
 #include "Rendering/Mesh.h"
 #include "Rendering/RenderingEngine.h"
 #include "Rendering/Texture.h"
 
 #include "Physics/PhysicsEngine.h"
+
+#include "Game.h"
 
 using namespace DirectX;
 using namespace DimEngine;
@@ -106,44 +110,49 @@ void Game::CreateBasicGeometry()
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
 
-	RenderTexture* portalTexture = new RenderTexture(device, 512u);
+	RenderTexture* portalTexture1 = new RenderTexture(device, 512u);
+	RenderTexture* portalTexture2 = new RenderTexture(device, 512u);
 
 	simpleMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr);
-	portalMaterial = new Material(vertexShader, psPortal, portalTexture->GetResourceView(), portalTexture->GetSamplerState());
+	portalMaterial1 = new Material(vertexShader, psPortal, portalTexture1->GetResourceView(), portalTexture1->GetSamplerState());
+	portalMaterial2 = new Material(vertexShader, psPortal, portalTexture2->GetResourceView(), portalTexture2->GetSamplerState());
 	
-	camera = new GameObject();
-	camera->SetLocalRotation(0, 180, 0);
-	camera->AddComponent<Camera>();
-
-	portalCamera = (new GameObject())->AddComponent<Camera>();
-	portalCamera->SetRenderTexture(portalTexture);
-	portalCamera->SetRatio(1);
-
 	GameObject* directionalLightObject = new GameObject();
 	directionalLightObject->SetRotation(90, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
+
+
+	cameraObject = new GameObject();
+	cameraObject->SetLocalRotation(0, 180, 0);
+	camera = cameraObject->AddComponent<Camera>();
+	cameraObject->AddComponent<CameraController>();
 	
+
+	portalCamera1 = (new GameObject())->AddComponent<Camera>();
+	portalCamera1->SetRenderTexture(portalTexture1);
+	portalCamera1->SetRatio(1);
+
+	portalCamera2 = (new GameObject())->AddComponent<Camera>();
+	portalCamera2->SetRenderTexture(portalTexture2);
+	portalCamera2->SetRatio(1);
+
+	portal1 = _create_portal(portalMaterial1, 0, 0, -10, XMQuaternionIdentity());
+	portal2 = _create_portal(portalMaterial2, 5, 0, 5, XMQuaternionRotationRollPitchYaw(0, XM_1DIV2PI, 0));
+
+	portal1->SetExit(portal2);
+	portal1->SetMainCamera(camera);
+	portal1->SetViewCamera(portalCamera1);
+
+	portal2->SetExit(portal1);
+	portal2->SetMainCamera(camera);
+	portal2->SetViewCamera(portalCamera2);
+
+
 	floor = new GameObject();
 	floor->SetPosition(0, -2, 0);
 	floor->SetLocalScale(100, 0.1f, 100);
-	floor->AddComponent<Renderer>(simpleMaterial, cubeMesh);
-
-	portal = new GameObject();
-	portal->SetLocalPosition(0, 0, -10);
-	portal->SetLocalRotation(0, 0, 90);
-	portal->SetLocalScale(5, 5, 0.1f);
-	portal->AddComponent<Renderer>(portalMaterial, cubeMesh);
-
-	pillar1 = new GameObject();
-	pillar1->SetLocalPosition(-2.5, 0, -10);
-	pillar1->SetLocalScale(0.2, 5.5, 0.2f);
-	pillar1->AddComponent<Renderer>(simpleMaterial, cubeMesh);
-
-	pillar2 = new GameObject();
-	pillar2->SetLocalPosition(2.5, 0, -10);
-	pillar2->SetLocalScale(0.2, 5.5, 0.2f);
-	pillar2->AddComponent<Renderer>(simpleMaterial, cubeMesh);
-
+	floor->AddComponent<Renderer>(simpleMaterial, cubeMesh); 
+	
 	cube = new GameObject();
 	cube->SetLocalPosition(0, 0, -15);
 	cube->AddComponent<Renderer>(simpleMaterial, cubeMesh);
@@ -151,6 +160,34 @@ void Game::CreateBasicGeometry()
 	sphere = new GameObject();
 	sphere->SetLocalPosition(0, 0, 5);
 	sphere->AddComponent<Renderer>(simpleMaterial, sphereMesh);
+}
+
+__forceinline Portal* Game::_create_portal(Material* material, f32 x, f32 y, f32 z, XMVECTOR q)
+{
+	GameObject* portal = new GameObject();
+
+	GameObject* portalArea1 = new GameObject();
+	portalArea1->SetParent(portal);
+	portalArea1->SetLocalRotation(0, 0, 90);
+	portalArea1->SetLocalScale(5, 5, 0.1f);
+	portalArea1->AddComponent<Renderer>(material, cubeMesh);
+
+	GameObject* pillar1L = new GameObject();
+	pillar1L->SetParent(portal);
+	pillar1L->SetLocalPosition(-2.5f, 0, 0);
+	pillar1L->SetLocalScale(0.2f, 5.5f, 0.2f);
+	pillar1L->AddComponent<Renderer>(simpleMaterial, cubeMesh);
+
+	GameObject* pillar1R = new GameObject();
+	pillar1R->SetParent(portal);
+	pillar1R->SetLocalPosition(2.5f, 0, 0);
+	pillar1R->SetLocalScale(0.2f, 5.5f, 0.2f);
+	pillar1R->AddComponent<Renderer>(simpleMaterial, cubeMesh);
+
+	portal->SetLocalPosition(x, y, z);
+	portal->SetLocalRotation(q);
+
+	return portal->AddComponent<Portal>();
 }
 
 void Game::OnResize()
@@ -165,23 +202,7 @@ void Game::Update(float deltaTime, float totalTime)
 	if (GetAsyncKeyState(VK_ESCAPE))
 		Quit();
 
-	if (GetAsyncKeyState('W') & 0x8000)
-		camera->Translate(0.0f, 0.0f, deltaTime, SELF);
-
-	if (GetAsyncKeyState('A') & 0x8000)
-		camera->Translate(-deltaTime, 0.0f, 0.0f, SELF);
-
-	if (GetAsyncKeyState('S') & 0x8000)
-		camera->Translate(0.0f, 0.0f, -deltaTime, SELF);
-
-	if (GetAsyncKeyState('D') & 0x8000)
-		camera->Translate(deltaTime, 0.0f, 0.0f, SELF);
-
-	if (GetAsyncKeyState(VK_SPACE) & 0x8000)
-		camera->Translate(0.0f, deltaTime, 0.0f, SELF);
-
-	if (GetAsyncKeyState('X') & 0x8000)
-		camera->Translate(0.0f, -deltaTime, 0.0f, SELF);
+	Scene::GetCurrentScene()->Update(deltaTime, totalTime);
 
 	DimEngine::Physics::PhysicsEngine::GetSingleton()->CollisionsDetection(deltaTime,totalTime);
 }
@@ -194,7 +215,8 @@ void Game::Draw(float deltaTime, float totalTime)
 	renderingEngine->UpdateLightSources();
 	renderingEngine->SortRenderables();
 
-	portalCamera->RenderToRenderTarget(context);
+	portalCamera1->RenderToRenderTarget(context);
+	portalCamera2->RenderToRenderTarget(context);
 
 	D3D11_VIEWPORT viewport = {};
 	viewport.TopLeftX = 0;
@@ -270,7 +292,7 @@ void Game::OnMouseMove(WPARAM buttonState, int x, int y)
 	}
 
 	if (buttonState & 0x0002)
-		camera->Rotate((prevMousePos.y - y) / 31.41592653579f, (x - prevMousePos.x) / 31.41592653579f, 0.0f);
+		cameraObject->Rotate((y - prevMousePos.y) / 31.41592653579f, (x - prevMousePos.x) / 31.41592653579f, 0.0f);
 
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;

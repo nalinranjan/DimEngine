@@ -53,6 +53,7 @@ namespace DimEngine
 		Transform* GetParent();
 		Transform* GetChild(size_t index);
 		size_t GetChildCount();
+		XMVECTOR GetForwardVector();
 
 		void SetLocalPosition(f32 x, f32 y, f32 z);
 		void SetLocalPosition(XMFLOAT3 position);
@@ -72,6 +73,7 @@ namespace DimEngine
 		//void SetScale(f32 x, f32 y, f32 z);
 		//void SetScale(XMFLOAT3 scale);
 		//void SetScale(XMVECTOR scale);
+		void SetForwardVector(XMVECTOR v);
 
 		void* operator new(size_t size);
 		void operator delete(void* p);

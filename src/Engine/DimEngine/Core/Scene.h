@@ -12,7 +12,7 @@
 
 namespace DimEngine
 {
-	class Scene : IUpdatable
+	class __declspec(dllexport) Scene : IUpdatable
 	{
 		friend class GameObject;
 
@@ -34,6 +34,8 @@ namespace DimEngine
 		size_t AddRootObject(GameObject* gameObject);
 		bool RemoveRootObject(GameObject* gameObject);
 	
+
+	public:
 		void Update(f32 deltaTime, f32 currentTime);
 		void LateUpdate(f32 deltaTime, f32 currentTime);
 	};

@@ -95,6 +95,11 @@ __inline size_t DimEngine::Transform::GetChildCount()
 	return children.size();
 }
 
+__inline XMVECTOR DimEngine::Transform::GetForwardVector()
+{
+	return XMVector3Rotate(XMVectorSet(0, 0, 1, 0), GetRotation());
+}
+
 __inline void DimEngine::Transform::SetLocalPosition(f32 x, f32 y, f32 z)
 {
 	SetLocalPosition(XMVectorSet(x, y, z, 0));
@@ -229,6 +234,25 @@ void DimEngine::Transform::SetParent(Transform* parent)
 	}
 }
 
+__inline void DimEngine::Transform::SetForwardVector(XMVECTOR v)
+{
+	XMVECTOR f = XMVectorSet(0, 0, 1, 0);
+
+	f32 dot = XMVector3Dot(f, v).m128_f32[0];
+
+	if (abs(dot) > 0.999999f)
+	{
+		SetRotation(XMQuaternionIdentity());
+	}
+	else
+	{
+		XMVECTOR q = XMVector3Cross(f, XMVector2Normalize(v));
+		q.m128_f32[3] = dot;
+
+		SetRotation(q);
+	}
+}
+
 void* DimEngine::Transform::operator new(size_t size)
 {
 	return _aligned_malloc(size, 16);
@@ -292,12 +316,12 @@ __inline void DimEngine::Transform::Rotate(XMVECTOR rotation, Space space)
 				localRotation = XMQuaternionMultiply(localRotation, XMQuaternionMultiply(parentRotation, XMQuaternionMultiply(rotation, XMQuaternionInverse(parentRotation))));
 			}
 			else
-				localRotation = XMQuaternionMultiply(localRotation, rotation);
+				localRotation = XMQuaternionMultiply(rotation, localRotation);
 			break;
 
 
 		case SELF:
-			localRotation = XMQuaternionMultiply(localRotation, rotation);
+			localRotation = XMQuaternionMultiply(rotation, localRotation);
 			break;
 		}
 

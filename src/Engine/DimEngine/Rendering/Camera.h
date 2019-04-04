@@ -12,7 +12,7 @@ using namespace DimEngine::Rendering;
 
 namespace DimEngine
 {
-	class __declspec(dllexport)  Camera : public GameComponent
+	class __declspec(dllexport) Camera : public GameComponent
 	{
 		friend class RenderingEngine;
 
