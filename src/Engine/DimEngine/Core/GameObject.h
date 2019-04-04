@@ -16,9 +16,53 @@ namespace DimEngine
 
 
 	private:
-		bool isActive;
-		bool isStatic;
 		unordered_map<type_index, GameComponent*> components;
+		union
+		{
+			i32 flag;
+			struct
+			{
+				bool isActive : 1;
+				bool isStatic : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool isDestroyed : 1;
+			};
+		};
 
 
 	public:

@@ -39,10 +39,9 @@ public:
 
 private:
 	void LoadShaders();
-	void CreateMatrces();
-	void CreateBasicGeometry();
+	void CreateScene();
 
-	Portal* _create_portal(Material* material, f32 x = 0, f32 y = 0, f32 z = 0, f32 rx = 0, f32 ry = 0, f32 rz = 0);
+	Portal* __CreatePortal(Material* material, f32 x = 0, f32 y = 0, f32 z = 0, f32 rx = 0, f32 ry = 0, f32 rz = 0);
 
 	ResourceManager* rm;
 
@@ -53,22 +52,23 @@ private:
 	SimplePixelShader* pixelShader;
 	SimplePixelShader* psPortal;
 
-	Texture* grassTexture;
-	Texture* wallTexture;
-	Texture* rockTexture;
 
 	Mesh* sphereMesh;
 	Mesh* cubeMesh;
 
+
+	Texture* grassTexture;
+	Texture* wallTexture;
+	Texture* rockTexture;
 	RenderTexture* portalTexture1;
 	RenderTexture* portalTexture2;
 
 	Material* grassMaterial;
 	Material* wallMaterial;
 	Material* rockMaterial;
-
 	Material* portalMaterial1;
 	Material* portalMaterial2;
+
 
 	DirectionalLight* directionalLight;
 
@@ -84,6 +84,7 @@ private:
 	GameObject* floor;
 	GameObject* cube;
 	GameObject* sphere;
+
 
 	ID3D11DepthStencilState* zPrepassDepthStencilState;
 };

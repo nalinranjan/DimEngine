@@ -9,36 +9,45 @@ DimEngine::GameObject::GameObject() : Transform(), components(4)
 {
 	index = Scene::GetCurrentScene()->AddRootObject(this);
 
-	isActive = true;
-	isStatic = false;
+	flag = FLAG_ACTIVE;
 }
 
 DimEngine::GameObject::GameObject(float x, float y, float z) : Transform(x, y, z), components(4)
 {
 	index = Scene::GetCurrentScene()->AddRootObject(this);
 
-	isActive = true;
-	isStatic = false;
+	flag = FLAG_ACTIVE;
 }
 
 DimEngine::GameObject::GameObject(XMVECTOR position, XMVECTOR rotation, XMVECTOR scale) : Transform(position, rotation, scale), components(4)
 {
 	index = Scene::GetCurrentScene()->AddRootObject(this);
 
-	isActive = true;
-	isStatic = false;
+	flag = FLAG_ACTIVE;
 }
 
 DimEngine::GameObject::~GameObject()
 {
+	isDestroyed = true;
+
 	if (!Scene::GetCurrentScene()->RemoveRootObject(this))
 		parent->__RemoveChild(this);
 
 	for (auto it = components.begin(); it != components.end(); it++)
-		delete (*it).second;
+		delete it->second;
 
 	for (auto it = children.begin(); it != children.end(); it++)
 		delete (*it);
+}
+
+__inline GameObject* DimEngine::GameObject::GetParent()
+{
+	return static_cast<GameObject*>(parent);
+}
+
+__inline GameObject* DimEngine::GameObject::GetChild(size_t index)
+{
+	return static_cast<GameObject*>(Transform::GetChild(index));
 }
 
 __inline bool DimEngine::GameObject::IsActive()
@@ -56,16 +65,6 @@ __inline bool DimEngine::GameObject::IsStatic()
 	return isStatic;
 }
 
-__inline GameObject* DimEngine::GameObject::GetParent()
-{
-	return static_cast<GameObject*>(parent);
-}
-
-__inline GameObject* DimEngine::GameObject::GetChild(size_t index)
-{
-	return static_cast<GameObject*>(Transform::GetChild(index));
-}
-
 __inline void DimEngine::GameObject::SetParent(GameObject* other)
 {
 	Scene::GetCurrentScene()->RemoveRootObject(this);
@@ -78,7 +77,7 @@ void DimEngine::GameObject::SendMessage_(const Message& message)
 	HandleMessage(message);
 
 	for (auto it = components.begin(); it != components.end(); it++)
-		(*it).second->HandleMessage(message);
+		it->second->HandleMessage(message);
 }
 
 void DimEngine::GameObject::SendMessageUp(const Message& message, u32 level)
@@ -86,7 +85,7 @@ void DimEngine::GameObject::SendMessageUp(const Message& message, u32 level)
 	HandleMessage(message);
 
 	for (auto it = components.begin(); it != components.end(); it++)
-		(*it).second->HandleMessage(message);
+		it->second->HandleMessage(message);
 
 	if (level-- > 0 && parent)
 		parent->SendMessageUp(message, level);
@@ -97,7 +96,7 @@ void DimEngine::GameObject::SendMessageDown(const Message& message, u32 level)
 	HandleMessage(message);
 
 	for (auto it = components.begin(); it != components.end(); it++)
-		(*it).second->HandleMessage(message);
+		it->second->HandleMessage(message);
 
 	if (level-- > 0)
 		for (auto it = children.begin(); it != children.end(); it++)

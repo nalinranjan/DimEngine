@@ -23,8 +23,6 @@ namespace DimEngine
 {
 	namespace Rendering
 	{
-		static bool SortRenderables(Renderable a, Renderable b);
-
 		class __declspec(dllexport) RenderingEngine
 		{
 			friend class Camera;
@@ -36,8 +34,13 @@ namespace DimEngine
 		private:
 			static RenderingEngine* singleton;
 
-			static void Initialize(i32 maxNumMaterials = DEFAULT_MAX_NUM_MATERIALS, i32 maxNumMeshes = DEFAULT_MAX_NUM_MESHES, i32 defaultNumRenderables = 128, i32 defaultNumViews = 4);
 
+		public:
+			static void Initialize(i32 maxNumMaterials = DEFAULT_MAX_NUM_MATERIALS, i32 maxNumMeshes = DEFAULT_MAX_NUM_MESHES, i32 defaultNumRenderables = 128, i32 defaultNumViews = 4);
+			static void Stop();
+
+
+		private:
 			PoolAllocator<sizeof(Material)> materialAllocator;
 			PoolAllocator<sizeof(Mesh)> meshAllocator;
 
@@ -49,8 +52,8 @@ namespace DimEngine
 			Camera* cameraList;
 			Light* lightList;
 
-			SimpleVertexShader* vsZPrepass;
-			ID3D11DepthStencilState* zPrepassDepthState;
+			//SimpleVertexShader* vsZPrepass;
+			//ID3D11DepthStencilState* zPrepassDepthState;
 
 
 			RenderingEngine(i32 maxNumMaterials, i32 maxNumMeshes, i32 defaultNumRenderables, i32 defaultNumCameraProxies);

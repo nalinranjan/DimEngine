@@ -3,15 +3,6 @@
 
 #include "RenderingEngine.h"
 #include "SimpleShader.h"
-
-static bool DimEngine::Rendering::SortRenderables(Renderable a, Renderable b)
-{
-	uptr ma = reinterpret_cast<uptr>(a.material);
-	uptr mb = reinterpret_cast<uptr>(b.material);
-
-	return ma < mb;
-}
-
 DimEngine::Rendering::RenderingEngine* DimEngine::Rendering::RenderingEngine::singleton = nullptr;
 
 DimEngine::Rendering::RenderingEngine* DimEngine::Rendering::RenderingEngine::GetSingleton()
@@ -27,23 +18,26 @@ void DimEngine::Rendering::RenderingEngine::Initialize(i32 maxNumMaterials, i32 
 	singleton = new RenderingEngine(maxNumMeshes, maxNumMeshes, defaultNumRenderables, defaultNumViews);
 }
 
+void DimEngine::Rendering::RenderingEngine::Stop()
+{
+	delete singleton;
+}
+
 DimEngine::Rendering::RenderingEngine::RenderingEngine(i32 maxNumMaterials, i32 maxNumMeshes, i32 defaultNumRenderables, i32 defaultNumCameraProxies) : materialAllocator(maxNumMeshes), meshAllocator(maxNumMeshes), renderableAllocator(defaultNumRenderables), viewerAllocator(defaultNumCameraProxies)
 {
 	rendererList = nullptr;
 	cameraList = nullptr;
 	lightList = nullptr;
 
-	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
-	depthStencilDesc.DepthEnable = true;
-	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+	//D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
+	//depthStencilDesc.DepthEnable = true;
+	//depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	//depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 }
 
 DimEngine::Rendering::RenderingEngine::~RenderingEngine()
 {
-	delete vsZPrepass;
-
-
+	//delete vsZPrepass;
 	singleton = nullptr;
 }
 
@@ -209,7 +203,13 @@ void DimEngine::Rendering::RenderingEngine::UpdateLightSources()
 
 void DimEngine::Rendering::RenderingEngine::SortRenderables()
 {
-	renderableAllocator.Sort(DimEngine::Rendering::SortRenderables);
+	renderableAllocator.Sort([](Renderable a, Renderable b)
+	{
+		uptr ma = reinterpret_cast<uptr>(a.material);
+		uptr mb = reinterpret_cast<uptr>(b.material);
+
+		return ma < mb;
+	});
 }
 
 void DimEngine::Rendering::RenderingEngine::PerformZPrepass(SimpleVertexShader* shader, ID3D11DeviceContext* context)

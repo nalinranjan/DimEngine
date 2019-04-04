@@ -75,6 +75,9 @@ void DimEngine::Camera::RenderToRenderTarget(ID3D11DeviceContext* context)
 
 
 		RenderingEngine::GetSingleton()->DrawForward(context, this);
+
+
+		context->OMSetRenderTargets(0, nullptr, nullptr);
 	}
 }
 

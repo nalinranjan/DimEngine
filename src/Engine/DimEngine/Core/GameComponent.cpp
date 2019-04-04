@@ -1,13 +1,18 @@
 #include "GameObject.h"
 
-bool DimEngine::GameComponent::IsActive()
-{
-	return isActive;
-}
-
 DimEngine::GameObject * DimEngine::GameComponent::GetGameObject()
 {
 	return gameObject;
+}
+
+bool DimEngine::GameComponent::IsActive()
+{
+	return isActive && gameObject->IsActive();
+}
+
+bool DimEngine::GameComponent::IsActiveSelf()
+{
+	return isActive;
 }
 
 void DimEngine::GameComponent::SendMessage_(const Message & message)

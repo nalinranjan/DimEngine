@@ -12,12 +12,22 @@ DimEngine::Scene* DimEngine::Scene::GetCurrentScene()
 	return currentScene;
 }
 
+void DimEngine::Scene::UnloadAll()
+{
+	delete currentScene;
+}
+
 DimEngine::Scene::Scene()
 {
+	flag = FLAG_ACTIVE;
 }
 
 DimEngine::Scene::~Scene()
 {
+	isDestroyed = true;
+
+	for (auto it = roots.begin(); it != roots.end(); it++)
+		delete *it;
 }
 
 size_t DimEngine::Scene::AddRootObject(GameObject* gameObject)
@@ -29,6 +39,9 @@ size_t DimEngine::Scene::AddRootObject(GameObject* gameObject)
 
 bool DimEngine::Scene::RemoveRootObject(GameObject* gameObject)
 {
+	if (isDestroyed)
+		return true;
+
 	if (gameObject->parent)
 		return false;
 

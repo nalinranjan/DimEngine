@@ -6,25 +6,70 @@
 #include "Core/Global.h"
 #include "Core/Scene.h"
 
+#include "Physics/PhysicsEngine.h"
+
 #include "Rendering/Mesh.h"
 #include "Rendering/RenderingEngine.h"
 #include "Rendering/Texture.h"
 
-#include "Physics/PhysicsEngine.h"
-
 #include "Game.h"
 
 using namespace DirectX;
+
 using namespace DimEngine;
-using namespace DimEngine::Rendering;
 using namespace DimEngine::Physics;
+using namespace DimEngine::Rendering;
+
 
 Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720, true)
 {
+	vsZPrepass = nullptr;
 	vertexShader = nullptr;
 	pixelShader = nullptr;
+	psPortal = nullptr;
+
+
+	sphereMesh = nullptr;
+	cubeMesh = nullptr;
+
+
+	grassTexture = nullptr;
+	wallTexture = nullptr;
+	rockTexture = nullptr;
+	
+	portalTexture1 = nullptr;
+	portalTexture2 = nullptr;
+
+
+	grassMaterial = nullptr;
+	wallMaterial = nullptr;
+	rockMaterial = nullptr;
+	
+	portalMaterial1 = nullptr;
+	portalMaterial2 = nullptr;
+
+
+	directionalLight = nullptr;
+
+	cameraObject = nullptr;
+	camera = nullptr;
+
+	portalCamera1 = nullptr;
+	portalCamera2 = nullptr;
+
+	portal1 = nullptr;
+	portal2 = nullptr;
+
+	floor = nullptr;
+	cube = nullptr;
+	sphere = nullptr;
+
+
+	zPrepassDepthStencilState = nullptr;
+
 
 	Global::SetScreenRatio(1280.0f / 720.0f);
+
 
 #if defined(DEBUG) || defined(_DEBUG)
 	// Do we want a console window?  Probably only in debug mode
@@ -35,13 +80,64 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 
 Game::~Game()
 {
-	//for (auto& m : entityVector) delete m;
+	if (vsZPrepass)
+		delete vsZPrepass;
 
-	//delete vertexShader;
-	//delete pixelShader;
-	//if (mesh) delete mesh;
-	//delete camera;
-	//if (grassMaterial) delete grassMaterial;
+	if (vertexShader)
+		delete vertexShader;
+
+	if (pixelShader)
+		delete pixelShader;
+
+	if (psPortal)
+		delete psPortal;
+
+
+	if (sphereMesh)
+		delete sphereMesh;
+
+	if (cubeMesh)
+		delete cubeMesh;
+
+	if (grassTexture)
+		delete grassTexture;
+
+	if (wallTexture)
+		delete wallTexture;
+
+	if (rockTexture)
+		delete rockTexture;
+
+	if (portalTexture1)
+		delete portalTexture1;
+
+	if (portalTexture2)
+		delete portalTexture2;
+
+
+	if (grassMaterial)
+		delete grassMaterial;
+
+	if (wallMaterial)
+		delete wallMaterial;
+
+	if (rockMaterial)
+		delete rockMaterial;
+
+	if (portalMaterial1)
+		delete portalMaterial1;
+
+	if (portalMaterial2)
+		delete portalMaterial2;
+
+
+	if (zPrepassDepthStencilState)
+		zPrepassDepthStencilState->Release();
+
+
+	Scene::UnloadAll();
+
+	RenderingEngine::Stop();
 }
 
 void Game::Init()
@@ -49,8 +145,7 @@ void Game::Init()
 	rm = ResourceManager::GetSingleton();
 	rm->Initialize(device, context);
 	LoadShaders();
-	CreateMatrces();
-	CreateBasicGeometry();
+	CreateScene();
 	DimEngine::Physics::PhysicsEngine::Initialize();
 }
 
@@ -79,6 +174,7 @@ void Game::LoadShaders()
 	psPortal = new SimplePixelShader(device, context);
 	psPortal->LoadShaderFile((wpath + std::wstring(L"/ps_portal.cso")).c_str());
 
+
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
 	depthStencilDesc.DepthEnable = true;
 	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
@@ -87,25 +183,7 @@ void Game::LoadShaders()
 	device->CreateDepthStencilState(&depthStencilDesc, &zPrepassDepthStencilState);
 }
 
-void Game::CreateMatrces()
-{
-	//XMMATRIX W = XMMatrixIdentity();
-	//XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(W)); 
-	//
-	//XMVECTOR pos = XMVectorSet(0, 0, -20, 0);
-	//XMVECTOR dir = XMVectorSet(0, 0, 1, 0);
-	//XMVECTOR up = XMVectorSet(0, 1, 0, 0);
-	//XMMATRIX V = XMMatrixLookToLH(
-	//	pos,     // The position of the "camera"
-	//	dir,     // Direction the camera is looking
-	//	up);     // "Up" direction in 3D space (prevents roll)
-	//XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(V));
-
-	//XMMATRIX projection = camera->UpdateProjection((float)width / height);
-	//XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(projection)); 
-}
-
-void Game::CreateBasicGeometry()
+void Game::CreateScene()
 {
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
@@ -141,8 +219,8 @@ void Game::CreateBasicGeometry()
 	portalCamera2->SetRenderTexture(portalTexture2);
 	portalCamera2->SetRatio(1);
 
-	portal1 = _create_portal(portalMaterial1, 0, 0, -10);
-	portal2 = _create_portal(portalMaterial2, 5, 0, 5, 0, -90, 0);
+	portal1 = __CreatePortal(portalMaterial1, 0, 0, -10);
+	portal2 = __CreatePortal(portalMaterial2, 5, 0, 5, 0, -90, 0);
 
 	portal1->SetExit(portal2);
 	portal1->SetMainCamera(camera);
@@ -172,7 +250,7 @@ void Game::CreateBasicGeometry()
 	sphere->AddComponent<Renderer>(rockMaterial, sphereMesh);
 }
 
-__forceinline Portal* Game::_create_portal(Material* material, f32 x, f32 y, f32 z, f32 rx, f32 ry, f32 rz)
+__forceinline Portal* Game::__CreatePortal(Material* material, f32 x, f32 y, f32 z, f32 rx, f32 ry, f32 rz)
 {
 	GameObject* portal = new GameObject();
 
