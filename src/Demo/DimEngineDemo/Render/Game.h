@@ -42,7 +42,9 @@ private:
 	void CreateMatrces();
 	void CreateBasicGeometry();
 
-	Portal* _create_portal(Material* material, f32 x, f32 y, f32 z, XMVECTOR q);
+	Portal* _create_portal(Material* material, f32 x = 0, f32 y = 0, f32 z = 0, f32 rx = 0, f32 ry = 0, f32 rz = 0);
+
+	ResourceManager* rm;
 
 	POINT prevMousePos;
 
@@ -51,12 +53,20 @@ private:
 	SimplePixelShader* pixelShader;
 	SimplePixelShader* psPortal;
 
-	ResourceManager* rm;
+	Texture* grassTexture;
+	Texture* wallTexture;
+	Texture* rockTexture;
 
 	Mesh* sphereMesh;
 	Mesh* cubeMesh;
 
-	Material* simpleMaterial;
+	RenderTexture* portalTexture1;
+	RenderTexture* portalTexture2;
+
+	Material* grassMaterial;
+	Material* wallMaterial;
+	Material* rockMaterial;
+
 	Material* portalMaterial1;
 	Material* portalMaterial2;
 

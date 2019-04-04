@@ -4,13 +4,9 @@
 
 void Portal::Update(f32 deltaTime, f32 gameTime)
 {
-	XMVECTOR posOffset = XMVectorSubtract(mainCamera->GetGameObject()->GetPosition(), gameObject->GetPosition());
+	XMVECTOR posOffset = XMVector3Rotate(XMVector3Normalize(XMVectorSubtract(mainCamera->GetGameObject()->GetPosition(), gameObject->GetPosition())), XMQuaternionInverse(gameObject->GetRotation()));
 
-	XMVECTOR exitPosition = exit->GetGameObject()->GetPosition();
-	XMVECTOR rotOffset = XMQuaternionNormalizeEst(XMQuaternionMultiply(XMQuaternionInverse(gameObject->GetRotation()), exitPosition));
-
-	viewCamera->GetGameObject()->SetPosition(XMVectorAdd(exitPosition, XMVector3Rotate(posOffset, rotOffset)));
-	viewCamera->GetGameObject()->SetForwardVector(XMVector3Rotate(mainCamera->GetGameObject()->GetForwardVector(), rotOffset));
+	viewCamera->GetGameObject()->SetForwardVector(XMVector3Rotate(posOffset, exit->GetGameObject()->GetRotation()));
 }
 
 __inline void Portal::SetMainCamera(Camera* camera)

@@ -41,7 +41,7 @@ Game::~Game()
 	//delete pixelShader;
 	//if (mesh) delete mesh;
 	//delete camera;
-	//if (simpleMaterial) delete simpleMaterial;
+	//if (grassMaterial) delete grassMaterial;
 }
 
 void Game::Init()
@@ -110,20 +110,25 @@ void Game::CreateBasicGeometry()
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
 
-	RenderTexture* portalTexture1 = new RenderTexture(device, 512u);
-	RenderTexture* portalTexture2 = new RenderTexture(device, 512u);
+	grassTexture = new Texture((wchar_t*)L"../Assets/Textures/greengrass.jpg", D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_ANISOTROPIC, D3D11_FLOAT32_MAX, device, context);
+	wallTexture = new Texture((wchar_t*)L"../Assets/Textures/wall.jpg", D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_ANISOTROPIC, D3D11_FLOAT32_MAX, device, context);
+	rockTexture = new Texture((wchar_t*)L"../Assets/Textures/rock.jpg", D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_ANISOTROPIC, D3D11_FLOAT32_MAX, device, context);
+	portalTexture1 = new RenderTexture(device, 512u);
+	portalTexture2 = new RenderTexture(device, 512u);
 
-	simpleMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr);
+	grassMaterial = new Material(vertexShader, pixelShader, grassTexture->GetResourceView(), grassTexture->GetSamplerState());
+	wallMaterial = new Material(vertexShader, pixelShader, wallTexture->GetResourceView(), wallTexture->GetSamplerState());
+	rockMaterial = new Material(vertexShader, pixelShader, rockTexture->GetResourceView(), rockTexture->GetSamplerState());
 	portalMaterial1 = new Material(vertexShader, psPortal, portalTexture1->GetResourceView(), portalTexture1->GetSamplerState());
 	portalMaterial2 = new Material(vertexShader, psPortal, portalTexture2->GetResourceView(), portalTexture2->GetSamplerState());
 	
 	GameObject* directionalLightObject = new GameObject();
-	directionalLightObject->SetRotation(90, 0, 0);
+	directionalLightObject->SetRotation(45, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
 
 
 	cameraObject = new GameObject();
-	cameraObject->SetLocalRotation(0, 180, 0);
+	cameraObject->SetLocalRotation(0, 0, 0);
 	camera = cameraObject->AddComponent<Camera>();
 	cameraObject->AddComponent<CameraController>();
 	
@@ -136,8 +141,8 @@ void Game::CreateBasicGeometry()
 	portalCamera2->SetRenderTexture(portalTexture2);
 	portalCamera2->SetRatio(1);
 
-	portal1 = _create_portal(portalMaterial1, 0, 0, -10, XMQuaternionIdentity());
-	portal2 = _create_portal(portalMaterial2, 5, 0, 5, XMQuaternionRotationRollPitchYaw(0, XM_1DIV2PI, 0));
+	portal1 = _create_portal(portalMaterial1, 0, 0, -10);
+	portal2 = _create_portal(portalMaterial2, 5, 0, 5, 0, -90, 0);
 
 	portal1->SetExit(portal2);
 	portal1->SetMainCamera(camera);
@@ -147,22 +152,27 @@ void Game::CreateBasicGeometry()
 	portal2->SetMainCamera(camera);
 	portal2->SetViewCamera(portalCamera2);
 
+	portalCamera1->GetGameObject()->SetParent(portal2->GetGameObject());
+	portalCamera1->GetGameObject()->SetLocalPosition(0, 0, 0);
+	portalCamera2->GetGameObject()->SetParent(portal1->GetGameObject());
+	portalCamera2->GetGameObject()->SetLocalPosition(0, 0, 0);
+
 
 	floor = new GameObject();
 	floor->SetPosition(0, -2, 0);
 	floor->SetLocalScale(100, 0.1f, 100);
-	floor->AddComponent<Renderer>(simpleMaterial, cubeMesh); 
+	floor->AddComponent<Renderer>(grassMaterial, cubeMesh); 
 	
 	cube = new GameObject();
 	cube->SetLocalPosition(0, 0, -15);
-	cube->AddComponent<Renderer>(simpleMaterial, cubeMesh);
+	cube->AddComponent<Renderer>(rockMaterial, cubeMesh);
 
 	sphere = new GameObject();
 	sphere->SetLocalPosition(0, 0, 5);
-	sphere->AddComponent<Renderer>(simpleMaterial, sphereMesh);
+	sphere->AddComponent<Renderer>(rockMaterial, sphereMesh);
 }
 
-__forceinline Portal* Game::_create_portal(Material* material, f32 x, f32 y, f32 z, XMVECTOR q)
+__forceinline Portal* Game::_create_portal(Material* material, f32 x, f32 y, f32 z, f32 rx, f32 ry, f32 rz)
 {
 	GameObject* portal = new GameObject();
 
@@ -175,17 +185,23 @@ __forceinline Portal* Game::_create_portal(Material* material, f32 x, f32 y, f32
 	GameObject* pillar1L = new GameObject();
 	pillar1L->SetParent(portal);
 	pillar1L->SetLocalPosition(-2.5f, 0, 0);
-	pillar1L->SetLocalScale(0.2f, 5.5f, 0.2f);
-	pillar1L->AddComponent<Renderer>(simpleMaterial, cubeMesh);
+	pillar1L->SetLocalScale(0.2f, 5, 0.2f);
+	pillar1L->AddComponent<Renderer>(wallMaterial, cubeMesh);
 
 	GameObject* pillar1R = new GameObject();
 	pillar1R->SetParent(portal);
 	pillar1R->SetLocalPosition(2.5f, 0, 0);
-	pillar1R->SetLocalScale(0.2f, 5.5f, 0.2f);
-	pillar1R->AddComponent<Renderer>(simpleMaterial, cubeMesh);
+	pillar1R->SetLocalScale(0.2f, 5, 0.2f);
+	pillar1R->AddComponent<Renderer>(wallMaterial, cubeMesh);
+
+	GameObject* back = new GameObject();
+	back->SetParent(portal);
+	back->SetLocalPosition(0, 0, -0.1f);
+	back->SetLocalScale(5, 5, 0.1f);
+	back->AddComponent<Renderer>(wallMaterial, cubeMesh);
 
 	portal->SetLocalPosition(x, y, z);
-	portal->SetLocalRotation(q);
+	portal->SetLocalRotation(rx, ry, rz);
 
 	return portal->AddComponent<Portal>();
 }
@@ -228,7 +244,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	context->RSSetViewports(1, &viewport);
 
 
-	const float color[4] = { 0.4f, 1, 1, 0 };
+	const float color[4] = { 0.69f, 0.88f, 0.9f, 0.0f };
 
 	context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
 	context->ClearRenderTargetView(backBufferRTV, color);

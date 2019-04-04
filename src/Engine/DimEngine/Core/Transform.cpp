@@ -97,7 +97,7 @@ __inline size_t DimEngine::Transform::GetChildCount()
 
 __inline XMVECTOR DimEngine::Transform::GetForwardVector()
 {
-	return XMVector3Rotate(XMVectorSet(0, 0, 1, 0), GetRotation());
+	return XMVector3Normalize(XMVector3Rotate(XMVectorSet(0, 0, 1, 0), GetRotation()));
 }
 
 __inline void DimEngine::Transform::SetLocalPosition(f32 x, f32 y, f32 z)
@@ -236,20 +236,19 @@ void DimEngine::Transform::SetParent(Transform* parent)
 
 __inline void DimEngine::Transform::SetForwardVector(XMVECTOR v)
 {
+	v = XMVector3Normalize(v);
 	XMVECTOR f = XMVectorSet(0, 0, 1, 0);
 
 	f32 dot = XMVector3Dot(f, v).m128_f32[0];
 
 	if (abs(dot) > 0.999999f)
-	{
 		SetRotation(XMQuaternionIdentity());
-	}
 	else
 	{
-		XMVECTOR q = XMVector3Cross(f, XMVector2Normalize(v));
-		q.m128_f32[3] = dot;
+		XMVECTOR q = XMVector3Cross(f, v);
+		q.m128_f32[3] = 1 + dot;
 
-		SetRotation(q);
+		SetRotation(XMQuaternionNormalize(q));
 	}
 }
 
