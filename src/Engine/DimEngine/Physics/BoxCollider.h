@@ -23,6 +23,7 @@ namespace DimEngine
 			//std::vector<std::tuple<XMVECTOR, XMVECTOR>> edges;
 
 		public:
+			BoxCollider();
 			BoxCollider(XMVECTOR size);
 			~BoxCollider();
 		};

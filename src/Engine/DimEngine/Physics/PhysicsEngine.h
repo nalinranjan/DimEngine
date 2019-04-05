@@ -25,6 +25,9 @@ namespace DimEngine
 			static void Initialize();
 			static PhysicsEngine* GetSingleton();
 			void CollisionsDetection(float deltaTime, float totalTime);
+			void AddCollider(Collider* collider);
+			void RemoveCollider(Collider* collider);
+			void AddCollision(i32 node1, i32 node2);
 
 		private:
 			
@@ -37,10 +40,9 @@ namespace DimEngine
 			PhysicsEngine();
 
 			
-			void AddCollider(Collider* collider);
-			void AddCollision(i32 node1, i32 node2);
 
-			void RemoveCollider(Collider* collider);
+
+
 
 			void SolveCollision();
 			

@@ -73,10 +73,9 @@ bool DimEngine::Physics::Collider::IsOverlappingWith(Collider* other, float curr
 void DimEngine::Physics::Collider::Update(float deltaTime,float totalTime)
 {
 
-
+	printf("Accessed!");
 	std::unordered_map<Collider*, float>::iterator it = CollidedWith.begin();
 	while (it != CollidedWith.end())
-
 	{
 
 		if (it->second + collisionCheckBack < totalTime && abs(it->second) > 0.01f) {
@@ -100,17 +99,6 @@ void DimEngine::Physics::Collider::Update(float deltaTime,float totalTime)
 	}
 
 	previousPos = gameObject->GetPosition();
-}
-
-DimEngine::Physics::Collider::Collider()
-{
-	IsTrigger = false;
-	PhysicsEngine::GetSingleton()->AddCollider(this);
-}
-
-DimEngine::Physics::Collider::~Collider()
-{
-	PhysicsEngine::GetSingleton()->RemoveCollider(this);
 }
 
 DimEngine::Physics::BoundingVolumeType DimEngine::Physics::Collider::GetType()

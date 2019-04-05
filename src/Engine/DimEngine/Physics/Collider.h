@@ -37,8 +37,8 @@ namespace DimEngine
 
 			XMVECTOR previousPos;
 
-			Collider();
-			~Collider();
+			//Collider();
+			//~Collider();
 
 			BoundingVolumeType GetType();
 			BoundingVolume* GetBoundingVolume();
@@ -48,6 +48,7 @@ namespace DimEngine
 			void PreventOverlaps();
 			bool IsOverlappingWith(Collider* other, float currentTime);
 			void Update(float deltaTime,float totalTime);
+
 		};
 
 		//bool GetSeparatingPlane(XMVECTOR RPos, XMVECTOR Plane, BoxCollider* a, BoxCollider* b);

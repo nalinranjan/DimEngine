@@ -8,6 +8,7 @@
 #include "Rendering/Mesh.h"
 
 #include "Physics/PhysicsEngine.h"
+#include "Physics/SphereCollider.h"
 
 using namespace DirectX;
 using namespace DimEngine;
@@ -150,22 +151,15 @@ void Game::CreateBasicGeometry()
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
 	
 	go1 = new GameObject();
-	go1->SetPosition(0, 0, 10);
-	go1->SetLocalRotation(45, 0, 0);
-	go1->SetLocalScale(1, 2, 1);
-	go1->AddComponent<Renderer>(simpleMaterial, cubeMesh);
+	go1->SetPosition(-1, 0, 5);
+	go1->AddComponent<Renderer>(simpleMaterial, sphereMesh);
+	go1->AddComponent<SphereCollider>(0.5f);
+
 
 	go2 = new GameObject();
-	go2->SetParent(go1);
-	go2->SetLocalPosition(0, 4, 0);
-	go2->AddComponent<Renderer>(simpleMaterial, cubeMesh);
-
-	GameObject* go3 = new GameObject();
-	go3->SetParent(go2);
-	go3->SetLocalPosition(0, 2, 0);
-	go3->AddComponent<Renderer>(simpleMaterial, sphereMesh);
-
-	GameObject* go4 = new GameObject();
+	go2->SetPosition(1, 0, 5);
+	go2->AddComponent<Renderer>(simpleMaterial, sphereMesh);
+	go2->AddComponent<SphereCollider>(0.5f);
 
 }
 
@@ -208,8 +202,8 @@ void Game::Update(float deltaTime, float totalTime)
 	if (GetAsyncKeyState('X') & 0x8000)
 		camera->Translate(0.0f, -deltaTime, 0.0f, SELF);
 
-	go1->Rotate(0, 0, 20 * deltaTime);
-	go2->Rotate(0, 0, -50 * deltaTime);
+	go1->Translate(0.1f * deltaTime, 0, 0);
+	go2->Translate(-0.1f  * deltaTime, 0, 0);
 
 	DimEngine::Physics::PhysicsEngine::GetSingleton()->CollisionsDetection(deltaTime,totalTime);
 }
