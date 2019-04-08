@@ -47,7 +47,7 @@ void Game::Init()
 	LoadShaders();
 	CreateMatrces();
 	CreateBasicGeometry();
-	DimEngine::Physics::PhysicsEngine::Initialize();
+	//DimEngine::Physics::PhysicsEngine::Initialize();
 }
 
 void Game::LoadShaders()

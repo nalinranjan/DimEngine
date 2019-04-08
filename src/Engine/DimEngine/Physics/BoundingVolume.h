@@ -153,7 +153,8 @@ namespace DimEngine
 			template<class T1, class T2> friend bool TestOverlap(T1*, T2*, RigidBody*, RigidBody*, float);
 			//friend class OverlapCheck;
 
-
+		public:
+			BoundingSphere(XMVECTOR _pos, f32 _radius);
 		private:
 			XMVECTOR center;
 			f32 radius;

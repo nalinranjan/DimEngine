@@ -76,8 +76,7 @@ void DimEngine::Physics::PhysicsEngine::CollisionsDetection(float deltaTime, flo
 	{
 		//collider->ApplyGravity(deltaTime);
 		if (a->next == nullptr) continue;
-		for (Collider* b = b -> next; b; b = b->next)
-
+		for (Collider* b = a ->next; b; b = b->next)
 		{
 			// in the future, if the collider belongs to the subObject of current checking one, it should has the option to ignore it.
 			if (a != b){

@@ -172,3 +172,9 @@ XMVECTOR DimEngine::Physics::OrientedBoundingBox::GetHalfSize() const
 {
 	return XMVectorSubtract(H, center);
 }
+
+DimEngine::Physics::BoundingSphere::BoundingSphere(XMVECTOR _pos, f32 _radius)
+{
+	center = _pos;
+	radius = _radius;
+}
