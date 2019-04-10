@@ -141,7 +141,7 @@ void DimEngine::Rendering::RenderingEngine::UpdateRenderables()
 
 	for (Renderer* renderer = rendererList; renderer; renderer = renderer->next)
 	{
-		if (renderer->isActive)
+		if (renderer->IsActive())
 		{
 			Renderable& renderable = renderableAllocator[renderableAllocator.Allocate()];
 
@@ -158,7 +158,7 @@ void DimEngine::Rendering::RenderingEngine::UpdateViewers()
 
 	for (Camera* camera = cameraList; camera; camera = camera->next)
 	{
-		if (camera->isActive)
+		if (camera->IsActive())
 		{
 			if (camera->viewer == null_index)
 				camera->viewer = viewerAllocator.Allocate();
@@ -184,7 +184,7 @@ void DimEngine::Rendering::RenderingEngine::UpdateLightSources()
 
 	for (Light* light = lightList; light; light = light->next)
 	{
-		if (light->isActive)
+		if (light->IsActive())
 		{
 			LightSource& lightSource = lightSourceAllocator[lightSourceAllocator.Allocate()];
 			lightSource.ambientColor = light->ambientColor;
