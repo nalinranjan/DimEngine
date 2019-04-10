@@ -84,12 +84,11 @@ void DimEngine::Rendering::RenderingEngine::RemoveRenderer(Renderer* renderer)
 
 	if (previous)
 		previous->next = next;
+	else
+		rendererList = next;
 
 	if (next)
-		next = previous;
-
-	if (renderer == rendererList)
-		rendererList = next;
+		next->previous = previous;
 }
 
 void DimEngine::Rendering::RenderingEngine::RemoveCamera(Camera * camera)
@@ -102,12 +101,11 @@ void DimEngine::Rendering::RenderingEngine::RemoveCamera(Camera * camera)
 
 	if (previous)
 		previous->next = next;
+	else
+		cameraList = next;
 
 	if (next)
-		next = previous;
-
-	if (camera == cameraList)
-		cameraList = next;
+		next->previous = previous;
 }
 
 void DimEngine::Rendering::RenderingEngine::RemoveLight(Light* light)
@@ -120,12 +118,11 @@ void DimEngine::Rendering::RenderingEngine::RemoveLight(Light* light)
 
 	if (previous)
 		previous->next = next;
+	else
+		lightList = next;
 
 	if (next)
-		next = previous;
-
-	if (light == lightList)
-		lightList = next;
+		next->previous = previous;	
 }
 
 void DimEngine::Rendering::RenderingEngine::DestroyRenderable(i32 id)
