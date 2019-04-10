@@ -277,11 +277,18 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 		Material* material = renderableAllocator[j].material;
 		SimpleVertexShader* vertexShader = material->GetVertexShader();
 		SimplePixelShader* pixelShader = material->GetPixelShader();
+		std::unordered_map<std::string, std::pair<const void*, unsigned int>> pixelShaderData = material->GetPixelShaderData();
 
 		pixelShader->SetShader();
 
 		pixelShader->SetData("light", lightSourceAllocator.GetMemoryAddress(), sizeof(LightSource));
 		pixelShader->SetFloat4("cameraPosition", cameraPosition);
+
+		// Set up all data on pixel shader
+		for (auto it = pixelShaderData.begin(); it != pixelShaderData.end(); ++it) {
+			pixelShader->SetData(it->first, it->second.first, it->second.second);
+		}
+
 		if (material->getTexture())
 		{
 			pixelShader->SetShaderResourceView("TexAlbedo", material->getTexture());
@@ -298,12 +305,18 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 		{
 			Renderable& renderable = renderableAllocator[j];
 
+			std::unordered_map<std::string, std::pair<const void*, unsigned int>> vertexShaderData = material->GetVertexShaderData();
 			vertexShader->SetShader();
 
 			vertexShader->SetMatrix4x4("view", viewMatrix);
 			vertexShader->SetMatrix4x4("projection", projectionMatrix);
 			vertexShader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
 			vertexShader->SetMatrix4x4("world", renderable.worldMatrix);
+
+			// Set up all data on vertex shader
+			for (auto it = vertexShaderData.begin(); it != vertexShaderData.end(); ++it) {
+				vertexShader->SetData(it->first, it->second.first, it->second.second);
+			}
 
 			vertexShader->CopyAllBufferData();
 

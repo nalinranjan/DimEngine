@@ -50,6 +50,7 @@ private:
 	SimpleVertexShader* vsZPrepass;
 	SimpleVertexShader* vertexShader;
 	SimplePixelShader* pixelShader;
+	SimpleVertexShader* vsPortal;
 	SimplePixelShader* psPortal;
 
 

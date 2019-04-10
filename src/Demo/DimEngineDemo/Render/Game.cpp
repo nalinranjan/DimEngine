@@ -171,6 +171,9 @@ void Game::LoadShaders()
 	pixelShader = new SimplePixelShader(device, context);
 	pixelShader->LoadShaderFile(pixel);
 
+	vsPortal = new SimpleVertexShader(device, context);
+	vsPortal->LoadShaderFile((wpath + std::wstring(L"/vs_portal.cso")).c_str());
+
 	psPortal = new SimplePixelShader(device, context);
 	psPortal->LoadShaderFile((wpath + std::wstring(L"/ps_portal.cso")).c_str());
 
@@ -197,8 +200,8 @@ void Game::CreateScene()
 	grassMaterial = new Material(vertexShader, pixelShader, grassTexture->GetResourceView(), grassTexture->GetSamplerState());
 	wallMaterial = new Material(vertexShader, pixelShader, wallTexture->GetResourceView(), wallTexture->GetSamplerState());
 	rockMaterial = new Material(vertexShader, pixelShader, rockTexture->GetResourceView(), rockTexture->GetSamplerState());
-	portalMaterial1 = new Material(vertexShader, psPortal, portalTexture1->GetResourceView(), portalTexture1->GetSamplerState());
-	portalMaterial2 = new Material(vertexShader, psPortal, portalTexture2->GetResourceView(), portalTexture2->GetSamplerState());
+	portalMaterial1 = new Material(vsPortal, psPortal, portalTexture1->GetResourceView(), portalTexture1->GetSamplerState());
+	portalMaterial2 = new Material(vsPortal, psPortal, portalTexture2->GetResourceView(), portalTexture2->GetSamplerState());
 	
 	GameObject* directionalLightObject = new GameObject();
 	directionalLightObject->SetRotation(45, 0, 0);

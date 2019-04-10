@@ -38,3 +38,11 @@ ID3D11ShaderResourceView* DimEngine::Rendering::Material::getTexture() {
 ID3D11SamplerState* DimEngine::Rendering::Material::getSampler() {
 	return sampler;
 }
+
+void DimEngine::Rendering::Material::SetVertexData(std::string name, const void* data, unsigned int size) {
+	vertexShaderData[name] = std::make_pair(data, size);
+}
+
+void DimEngine::Rendering::Material::SetPixelData(std::string name, const void* data, unsigned int size) {
+	pixelShaderData[name] = std::make_pair(data, size);
+}

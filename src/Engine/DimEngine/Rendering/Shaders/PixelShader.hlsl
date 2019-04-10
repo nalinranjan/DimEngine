@@ -16,7 +16,6 @@ struct LightSource
     float3 direction;
 };
 
-
 cbuffer LightSourceData : register(b1)
 {
 	LightSource light;
