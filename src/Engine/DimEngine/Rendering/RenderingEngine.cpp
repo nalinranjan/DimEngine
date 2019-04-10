@@ -84,12 +84,11 @@ void DimEngine::Rendering::RenderingEngine::RemoveRenderer(Renderer* renderer)
 
 	if (previous)
 		previous->next = next;
+	else
+		rendererList = next;
 
 	if (next)
-		next = previous;
-
-	if (renderer == rendererList)
-		rendererList = next;
+		next->previous = previous;
 }
 
 void DimEngine::Rendering::RenderingEngine::RemoveCamera(Camera * camera)
@@ -102,12 +101,11 @@ void DimEngine::Rendering::RenderingEngine::RemoveCamera(Camera * camera)
 
 	if (previous)
 		previous->next = next;
+	else
+		cameraList = next;
 
 	if (next)
-		next = previous;
-
-	if (camera == cameraList)
-		cameraList = next;
+		next->previous = previous;
 }
 
 void DimEngine::Rendering::RenderingEngine::RemoveLight(Light* light)
@@ -120,12 +118,11 @@ void DimEngine::Rendering::RenderingEngine::RemoveLight(Light* light)
 
 	if (previous)
 		previous->next = next;
+	else
+		lightList = next;
 
 	if (next)
-		next = previous;
-
-	if (light == lightList)
-		lightList = next;
+		next->previous = previous;	
 }
 
 void DimEngine::Rendering::RenderingEngine::DestroyRenderable(i32 id)
@@ -144,7 +141,7 @@ void DimEngine::Rendering::RenderingEngine::UpdateRenderables()
 
 	for (Renderer* renderer = rendererList; renderer; renderer = renderer->next)
 	{
-		if (renderer->isActive)
+		if (renderer->IsActive())
 		{
 			Renderable& renderable = renderableAllocator[renderableAllocator.Allocate()];
 
@@ -161,7 +158,7 @@ void DimEngine::Rendering::RenderingEngine::UpdateViewers()
 
 	for (Camera* camera = cameraList; camera; camera = camera->next)
 	{
-		if (camera->isActive)
+		if (camera->IsActive())
 		{
 			if (camera->viewer == null_index)
 				camera->viewer = viewerAllocator.Allocate();
@@ -187,7 +184,7 @@ void DimEngine::Rendering::RenderingEngine::UpdateLightSources()
 
 	for (Light* light = lightList; light; light = light->next)
 	{
-		if (light->isActive)
+		if (light->IsActive())
 		{
 			LightSource& lightSource = lightSourceAllocator[lightSourceAllocator.Allocate()];
 			lightSource.ambientColor = light->ambientColor;
