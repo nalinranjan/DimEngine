@@ -1,16 +1,3 @@
-struct VertexShaderInput
-{
-	float3 position : POSITION;
-	float3 normal : NORMAL;
-	float2 uv : TEXCOORD;
-};
-
-struct VertexToPixel
-{
-	float4 svPosition : SV_POSITION;
-};
-
-
 cbuffer CameraData : register(b2)
 {
 	matrix view;
@@ -24,13 +11,9 @@ cbuffer ObjectData : register(b3)
 };
 
 
-VertexToPixel main(VertexShaderInput input)
+float4 main(float3 position : POSITION) : SV_POSITION
 {
-	VertexToPixel output;
-
 	matrix WVP = mul(world, viewProjection);
 
-	output.svPosition = mul(float4(input.position, 1.0f), WVP);
-
-	return output;
+	return mul(float4(position, 1.0f), WVP);
 }

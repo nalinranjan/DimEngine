@@ -212,6 +212,11 @@ void DimEngine::Rendering::RenderingEngine::SortRenderables()
 	});
 }
 
+void DimEngine::Rendering::RenderingEngine::UpdateGlobalData(float screenWidth, float screenHeight)
+{
+
+}
+
 void DimEngine::Rendering::RenderingEngine::PerformZPrepass(SimpleVertexShader* shader, ID3D11DeviceContext* context)
 {
 	context->PSSetShader(nullptr, nullptr, 0);

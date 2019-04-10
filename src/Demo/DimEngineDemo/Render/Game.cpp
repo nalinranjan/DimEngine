@@ -194,8 +194,8 @@ void Game::CreateScene()
 	grassTexture = new Texture((wchar_t*)L"../Assets/Textures/greengrass.jpg", D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_ANISOTROPIC, D3D11_FLOAT32_MAX, device, context);
 	wallTexture = new Texture((wchar_t*)L"../Assets/Textures/wall.jpg", D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_ANISOTROPIC, D3D11_FLOAT32_MAX, device, context);
 	rockTexture = new Texture((wchar_t*)L"../Assets/Textures/rock.jpg", D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_ANISOTROPIC, D3D11_FLOAT32_MAX, device, context);
-	portalTexture1 = new RenderTexture(device, 512u);
-	portalTexture2 = new RenderTexture(device, 512u);
+	portalTexture1 = new RenderTexture(device, 1280u, 720u);
+	portalTexture2 = new RenderTexture(device, 1280u, 720u);
 
 	grassMaterial = new Material(vertexShader, pixelShader, grassTexture->GetResourceView(), grassTexture->GetSamplerState());
 	wallMaterial = new Material(vertexShader, pixelShader, wallTexture->GetResourceView(), wallTexture->GetSamplerState());
@@ -216,11 +216,11 @@ void Game::CreateScene()
 
 	portalCamera1 = (new GameObject())->AddComponent<Camera>();
 	portalCamera1->SetRenderTexture(portalTexture1);
-	portalCamera1->SetRatio(1);
+	portalCamera1->SetRatio((float)width / height);
 
 	portalCamera2 = (new GameObject())->AddComponent<Camera>();
 	portalCamera2->SetRenderTexture(portalTexture2);
-	portalCamera2->SetRatio(1);
+	portalCamera2->SetRatio((float)width / height);
 
 	portal1 = __CreatePortal(portalMaterial1, 0, 0, -10);
 	portal2 = __CreatePortal(portalMaterial2, 5, 0, 5, 0, -90, 0);

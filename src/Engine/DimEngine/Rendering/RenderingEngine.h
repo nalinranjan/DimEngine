@@ -78,6 +78,7 @@ namespace DimEngine
 			void UpdateViewers();
 			void UpdateLightSources();
 			void SortRenderables();
+			void UpdateGlobalData(float screenWidth, float screenHeight);
 			void PerformZPrepass(SimpleVertexShader* shader, ID3D11DeviceContext* context);
 			void DrawForward(ID3D11DeviceContext* context);
 			void DrawForward(ID3D11DeviceContext* context, Camera* camera);

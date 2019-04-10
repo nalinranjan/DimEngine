@@ -59,8 +59,8 @@ void DimEngine::Camera::RenderToRenderTarget(ID3D11DeviceContext* context)
 		D3D11_VIEWPORT rtViewport = {};
 		rtViewport.TopLeftX = 0;
 		rtViewport.TopLeftY = 0;
-		rtViewport.Width = 512;
-		rtViewport.Height = 512;
+		rtViewport.Width = 1280;
+		rtViewport.Height = 720;
 		rtViewport.MinDepth = 0.0f;
 		rtViewport.MaxDepth = 1.0f;
 		context->RSSetViewports(1, &rtViewport);

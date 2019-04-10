@@ -1,14 +1,16 @@
-struct VertexToPixel
+cbuffer GlobalData : register(b0)
 {
-	float4 svPosition : SV_POSITION;
-};
+	float2 screenSize;
+}
 
 Texture2D TexAlbedo : register(t0);
+
 SamplerState Sampler : register(s0);
 
-float4 main(VertexToPixel input) : SV_TARGET
+float4 main(float4 svPosition : SV_POSITION) : SV_TARGET
 {
-	float2 uv = input.svPosition.xy / 512.0;
+	float2 uv = svPosition / float2(1280, 720);
     float4 albedo = TexAlbedo.Sample(Sampler, uv);
-    return float4(albedo.rgb, 1.0f);
+    
+	return float4(albedo.rgb, 1.0f);
 }
