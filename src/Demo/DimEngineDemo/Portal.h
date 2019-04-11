@@ -36,7 +36,7 @@ public:
 	void SetViewCamera(Camera* camera);
 	void SetExit(Portal* portal);
 	
-	static void Connect(Portal* a, Portal* b);
-	static void Connect(Warp& a, Warp& b);
+	//static void Connect(Portal* a, Portal* b);
+	//static void Connect(Warp& a, Warp& b);
 
 };

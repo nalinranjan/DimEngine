@@ -29,11 +29,3 @@ __inline void Portal::SetExit(Portal * portal)
 {
 	exit = portal;
 }
-
-void Portal::Connect(Portal* a, Portal* b) {
-	
-}
-
-void Portal::Connect(Warp& a, Warp& b) {
-
-}
