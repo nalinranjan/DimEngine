@@ -223,8 +223,8 @@ void Game::CreateScene()
 	portalCamera2->SetRenderTexture(portalTexture2);
 	portalCamera2->SetRatio((float)width / height);
 
-	portal1 = __CreatePortal(portalMaterial1, 0, 0, -10);
-	portal2 = __CreatePortal(portalMaterial2, 5, 0, 5, 0, -90, 0);
+	portal1 = __CreatePortal(portalMaterial1, -5, 0, 8);
+	portal2 = __CreatePortal(portalMaterial2, 5, 0, 8, 0, -180, 0);
 
 	portal1->SetExit(portal2);
 	portal1->SetMainCamera(camera);
