@@ -210,7 +210,7 @@ void Game::CreateScene()
 
 
 	cameraObject = new GameObject();
-	cameraObject->SetLocalRotation(0, 0, 0);
+	cameraObject->SetRotation(camRotX, camRotY, 0);
 	camera = cameraObject->AddComponent<Camera>();
 	cameraObject->AddComponent<CameraController>();
 	
@@ -383,8 +383,11 @@ void Game::OnMouseMove(WPARAM buttonState, int x, int y)
 		//camera->SetRotationY((x - prevMousePos.x) * 0.001f);
 	}
 
-	if (buttonState & 0x0002)
-		cameraObject->Rotate((y - prevMousePos.y) / 31.41592653579f, (x - prevMousePos.x) / 31.41592653579f, 0.0f);
+	if (buttonState & 0x0002) {
+		camRotX += (float)(y - prevMousePos.y) / 5.0f;
+		camRotY += (float)(x - prevMousePos.x) / 5.0f;
+		cameraObject->SetRotation(camRotX, camRotY, 0);
+	}
 
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;

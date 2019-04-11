@@ -100,6 +100,11 @@ __inline XMVECTOR DimEngine::Transform::GetForwardVector()
 	return XMVector3Normalize(XMVector3Rotate(XMVectorSet(0, 0, 1, 0), GetRotation()));
 }
 
+__inline XMVECTOR DimEngine::Transform::GetRightVector()
+{
+	return XMVector3Normalize(XMVector3Rotate(XMVectorSet(1, 0, 0, 0), GetRotation()));
+}
+
 __inline void DimEngine::Transform::SetLocalPosition(f32 x, f32 y, f32 z)
 {
 	SetLocalPosition(XMVectorSet(x, y, z, 0));
