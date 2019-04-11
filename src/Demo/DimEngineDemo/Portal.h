@@ -20,7 +20,23 @@ private:
 
 
 public:
+
+	struct Warp {
+		Warp(const Portal* fromPortal) : fromPortal(fromPortal), toPortal(nullptr) {
+			XMStoreFloat4x4(&delta, XMMatrixIdentity());
+			XMStoreFloat4x4(&deltaInv, XMMatrixIdentity());
+		}
+		XMFLOAT4X4 delta;
+		XMFLOAT4X4 deltaInv;
+		const Portal* fromPortal;
+		const Portal* toPortal;
+	};
+
 	void SetMainCamera(Camera* camera);
 	void SetViewCamera(Camera* camera);
 	void SetExit(Portal* portal);
+	
+	static void Connect(Portal* a, Portal* b);
+	static void Connect(Warp& a, Warp& b);
+
 };

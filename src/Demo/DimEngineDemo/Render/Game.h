@@ -56,7 +56,7 @@ private:
 
 	Mesh* sphereMesh;
 	Mesh* cubeMesh;
-
+	Mesh* quadMesh;
 
 	Texture* grassTexture;
 	Texture* wallTexture;
