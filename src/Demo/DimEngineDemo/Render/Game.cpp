@@ -224,7 +224,7 @@ void Game::CreateScene()
 	portalCamera2->SetRatio((float)width / height);
 
 	portal1 = __CreatePortal(portalMaterial1, -5, 0, 8);
-	portal2 = __CreatePortal(portalMaterial2, 5, 0, 8, 0, -180, 0);
+	portal2 = __CreatePortal(portalMaterial2, 5, 0, 8, 0, -90, 0);
 
 	portal1->SetExit(portal2);
 	portal1->SetMainCamera(camera);
@@ -250,7 +250,7 @@ void Game::CreateScene()
 	cube->AddComponent<Renderer>(rockMaterial, cubeMesh);
 
 	sphere = new GameObject();
-	sphere->SetLocalPosition(0, 0, 5);
+	sphere->SetLocalPosition(-5, 0, 10);
 	sphere->AddComponent<Renderer>(rockMaterial, sphereMesh);
 }
 
