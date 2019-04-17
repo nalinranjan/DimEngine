@@ -214,14 +214,14 @@ void Game::CreateScene()
 
 	cameraObject = new GameObject();
 	cameraObject->SetRotation(camRotX, camRotY, 0);
-	cameraObject->AddComponent<Renderer>(rockMaterial, sphereMesh);
+	//cameraObject->AddComponent<Renderer>(rockMaterial, sphereMesh);
 	cameraObject->AddComponent<SphereCollider>();
 	cameraObject->AddComponent<CameraController>();
 
 	GameObject* go = new GameObject();
 	go->SetParent(cameraObject);
 	go->SetLocalRotation(45, 0, 0);
-	go->Translate(0, 0, -5);
+	go->Translate(0, 0, 0);
 	camera = go->AddComponent<Camera>();
 	
 
