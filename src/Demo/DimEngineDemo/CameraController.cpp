@@ -1,10 +1,15 @@
 #include "Core/GameObject.h"
 
 #include "CameraController.h"
+#include "Portal.h"
+
+CameraController::CameraController()
+{
+	exitPortal = nullptr;
+}
 
 void CameraController::Update(f32 deltaTime, f32 totalTime)
 {
-
 	float speed = 5;
 	float forwardScale = 0;
 	float rightScale = 0;
@@ -29,6 +34,23 @@ void CameraController::Update(f32 deltaTime, f32 totalTime)
 
 	XMVECTOR forwardOffset = flatForward * speed * forwardScale * deltaTime;
 	XMVECTOR rightOffset = flatRight * speed * rightScale * deltaTime;
-	gameObject->SetPosition(XMVectorAdd(gameObject->GetPosition(), XMVectorAdd(forwardOffset, rightOffset)));
 
+	gameObject->SetPosition(XMVectorAdd(gameObject->GetPosition(), XMVectorAdd(forwardOffset, rightOffset)));
+}
+
+void CameraController::OnBeginOverlapping(GameObject* other)
+{
+	if (other->GetParent() != exitPortal)
+	{
+		exitPortal = other->GetParent()->GetComponent<Portal>()->GetExit()->GetGameObject();
+
+		gameObject->SetPosition(exitPortal->GetPosition());
+		gameObject->SetForwardVector(exitPortal->GetForwardVector());
+	}
+}
+
+void CameraController::OnEndOverlapping(GameObject* other)
+{
+	if (other->GetParent() == exitPortal)
+		exitPortal = nullptr;
 }

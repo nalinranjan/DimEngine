@@ -21,6 +21,11 @@ void Portal::Update(f32 deltaTime, f32 gameTime)
 	//viewCamera->GetGameObject()->SetForwardVector(XMVector3Rotate(posOffset, exit->GetGameObject()->GetRotation()));
 }
 
+__inline Portal* Portal::GetExit()
+{
+	return exit;
+}
+
 __inline void Portal::SetMainCamera(Camera* camera)
 {
 	mainCamera = camera;

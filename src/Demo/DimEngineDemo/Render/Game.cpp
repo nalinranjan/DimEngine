@@ -142,11 +142,14 @@ Game::~Game()
 
 void Game::Init()
 {
+	PhysicsEngine::Initialize();
+	RenderingEngine::Initialize();
+
 	rm = ResourceManager::GetSingleton();
 	rm->Initialize(device, context);
+	
 	LoadShaders();
 	CreateScene();
-	DimEngine::Physics::PhysicsEngine::Initialize();
 }
 
 void Game::LoadShaders()
@@ -211,8 +214,15 @@ void Game::CreateScene()
 
 	cameraObject = new GameObject();
 	cameraObject->SetRotation(camRotX, camRotY, 0);
-	camera = cameraObject->AddComponent<Camera>();
+	cameraObject->AddComponent<Renderer>(rockMaterial, sphereMesh);
+	cameraObject->AddComponent<SphereCollider>();
 	cameraObject->AddComponent<CameraController>();
+
+	GameObject* go = new GameObject();
+	go->SetParent(cameraObject);
+	go->SetLocalRotation(45, 0, 0);
+	go->Translate(0, 0, -5);
+	camera = go->AddComponent<Camera>();
 	
 
 	portalCamera1 = (new GameObject())->AddComponent<Camera>();
@@ -261,8 +271,9 @@ __forceinline Portal* Game::__CreatePortal(Material* material, f32 x, f32 y, f32
 	GameObject* portalArea1 = new GameObject();
 	portalArea1->SetParent(portal);
 	portalArea1->SetLocalRotation(0, 0, 90);
-	portalArea1->SetLocalScale(2.5f, 2.5f, 0.1f);
+	portalArea1->SetLocalScale(2.5f, 2.5f, 1);
 	portalArea1->AddComponent<Renderer>(material, quadMesh);
+	portalArea1->AddComponent<BoxCollider>(2, 2, 0.1f);
 
 	GameObject* pillar1L = new GameObject();
 	pillar1L->SetParent(portal);

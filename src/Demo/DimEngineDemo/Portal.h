@@ -32,6 +32,8 @@ public:
 		const Portal* toPortal;
 	};
 
+	Portal* GetExit();
+
 	void SetMainCamera(Camera* camera);
 	void SetViewCamera(Camera* camera);
 	void SetExit(Portal* portal);
