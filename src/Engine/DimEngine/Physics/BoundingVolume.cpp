@@ -18,96 +18,102 @@ DimEngine::Physics::AxisAlignedBoundingBox::AxisAlignedBoundingBox(XMVECTOR poin
 	max = point2;
 }
 
-DimEngine::f32 DimEngine::Physics::AxisAlignedBoundingBox::GetMinX() const
+__inline DimEngine::f32 DimEngine::Physics::AxisAlignedBoundingBox::GetMinX() const
 {
 	return min.m128_f32[0];
 }
 
-DimEngine::f32 DimEngine::Physics::AxisAlignedBoundingBox::GetMaxX() const
+__inline DimEngine::f32 DimEngine::Physics::AxisAlignedBoundingBox::GetMaxX() const
 {
 	return max.m128_f32[0];
 }
 
-DimEngine::f32 DimEngine::Physics::AxisAlignedBoundingBox::GetMinY() const
+__inline DimEngine::f32 DimEngine::Physics::AxisAlignedBoundingBox::GetMinY() const
 {
 	return min.m128_f32[1];
 }
 
-DimEngine::f32 DimEngine::Physics::AxisAlignedBoundingBox::GetMaxY() const
+__inline DimEngine::f32 DimEngine::Physics::AxisAlignedBoundingBox::GetMaxY() const
 {
 	return max.m128_f32[1];
 }
 
-DimEngine::f32 DimEngine::Physics::AxisAlignedBoundingBox::GetMinZ() const
+__inline DimEngine::f32 DimEngine::Physics::AxisAlignedBoundingBox::GetMinZ() const
 {
 	return min.m128_f32[2];
 }
 
-DimEngine::f32 DimEngine::Physics::AxisAlignedBoundingBox::GetMaxZ() const
+__inline DimEngine::f32 DimEngine::Physics::AxisAlignedBoundingBox::GetMaxZ() const
 {
 	return max.m128_f32[2];
 }
 
-DimEngine::f32 DimEngine::Physics::AxisAlignedBoundingBox::GetVolume() const
+__inline XMVECTOR DimEngine::Physics::AxisAlignedBoundingBox::GetCenter() const
 {
-	return _get_box_volume(XMVectorSubtract(max, min));
-
+	return XMVectorScale(XMVectorAdd(max, min), 0.5f);
 }
 
-void* DimEngine::Physics::AxisAlignedBoundingBox::operator new(size_t size)
+__inline XMVECTOR DimEngine::Physics::AxisAlignedBoundingBox::GetHalfSize() const
+{
+	return XMVectorScale(XMVectorSubtract(max, min), 0.5f);
+}
+
+__inline DimEngine::f32 DimEngine::Physics::AxisAlignedBoundingBox::GetVolume() const
+{
+	XMVECTOR lwh = XMVectorSubtract(max, min);
+	return lwh.m128_f32[0] * lwh.m128_f32[1] * lwh.m128_f32[2];
+}
+
+__inline void* DimEngine::Physics::AxisAlignedBoundingBox::operator new(size_t size)
 {
 	return _aligned_malloc(size, 16);
 }
 
-void DimEngine::Physics::AxisAlignedBoundingBox::operator delete(void* p)
+__inline void DimEngine::Physics::AxisAlignedBoundingBox::operator delete(void* p)
 {
 	_aligned_free(p);
 }
 
-void DimEngine::Physics::AxisAlignedBoundingBox::SetMinX(f32 value)
+__inline void DimEngine::Physics::AxisAlignedBoundingBox::SetMinX(f32 value)
 {
 	min.m128_f32[0] = value;
 }
 
-void DimEngine::Physics::AxisAlignedBoundingBox::SetMaxX(f32 value)
+__inline void DimEngine::Physics::AxisAlignedBoundingBox::SetMaxX(f32 value)
 {
 	max.m128_f32[0] = value;
 }
 
-void DimEngine::Physics::AxisAlignedBoundingBox::SetMinY(f32 value)
+__inline void DimEngine::Physics::AxisAlignedBoundingBox::SetMinY(f32 value)
 {
 	min.m128_f32[1] = value;
 }
 
-void DimEngine::Physics::AxisAlignedBoundingBox::SetMaxY(f32 value)
+__inline void DimEngine::Physics::AxisAlignedBoundingBox::SetMaxY(f32 value)
 {
 	max.m128_f32[1] = value;
 }
 
-void DimEngine::Physics::AxisAlignedBoundingBox::SetMinZ(f32 value)
+__inline void DimEngine::Physics::AxisAlignedBoundingBox::SetMinZ(f32 value)
 {
 	min.m128_f32[2] = value;
 }
 
-void DimEngine::Physics::AxisAlignedBoundingBox::SetMaxZ(f32 value)
+__inline void DimEngine::Physics::AxisAlignedBoundingBox::SetMaxZ(f32 value)
 {
 	max.m128_f32[2] = value;
 }
 
-void DimEngine::Physics::AxisAlignedBoundingBox::Union(const AxisAlignedBoundingBox& other)
+__inline void DimEngine::Physics::AxisAlignedBoundingBox::Union(const AxisAlignedBoundingBox& other)
 {
 	min = XMVectorMin(min, other.min);
 	max = XMVectorMin(max, other.max);
 }
 
-DimEngine::f32 DimEngine::Physics::AxisAlignedBoundingBox::GetUnionVolume(const AxisAlignedBoundingBox & other) const
+__inline DimEngine::f32 DimEngine::Physics::AxisAlignedBoundingBox::GetUnionVolume(const AxisAlignedBoundingBox & other) const
 {
-	return _get_box_volume(XMVectorSubtract(XMVectorMin(max, other.max), XMVectorMin(min, other.min)));
-}
-
-DimEngine::f32 DimEngine::Physics::AxisAlignedBoundingBox::_get_box_volume(XMVECTOR lwh) const
-{
-	return XMVectorMultiply(lwh, XMVectorMultiply(XMVectorSwizzle(lwh, 1, 2, 0, 3), XMVectorSwizzle(lwh, 2, 0, 1, 3))).m128_f32[0];
+	XMVECTOR lwh = XMVectorSubtract(XMVectorMin(max, other.max), XMVectorMin(min, other.min));
+	return lwh.m128_f32[0] * lwh.m128_f32[1] * lwh.m128_f32[2];
 }
 
 
@@ -131,34 +137,39 @@ const int DimEngine::Physics::OrientedBoundingBox::iEdges[12][2] = { { 0, 1 },
 																		 { 6, 7 },
 																		 { 7, 3 } };
 
-DimEngine::Physics::OrientedBoundingBox::OrientedBoundingBox(XMVECTOR size, XMVECTOR position, XMVECTOR rotation)
+DimEngine::Physics::OrientedBoundingBox::OrientedBoundingBox(XMMATRIX worldMatrix, XMVECTOR size, XMVECTOR offset)
 {
-	center = position;
+	SetData(worldMatrix, size, offset);
+}
+
+XMVECTOR DimEngine::Physics::OrientedBoundingBox::GetHalfDiagonalVector() const
+{
+	return XMVectorSubtract(H, center);
+}
+
+void DimEngine::Physics::OrientedBoundingBox::SetData(XMMATRIX worldMatrix, XMVECTOR size, XMVECTOR offset)
+{
+	center = XMVector3Transform(offset, worldMatrix);
+	this->size = XMVectorMultiply({ XMVector3Length(worldMatrix.r[0]).m128_f32[0], XMVector3Length(worldMatrix.r[1]).m128_f32[0], XMVector3Length(worldMatrix.r[2]).m128_f32[0] }, size);
 
 	XMVECTOR halfSize = XMVectorScale(size, 0.5f);
 
-	XMVECTOR min = XMVector3Rotate(XMVectorSubtract(position, halfSize), rotation);
-	XMVECTOR max = XMVector3Rotate(XMVectorAdd(position, halfSize), rotation);
+	f32 x = halfSize.m128_f32[0];
+	f32 y = halfSize.m128_f32[1];
+	f32 z = halfSize.m128_f32[2];
 
-	axisX = XMVector3Rotate({ 1, 0, 0 }, rotation);
-	axisY = XMVector3Rotate({ 0, 1, 0 }, rotation);
-	axisZ = XMVector3Rotate({ 0, 0, 1 }, rotation);
+	A = XMVector3Transform({-x, -y, -z}, worldMatrix);
+	B = XMVector3Transform({-x, -y, z}, worldMatrix);
+	C = XMVector3Transform({-x, y, -z}, worldMatrix);
+	D = XMVector3Transform({-x, y, z}, worldMatrix);
+	E = XMVector3Transform({x, -y, -z}, worldMatrix);
+	F = XMVector3Transform({-x, y, -z}, worldMatrix);
+	G = XMVector3Transform({x, y, -z}, worldMatrix);
+	H = XMVector3Transform({x, y, z}, worldMatrix);
 
-	f32 minX = min.m128_f32[0];
-	f32 maxX = max.m128_f32[0];
-	f32 minY = min.m128_f32[1];
-	f32 maxY = max.m128_f32[1];
-	f32 minZ = min.m128_f32[2];
-	f32 maxZ = max.m128_f32[2];
-
-	A = { minX, minY, minZ };
-	B = { minX, minY, maxZ };
-	C = { minX, maxY, minZ };
-	D = { minX, maxY, maxZ };
-	E = { maxX, minY, minZ };
-	F = { maxX, minY, maxZ };
-	G = { maxX, maxY, minZ };
-	H = { maxX, maxY, maxZ };
+	axisX = XMVector3Normalize(XMVectorSubtract(E, A));
+	axisY = XMVector3Normalize(XMVectorSubtract(C, A));
+	axisZ = XMVector3Normalize(XMVectorSubtract(B, A));
 
 	negativeX = XMPlaneFromPoints(B, A, D);
 	negativeZ = XMPlaneFromPoints(A, E, C);
@@ -168,7 +179,9 @@ DimEngine::Physics::OrientedBoundingBox::OrientedBoundingBox(XMVECTOR size, XMVE
 	positiveZ = XMPlaneFromPoints(F, B, H);
 }
 
-XMVECTOR DimEngine::Physics::OrientedBoundingBox::GetHalfSize() const
+
+void DimEngine::Physics::BoundingSphere::SetData(XMVECTOR position, f32 radius)
 {
-	return XMVectorSubtract(H, center);
+	this->center = position;
+	this->radius = radius;
 }

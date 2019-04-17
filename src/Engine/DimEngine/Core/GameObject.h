@@ -5,12 +5,16 @@
 #include <unordered_map>
 #include <vector>
 
+#include "../Physics/Collider.h"
+#include "../Physics/ICollisionCallback.h"
+
 #include "GameComponent.h"
 #include "Transform.h"
 
+
 namespace DimEngine
 {
-	class __declspec(dllexport) GameObject final : public Transform, private IUpdatable
+	class __declspec(dllexport) GameObject final : public Transform, private IUpdatable, public ICollisionCallback
 	{
 		friend class Scene;
 
@@ -91,9 +95,12 @@ namespace DimEngine
 		void Update(f32 deltaTime, f32 currentTime);
 		void LateUpdate(f32 deltaTime, f32 currentTime);
 
-
 	private:
 		void HandleMessage(const Message& message) { }
+
+		void OnBeginOverlapping(GameObject* other);
+		void OnOverlapping(GameObject* other);
+		void OnEndOverlapping(GameObject* other);
 	};
 
 

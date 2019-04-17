@@ -298,7 +298,9 @@ void Game::Update(float deltaTime, float totalTime)
 
 	Scene::GetCurrentScene()->Update(deltaTime, totalTime);
 
-	DimEngine::Physics::PhysicsEngine::GetSingleton()->CollisionsDetection(deltaTime,totalTime);
+	PhysicsEngine* physicsEngine = PhysicsEngine::GetSingleton();
+	physicsEngine->UpdateBoundingVolumes();
+	physicsEngine->SolveCollisions();
 }
 
 void Game::Draw(float deltaTime, float totalTime)

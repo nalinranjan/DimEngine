@@ -1,27 +1,17 @@
 #include <cstdlib>
 
+#include "../Core/GameObject.h"
+
 #include "Collider.h"
 #include "PhysicsEngine.h"
 
 using namespace DirectX;
+using namespace DimEngine::Physics;
 
-f32 collisionCheckBack = 0.05f;
 
-void DimEngine::Physics::Collider::LogCollision(Collider * other, float currentTime)
-{
-	CollidedWith[other] = currentTime;
-}
+f32 collisionCheckBack = 0.00f;
 
-void DimEngine::Physics::Collider::PreventOverlaps()
-{
-	if (!gameObject->IsStatic()) {
-		// revert the pos to previous frame
-		gameObject->SetPosition(previousPos);
-	}
-    //previousPos = gameObject->GetPosition();
-}
-
-bool DimEngine::Physics::Collider::IsOverlappingWith(Collider* other, float currentTime)
+bool DimEngine::Collider::IsOverlappingWith(Collider* other)
 {
 	switch (type)
 	{
@@ -37,12 +27,12 @@ bool DimEngine::Physics::Collider::IsOverlappingWith(Collider* other, float curr
 
 
 		case DimEngine::Physics::OBB:
-			return DimEngine::Physics::TestOverlap(reinterpret_cast<OrientedBoundingBox*>(GetBoundingVolume()), reinterpret_cast<OrientedBoundingBox*>(other->GetBoundingVolume()), gameObject->GetComponent<RigidBody>(), gameObject->GetComponent<RigidBody>(), currentTime);
+			return DimEngine::Physics::TestOverlap(static_cast<OrientedBoundingBox*>(GetBoundingVolume()), static_cast<OrientedBoundingBox*>(other->GetBoundingVolume()));
 			break;
 
 
 		case DimEngine::Physics::Sphere:
-			return DimEngine::Physics::TestOverlap(reinterpret_cast<OrientedBoundingBox*>(GetBoundingVolume()), reinterpret_cast<BoundingSphere*>(other->GetBoundingVolume()), gameObject->GetComponent<RigidBody>(), gameObject->GetComponent<RigidBody>(), currentTime);
+			return DimEngine::Physics::TestOverlap(static_cast<OrientedBoundingBox*>(GetBoundingVolume()), static_cast<BoundingSphere*>(other->GetBoundingVolume()));
 			break;
 		}
 		break;
@@ -56,12 +46,12 @@ bool DimEngine::Physics::Collider::IsOverlappingWith(Collider* other, float curr
 
 
 		case DimEngine::Physics::OBB:
-			return DimEngine::Physics::TestOverlap(reinterpret_cast<OrientedBoundingBox*>(GetBoundingVolume()), reinterpret_cast<BoundingSphere*>(other->GetBoundingVolume()), gameObject->GetComponent<RigidBody>(), gameObject->GetComponent<RigidBody>(), currentTime);
+			return DimEngine::Physics::TestOverlap(static_cast<OrientedBoundingBox*>(other->GetBoundingVolume()), static_cast<BoundingSphere*>(GetBoundingVolume()));
 			break;
 
 
 		case DimEngine::Physics::Sphere:
-			return DimEngine::Physics::TestOverlap(reinterpret_cast<BoundingSphere*>(GetBoundingVolume()), reinterpret_cast<BoundingSphere*>(other->GetBoundingVolume()), gameObject->GetComponent<RigidBody>(), gameObject->GetComponent<RigidBody>(), currentTime);
+			return DimEngine::Physics::TestOverlap(static_cast<BoundingSphere*>(GetBoundingVolume()), static_cast<BoundingSphere*>(other->GetBoundingVolume()));
 			break;
 		}
 		break;
@@ -70,32 +60,105 @@ bool DimEngine::Physics::Collider::IsOverlappingWith(Collider* other, float curr
 	throw "NOT IMPLEMENTED";
 }
 
-void DimEngine::Physics::Collider::Update(float deltaTime)
+DimEngine::Collider::Collider()
 {
-	previousPos = gameObject->GetPosition();
-}
+	this->next = nullptr;
+	this->previous = nullptr;
 
-DimEngine::Physics::Collider::Collider()
-{
-	IsTrigger = false;
+	this->boundingVolume = nullptr;
+
 	PhysicsEngine::GetSingleton()->AddCollider(this);
 }
 
-DimEngine::Physics::Collider::~Collider()
+DimEngine::Collider::Collider(BoundingVolumeType type)
+{
+	this->next = nullptr;
+	this->previous = nullptr;
+
+	this->type = type;
+	this->boundingVolume = nullptr;
+
+	PhysicsEngine::GetSingleton()->AddCollider(this);
+}
+
+DimEngine::Collider::~Collider()
 {
 	PhysicsEngine::GetSingleton()->RemoveCollider(this);
 }
 
-DimEngine::Physics::BoundingVolumeType DimEngine::Physics::Collider::GetType()
+BoundingVolumeType DimEngine::Collider::GetType()
 {
 	return type;
 }
 
-DimEngine::Physics::BoundingVolume * DimEngine::Physics::Collider::GetBoundingVolume()
+BoundingVolume* DimEngine::Collider::GetBoundingVolume()
 {
 	return boundingVolume;
 }
 
+
+DimEngine::BoxCollider::BoxCollider(f32 x, f32 y, f32 z) : BoxCollider(XMVectorSet(x, y, z, 0))
+{
+}
+
+DimEngine::BoxCollider::BoxCollider(XMVECTOR size, XMVECTOR offset) : Collider(OBB)
+{
+	this->size = size;
+	this->offset = offset;
+}
+
+DimEngine::BoxCollider::~BoxCollider()
+{
+}
+
+__inline XMVECTOR DimEngine::BoxCollider::GetSize() const
+{
+	return size;
+}
+
+__inline XMVECTOR DimEngine::BoxCollider::GetOffset() const
+{
+	return offset;
+}
+
+__inline void DimEngine::BoxCollider::SetSize(f32 x, f32 y, f32 z)
+{
+	this->size = { x, y, z };
+}
+
+__inline void DimEngine::BoxCollider::SetSize(XMVECTOR size)
+{
+	this->size = size;
+}
+
+__inline void DimEngine::BoxCollider::SetOffset(f32 x, f32 y, f32 z)
+{
+	SetOffset({ x, y, z });
+}
+
+void DimEngine::BoxCollider::SetOffset(XMVECTOR xyz)
+{
+	offset = xyz;
+}
+
+
+DimEngine::SphereCollider::SphereCollider() : SphereCollider(0.5)
+{
+}
+
+DimEngine::SphereCollider::SphereCollider(f32 radius) : Collider(Sphere)
+{
+	this->radius = radius;
+}
+
+DimEngine::SphereCollider::~SphereCollider()
+{
+}
+
+__inline f32 DimEngine::SphereCollider::GetRadius() const
+{
+	return radius;
+}
 
 //
 //bool isUnique(std::vector<XMVECTOR> points, XMVECTOR test)

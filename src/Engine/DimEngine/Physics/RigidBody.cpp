@@ -1,34 +1,35 @@
+#include "../Core/GameObject.h"
+
 #include "RigidBody.h"
 
-DimEngine::Physics::RigidBody::RigidBody()
+
+DimEngine::RigidBody::RigidBody()
 {
 	velocity = XMVectorZero();
 	angularVelocity = XMVectorZero();
 
 	mass = 1;
 	isAffectedByGravity = true;
-	isKinematic = false;
 }
 
-DimEngine::Physics::RigidBody::RigidBody(XMVECTOR velocity, XMVECTOR angularVelocity)
+DimEngine::RigidBody::RigidBody(XMVECTOR velocity, XMVECTOR angularVelocity)
 {
 	this->velocity = velocity;
 	this->angularVelocity = angularVelocity;
 
 	mass = 1;
 	isAffectedByGravity = true;
-	isKinematic = false;
 }
 
-void DimEngine::Physics::RigidBody::ApplyForce(XMVECTOR force)
+void DimEngine::RigidBody::ApplyForce(XMVECTOR force)
 {
-	if (!gameObject->IsStatic() && !isKinematic)
+	if (!gameObject->IsStatic())
 		XMVectorAdd(velocity, XMVectorScale(force, 1 / mass));
 }
 
-void DimEngine::Physics::RigidBody::ApplyAngularForce(XMVECTOR force)
+void DimEngine::RigidBody::ApplyAngularForce(XMVECTOR force)
 {
-	if (!gameObject->IsStatic() && !isKinematic)
+	if (!gameObject->IsStatic())
 		XMVectorAdd(velocity, XMVectorScale(force, 1 / mass));
 }
 

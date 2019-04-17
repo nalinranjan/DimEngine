@@ -6,11 +6,13 @@
 #include "../Common/Typedefs.h"
 #include "../Message/IMessageReceiver.h"
 #include "../Message/Message.h"
+#include "../Physics/PhysicsEngine.h"
 #include "../Rendering/RenderingEngine.h"
 
 #include "Space.h"
 
 using namespace DirectX;
+using namespace DimEngine::Physics;
 using namespace DimEngine::Rendering;
 using namespace std;
 
@@ -19,6 +21,7 @@ namespace DimEngine
 	struct __declspec(dllexport) Transform : public IMessageReceiver
 	{
 		friend class GameObject;
+		friend class PhysicsEngine;
 		friend class RenderingEngine;
 		friend class Scene;
 		

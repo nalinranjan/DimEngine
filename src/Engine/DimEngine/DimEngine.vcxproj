@@ -182,6 +182,7 @@
     <ClInclude Include="Physics\Collider.h" />
     <ClInclude Include="Physics\DynamicBVH.hpp" />
     <ClInclude Include="Physics\DynamicBVHNode.hpp" />
+    <ClInclude Include="Physics\ICollisionCallback.h" />
     <ClInclude Include="Physics\PhysicsEngine.h" />
     <ClInclude Include="Physics\RigidBody.h" />
     <ClInclude Include="Physics\SphereCollider.h" />

@@ -1,4 +1,9 @@
+#include "../Core/GameObject.h"
+
 #include "PhysicsEngine.h"
+
+using namespace DimEngine;
+
 
 DimEngine::Physics::PhysicsEngine* DimEngine::Physics::PhysicsEngine::singleton = nullptr;
 
@@ -31,21 +36,6 @@ void DimEngine::Physics::PhysicsEngine::AddCollider(Collider* collider)
 	colliderList = collider;
 }
 
-void DimEngine::Physics::PhysicsEngine::AddCollision(i32 node1, i32 node2)
-{
-	{
-		Collision* collision = new Collision(node1, node2);
-
-		if (collisionList)
-		{
-			collision->next = collisionList;
-			collisionList->previous = collision;
-		}
-		else
-			collisionList = collision;
-	}
-}
-
 void DimEngine::Physics::PhysicsEngine::RemoveCollider(Collider* collider)
 {
 	if (!colliderList)
@@ -56,57 +46,101 @@ void DimEngine::Physics::PhysicsEngine::RemoveCollider(Collider* collider)
 
 	if (previous)
 		previous->next = next;
+	else
+		colliderList = next;
 
 	if (next)
-		next = previous;
-
-	if (collider == colliderList)
-		colliderList = next;
+		next->previous = previous;
 }
 
-void DimEngine::Physics::PhysicsEngine::SolveCollision()
-{
-	for (int i = 0; i < movedObjects.GetSize(); ++i)
-		hierarchy.IsOverlappingWith(movedObjects[i], this);
-}
+//void DimEngine::Physics::PhysicsEngine::AddCollision(i32 node1, i32 node2)
+//{
+//	{
+//		Collision* collision = new Collision(node1, node2);
+//
+//		if (collisionList)
+//		{
+//			collision->next = collisionList;
+//			collisionList->previous = collision;
+//		}
+//		else
+//			collisionList = collision;
+//	}
+//}
 
-void DimEngine::Physics::PhysicsEngine::CollisionsDetection(float deltaTime, float totalTime)
+void DimEngine::Physics::PhysicsEngine::UpdateBoundingVolumes()
 {
-	for (Collider* a = colliderList; a; a = a->next)
+	for (Collider* collider = colliderList; collider; collider = collider->next)
 	{
-		//collider->ApplyGravity(deltaTime);
-		if (a->next == nullptr) continue;
-		for (Collider* b = b -> next; b; b = b->next)
+		GameObject* gameObject = collider->GetGameObject();
 
+		switch (collider->type)
 		{
-			// in the future, if the collider belongs to the subObject of current checking one, it should has the option to ignore it.
+		case AABB:
+			break;
 
-			if (a != b){
 
-				bool collied = a->IsOverlappingWith(b, totalTime);
-				if (collied) {
-					a->PreventOverlaps();
-					b->PreventOverlaps();
-					a->LogCollision(b, totalTime);
-					b->LogCollision(a, totalTime);
+		case OBB:
+			if (!collider->boundingVolume)
+				collider->boundingVolume = new OrientedBoundingBox();
+
+			static_cast<OrientedBoundingBox*>(collider->boundingVolume)->SetData(gameObject->GetWorldMatrix(), static_cast<BoxCollider*>(collider)->GetSize());
+			break;
+
+
+		case Sphere:
+			if (!collider->boundingVolume)
+				collider->boundingVolume = new BoundingSphere();
+
+			static_cast<BoundingSphere*>(collider->boundingVolume)->SetData(gameObject->GetPosition(), static_cast<SphereCollider*>(collider)->GetRadius());
+			break;
+		}
+	}
+}
+
+void DimEngine::Physics::PhysicsEngine::SolveCollisions()
+{
+	for (Collider* colliderA = colliderList; colliderA; colliderA = colliderA->next)
+		if (colliderA)
+			for (Collider* colliderB = colliderA->next; colliderB; colliderB = colliderB->next)
+			{
+				auto it = colliderA->contacts.find(colliderB);
+
+				GameObject* gameObjectA = colliderA->GetGameObject();
+				GameObject* gameObjectB = colliderB->GetGameObject();
+
+				if (colliderA->IsOverlappingWith(colliderB))
+				{
+					if (it == colliderA->contacts.end())
+					{
+						colliderA->contacts.insert(colliderB);
+						static_cast<ICollisionCallback*>(gameObjectA)->OnBeginOverlapping(gameObjectB);
+
+						colliderB->contacts.insert(colliderA);
+						static_cast<ICollisionCallback*>(gameObjectB)->OnBeginOverlapping(gameObjectA);
+					}
+
+					static_cast<ICollisionCallback*>(gameObjectA)->OnOverlapping(gameObjectB);
+					static_cast<ICollisionCallback*>(gameObjectB)->OnOverlapping(gameObjectA);
 				}
-				else if (a->CollidedWith[b] != 0 && !collied) {
-					a->CollidedWith[b] = 0.0f;
-					b->CollidedWith[a] = 0.0f;
+				else if (it != colliderA->contacts.end())
+				{
+					colliderA->contacts.erase(it);
+					static_cast<ICollisionCallback*>(gameObjectA)->OnEndOverlapping(gameObjectB);
+
+					colliderB->contacts.erase(colliderA);
+					static_cast<ICollisionCallback*>(gameObjectB)->OnEndOverlapping(gameObjectA);
 				}
 			}
-		}
-		a->Update(deltaTime);
-	}
 }
 
-
-bool DimEngine::Physics::PhysicsEngine::DynamicBVHTestOverlapCallback(i32 node1, i32 node2)
-{
-	if (node1 != node2)
-	{
-		AddCollision(node1, node2);
-	}
-
-	return true;
-}
+//
+//bool DimEngine::Physics::PhysicsEngine::DynamicBVHTestOverlapCallback(i32 node1, i32 node2)
+//{
+//	if (node1 != node2)
+//	{
+//		AddCollision(node1, node2);
+//	}
+//
+//	return true;
+//}

@@ -122,3 +122,33 @@ __inline void DimEngine::GameObject::LateUpdate(f32 deltaTime, f32 currentTime)
 			component->LateUpdate(deltaTime, currentTime);
 	}
 }
+
+__inline void DimEngine::GameObject::OnBeginOverlapping(GameObject* other)
+{
+	for (auto it = components.begin(); it != components.end(); it++)
+	{
+		GameComponent* component = it->second;
+		if (component->IsActiveSelf())
+			component->OnBeginOverlapping(other);
+	}
+}
+
+__inline void DimEngine::GameObject::OnOverlapping(GameObject* other)
+{
+	for (auto it = components.begin(); it != components.end(); it++)
+	{
+		GameComponent* component = it->second;
+		if (component->IsActiveSelf())
+			component->OnOverlapping(other);
+	}
+}
+
+__inline void DimEngine::GameObject::OnEndOverlapping(GameObject* other)
+{
+	for (auto it = components.begin(); it != components.end(); it++)
+	{
+		GameComponent* component = it->second;
+		if (component->IsActiveSelf())
+			component->OnEndOverlapping(other);
+	}
+}
