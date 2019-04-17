@@ -66,7 +66,7 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 
 
 	zPrepassDepthStencilState = nullptr;
-
+	portalDepthStencilState = nullptr;
 
 	Global::SetScreenRatio(1280.0f / 720.0f);
 
@@ -134,6 +134,9 @@ Game::~Game()
 	if (zPrepassDepthStencilState)
 		zPrepassDepthStencilState->Release();
 
+	if (portalDepthStencilState)
+		portalDepthStencilState->Release();
+
 
 	Scene::UnloadAll();
 
@@ -184,6 +187,28 @@ void Game::LoadShaders()
 	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 
 	device->CreateDepthStencilState(&depthStencilDesc, &zPrepassDepthStencilState);
+
+
+	D3D11_DEPTH_STENCIL_DESC portalDSDesc = {};
+	portalDSDesc.DepthEnable = true;
+	portalDSDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	portalDSDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	portalDSDesc.StencilEnable = true;
+	portalDSDesc.StencilReadMask = 0xFF;
+	portalDSDesc.StencilWriteMask = 0xFF;
+
+	portalDSDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	portalDSDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	portalDSDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
+	portalDSDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	portalDSDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	portalDSDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	portalDSDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	portalDSDesc.BackFace.StencilFunc = D3D11_COMPARISON_NEVER;
+
+	device->CreateDepthStencilState(&portalDSDesc, &portalDepthStencilState);
 }
 
 void Game::CreateScene()
@@ -307,8 +332,15 @@ void Game::Draw(float deltaTime, float totalTime)
 	renderingEngine->UpdateLightSources();
 	renderingEngine->SortRenderables();
 
-	portalCamera1->RenderToRenderTarget(context);
-	portalCamera2->RenderToRenderTarget(context);
+	//portalCamera1->RenderToRenderTarget(context);
+	//portalCamera2->RenderToRenderTarget(context);
+
+	context->OMSetDepthStencilState(portalDepthStencilState, 1);
+	context->OMSetRenderTargets(0, nullptr, depthStencilView);
+	context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	renderingEngine->DrawForward(context);/* , portalCamera1);
+	renderingEngine->DrawForward(context, portalCamera2);*/
+
 
 	D3D11_VIEWPORT viewport = {};
 	viewport.TopLeftX = 0;
