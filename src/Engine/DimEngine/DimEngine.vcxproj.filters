@@ -271,6 +271,9 @@
     <FxCompile Include="Rendering\Shaders\ps_portal.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Rendering\Shaders\vs_portal.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DimEngine.rc">

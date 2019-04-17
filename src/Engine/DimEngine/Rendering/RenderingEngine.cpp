@@ -84,12 +84,11 @@ void DimEngine::Rendering::RenderingEngine::RemoveRenderer(Renderer* renderer)
 
 	if (previous)
 		previous->next = next;
+	else
+		rendererList = next;
 
 	if (next)
-		next = previous;
-
-	if (renderer == rendererList)
-		rendererList = next;
+		next->previous = previous;
 }
 
 void DimEngine::Rendering::RenderingEngine::RemoveCamera(Camera * camera)
@@ -102,12 +101,11 @@ void DimEngine::Rendering::RenderingEngine::RemoveCamera(Camera * camera)
 
 	if (previous)
 		previous->next = next;
+	else
+		cameraList = next;
 
 	if (next)
-		next = previous;
-
-	if (camera == cameraList)
-		cameraList = next;
+		next->previous = previous;
 }
 
 void DimEngine::Rendering::RenderingEngine::RemoveLight(Light* light)
@@ -120,12 +118,11 @@ void DimEngine::Rendering::RenderingEngine::RemoveLight(Light* light)
 
 	if (previous)
 		previous->next = next;
+	else
+		lightList = next;
 
 	if (next)
-		next = previous;
-
-	if (light == lightList)
-		lightList = next;
+		next->previous = previous;	
 }
 
 void DimEngine::Rendering::RenderingEngine::DestroyRenderable(i32 id)
@@ -144,7 +141,7 @@ void DimEngine::Rendering::RenderingEngine::UpdateRenderables()
 
 	for (Renderer* renderer = rendererList; renderer; renderer = renderer->next)
 	{
-		if (renderer->isActive)
+		if (renderer->IsActive())
 		{
 			Renderable& renderable = renderableAllocator[renderableAllocator.Allocate()];
 
@@ -161,7 +158,7 @@ void DimEngine::Rendering::RenderingEngine::UpdateViewers()
 
 	for (Camera* camera = cameraList; camera; camera = camera->next)
 	{
-		if (camera->isActive)
+		if (camera->IsActive())
 		{
 			if (camera->viewer == null_index)
 				camera->viewer = viewerAllocator.Allocate();
@@ -187,7 +184,7 @@ void DimEngine::Rendering::RenderingEngine::UpdateLightSources()
 
 	for (Light* light = lightList; light; light = light->next)
 	{
-		if (light->isActive)
+		if (light->IsActive())
 		{
 			LightSource& lightSource = lightSourceAllocator[lightSourceAllocator.Allocate()];
 			lightSource.ambientColor = light->ambientColor;
@@ -210,6 +207,11 @@ void DimEngine::Rendering::RenderingEngine::SortRenderables()
 
 		return ma < mb;
 	});
+}
+
+void DimEngine::Rendering::RenderingEngine::UpdateGlobalData(float screenWidth, float screenHeight)
+{
+
 }
 
 void DimEngine::Rendering::RenderingEngine::PerformZPrepass(SimpleVertexShader* shader, ID3D11DeviceContext* context)
@@ -277,11 +279,18 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 		Material* material = renderableAllocator[j].material;
 		SimpleVertexShader* vertexShader = material->GetVertexShader();
 		SimplePixelShader* pixelShader = material->GetPixelShader();
+		std::unordered_map<std::string, std::pair<const void*, unsigned int>> pixelShaderData = material->GetPixelShaderData();
 
 		pixelShader->SetShader();
 
 		pixelShader->SetData("light", lightSourceAllocator.GetMemoryAddress(), sizeof(LightSource));
 		pixelShader->SetFloat4("cameraPosition", cameraPosition);
+
+		// Set up all data on pixel shader
+		for (auto it = pixelShaderData.begin(); it != pixelShaderData.end(); ++it) {
+			pixelShader->SetData(it->first, it->second.first, it->second.second);
+		}
+
 		if (material->getTexture())
 		{
 			pixelShader->SetShaderResourceView("TexAlbedo", material->getTexture());
@@ -298,12 +307,18 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 		{
 			Renderable& renderable = renderableAllocator[j];
 
+			std::unordered_map<std::string, std::pair<const void*, unsigned int>> vertexShaderData = material->GetVertexShaderData();
 			vertexShader->SetShader();
 
 			vertexShader->SetMatrix4x4("view", viewMatrix);
 			vertexShader->SetMatrix4x4("projection", projectionMatrix);
 			vertexShader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
 			vertexShader->SetMatrix4x4("world", renderable.worldMatrix);
+
+			// Set up all data on vertex shader
+			for (auto it = vertexShaderData.begin(); it != vertexShaderData.end(); ++it) {
+				vertexShader->SetData(it->first, it->second.first, it->second.second);
+			}
 
 			vertexShader->CopyAllBufferData();
 

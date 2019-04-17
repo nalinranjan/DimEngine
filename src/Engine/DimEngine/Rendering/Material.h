@@ -3,6 +3,9 @@
 #include "SimpleShader.h"
 #include "Texture.h"
 
+#include <unordered_map>
+#include <string>
+
 namespace DimEngine
 {
 	namespace Rendering
@@ -29,12 +32,22 @@ namespace DimEngine
 			ID3D11ShaderResourceView* getTexture();
 			ID3D11SamplerState* getSampler();
 
+			std::unordered_map<std::string, std::pair<const void*, unsigned int>> GetVertexShaderData() { return vertexShaderData; }
+			std::unordered_map<std::string, std::pair<const void*, unsigned int>> GetPixelShaderData() { return pixelShaderData; }
+
+			void SetVertexData(std::string name, const void* data, unsigned int size);
+			void SetPixelData(std::string name, const void* data, unsigned int size);
+
 		private:
 			SimpleVertexShader* vertexShader;
 			SimplePixelShader* pixelShader;
 
 			ID3D11ShaderResourceView* texture;
 			ID3D11SamplerState* sampler;
+
+			std::unordered_map<std::string, std::pair<const void*, unsigned int>> vertexShaderData;
+			std::unordered_map<std::string, std::pair<const void*, unsigned int>> pixelShaderData;
+
 		};
 	}
 }

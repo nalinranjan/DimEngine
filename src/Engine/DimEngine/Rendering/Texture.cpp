@@ -33,10 +33,10 @@ DimEngine::Rendering::RenderTexture::RenderTexture(ID3D11Device* device, u32 siz
 {
 }
 
-DimEngine::Rendering::RenderTexture::RenderTexture(ID3D11Device* device, u32 height, u32 width)
+DimEngine::Rendering::RenderTexture::RenderTexture(ID3D11Device* device, u32 width, u32 height)
 {
-	this->height = height;
 	this->width = width;
+	this->height = height;
 
 
 	ID3D11Texture2D* texture;
@@ -46,7 +46,7 @@ DimEngine::Rendering::RenderTexture::RenderTexture(ID3D11Device* device, u32 hei
 	textureDesc.Width = width;
 	textureDesc.MipLevels = 1;
 	textureDesc.ArraySize = 1;
-	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	textureDesc.SampleDesc.Count = 1;
 	textureDesc.Usage = D3D11_USAGE_DEFAULT;
 	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;

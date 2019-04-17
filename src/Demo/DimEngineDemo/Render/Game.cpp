@@ -171,6 +171,9 @@ void Game::LoadShaders()
 	pixelShader = new SimplePixelShader(device, context);
 	pixelShader->LoadShaderFile(pixel);
 
+	vsPortal = new SimpleVertexShader(device, context);
+	vsPortal->LoadShaderFile((wpath + std::wstring(L"/vs_portal.cso")).c_str());
+
 	psPortal = new SimplePixelShader(device, context);
 	psPortal->LoadShaderFile((wpath + std::wstring(L"/ps_portal.cso")).c_str());
 
@@ -187,18 +190,19 @@ void Game::CreateScene()
 {
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
+	quadMesh = new Mesh(device, (char*)"../Assets/Models/quad.obj");
 
 	grassTexture = new Texture((wchar_t*)L"../Assets/Textures/greengrass.jpg", D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_ANISOTROPIC, D3D11_FLOAT32_MAX, device, context);
 	wallTexture = new Texture((wchar_t*)L"../Assets/Textures/wall.jpg", D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_ANISOTROPIC, D3D11_FLOAT32_MAX, device, context);
 	rockTexture = new Texture((wchar_t*)L"../Assets/Textures/rock.jpg", D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_ANISOTROPIC, D3D11_FLOAT32_MAX, device, context);
-	portalTexture1 = new RenderTexture(device, 512u);
-	portalTexture2 = new RenderTexture(device, 512u);
+	portalTexture1 = new RenderTexture(device, 1280u, 720u);
+	portalTexture2 = new RenderTexture(device, 1280u, 720u);
 
 	grassMaterial = new Material(vertexShader, pixelShader, grassTexture->GetResourceView(), grassTexture->GetSamplerState());
 	wallMaterial = new Material(vertexShader, pixelShader, wallTexture->GetResourceView(), wallTexture->GetSamplerState());
 	rockMaterial = new Material(vertexShader, pixelShader, rockTexture->GetResourceView(), rockTexture->GetSamplerState());
-	portalMaterial1 = new Material(vertexShader, psPortal, portalTexture1->GetResourceView(), portalTexture1->GetSamplerState());
-	portalMaterial2 = new Material(vertexShader, psPortal, portalTexture2->GetResourceView(), portalTexture2->GetSamplerState());
+	portalMaterial1 = new Material(vsPortal, psPortal, portalTexture1->GetResourceView(), portalTexture1->GetSamplerState());
+	portalMaterial2 = new Material(vsPortal, psPortal, portalTexture2->GetResourceView(), portalTexture2->GetSamplerState());
 	
 	GameObject* directionalLightObject = new GameObject();
 	directionalLightObject->SetRotation(45, 0, 0);
@@ -206,21 +210,21 @@ void Game::CreateScene()
 
 
 	cameraObject = new GameObject();
-	cameraObject->SetLocalRotation(0, 0, 0);
+	cameraObject->SetRotation(camRotX, camRotY, 0);
 	camera = cameraObject->AddComponent<Camera>();
 	cameraObject->AddComponent<CameraController>();
 	
 
 	portalCamera1 = (new GameObject())->AddComponent<Camera>();
 	portalCamera1->SetRenderTexture(portalTexture1);
-	portalCamera1->SetRatio(1);
+	portalCamera1->SetRatio((float)width / height);
 
 	portalCamera2 = (new GameObject())->AddComponent<Camera>();
 	portalCamera2->SetRenderTexture(portalTexture2);
-	portalCamera2->SetRatio(1);
+	portalCamera2->SetRatio((float)width / height);
 
-	portal1 = __CreatePortal(portalMaterial1, 0, 0, -10);
-	portal2 = __CreatePortal(portalMaterial2, 5, 0, 5, 0, -90, 0);
+	portal1 = __CreatePortal(portalMaterial1, -5, 0, 8);
+	portal2 = __CreatePortal(portalMaterial2, 5, 0, 8, 0, -180, 0);
 
 	portal1->SetExit(portal2);
 	portal1->SetMainCamera(camera);
@@ -257,8 +261,8 @@ __forceinline Portal* Game::__CreatePortal(Material* material, f32 x, f32 y, f32
 	GameObject* portalArea1 = new GameObject();
 	portalArea1->SetParent(portal);
 	portalArea1->SetLocalRotation(0, 0, 90);
-	portalArea1->SetLocalScale(5, 5, 0.1f);
-	portalArea1->AddComponent<Renderer>(material, cubeMesh);
+	portalArea1->SetLocalScale(2.5f, 2.5f, 0.1f);
+	portalArea1->AddComponent<Renderer>(material, quadMesh);
 
 	GameObject* pillar1L = new GameObject();
 	pillar1L->SetParent(portal);
@@ -271,12 +275,6 @@ __forceinline Portal* Game::__CreatePortal(Material* material, f32 x, f32 y, f32
 	pillar1R->SetLocalPosition(2.5f, 0, 0);
 	pillar1R->SetLocalScale(0.2f, 5, 0.2f);
 	pillar1R->AddComponent<Renderer>(wallMaterial, cubeMesh);
-
-	GameObject* back = new GameObject();
-	back->SetParent(portal);
-	back->SetLocalPosition(0, 0, -0.1f);
-	back->SetLocalScale(5, 5, 0.1f);
-	back->AddComponent<Renderer>(wallMaterial, cubeMesh);
 
 	portal->SetLocalPosition(x, y, z);
 	portal->SetLocalRotation(rx, ry, rz);
@@ -387,8 +385,11 @@ void Game::OnMouseMove(WPARAM buttonState, int x, int y)
 		//camera->SetRotationY((x - prevMousePos.x) * 0.001f);
 	}
 
-	if (buttonState & 0x0002)
-		cameraObject->Rotate((y - prevMousePos.y) / 31.41592653579f, (x - prevMousePos.x) / 31.41592653579f, 0.0f);
+	if (buttonState & 0x0002) {
+		camRotX += (float)(y - prevMousePos.y) / 5.0f;
+		camRotY += (float)(x - prevMousePos.x) / 5.0f;
+		cameraObject->SetRotation(camRotX, camRotY, 0);
+	}
 
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;

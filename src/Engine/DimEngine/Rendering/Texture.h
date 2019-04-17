@@ -29,13 +29,14 @@ namespace DimEngine {
 		private:
 			ID3D11RenderTargetView* renderTargetView;
 			ID3D11DepthStencilView* depthStencilView;
-			u32 height;
+			
 			u32 width;
+			u32 height;
 
 
 		public:
 			RenderTexture(ID3D11Device* device, u32 size);
-			RenderTexture(ID3D11Device* device, u32 height, u32 width);
+			RenderTexture(ID3D11Device* device, u32 width, u32 height);
 			~RenderTexture();
 
 			ID3D11RenderTargetView* GetRenderTargetView();

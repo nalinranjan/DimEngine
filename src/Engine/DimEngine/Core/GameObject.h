@@ -75,16 +75,19 @@ namespace DimEngine
 		GameObject(XMVECTOR position, XMVECTOR rotation, XMVECTOR scale);
 		~GameObject();
 
-		bool IsActive();
-		bool IsActiveSelf();
-		bool IsStatic();
+
 		GameObject* GetParent();
 		GameObject* GetChild(size_t index);
 		template<class T> T* GetComponent();
+		bool IsActive();
+		bool IsActiveSelf();
+		bool IsStatic();
 
 		void SetParent(GameObject* other);
 		template<class T, class... argTs> T* AddComponent(argTs... args);
 		template<class T> void RemoveComponent();
+		void SetActive(bool flag);
+
 
 		void SendMessage_(const Message& message);
 		void SendMessageUp(const Message& message, u32 level = UINT_MAX);

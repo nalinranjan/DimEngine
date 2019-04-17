@@ -50,12 +50,13 @@ private:
 	SimpleVertexShader* vsZPrepass;
 	SimpleVertexShader* vertexShader;
 	SimplePixelShader* pixelShader;
+	SimpleVertexShader* vsPortal;
 	SimplePixelShader* psPortal;
 
 
 	Mesh* sphereMesh;
 	Mesh* cubeMesh;
-
+	Mesh* quadMesh;
 
 	Texture* grassTexture;
 	Texture* wallTexture;
@@ -74,6 +75,8 @@ private:
 
 	GameObject* cameraObject;
 	Camera* camera;
+	f32 camRotX = 0;
+	f32 camRotY = 0;
 
 	Camera* portalCamera1;
 	Camera* portalCamera2;

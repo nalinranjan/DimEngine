@@ -72,6 +72,11 @@ __inline void DimEngine::GameObject::SetParent(GameObject* other)
 	return Transform::SetParent(other);
 }
 
+void DimEngine::GameObject::SetActive(bool flag)
+{
+	isActive = flag;
+}
+
 void DimEngine::GameObject::SendMessage_(const Message& message)
 {
 	HandleMessage(message);

@@ -57,6 +57,7 @@ namespace DimEngine
 		Transform* GetChild(size_t index);
 		size_t GetChildCount();
 		XMVECTOR GetForwardVector();
+		XMVECTOR GetRightVector();
 
 		void SetLocalPosition(f32 x, f32 y, f32 z);
 		void SetLocalPosition(XMFLOAT3 position);

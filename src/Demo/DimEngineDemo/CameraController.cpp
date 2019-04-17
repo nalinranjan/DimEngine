@@ -4,21 +4,31 @@
 
 void CameraController::Update(f32 deltaTime, f32 totalTime)
 {
+
+	float speed = 5;
+	float forwardScale = 0;
+	float rightScale = 0;
+
 	if (GetAsyncKeyState('W') & 0x8000)
-		gameObject->Translate(0.0f, 0.0f, deltaTime, SELF);
+		forwardScale = 1;
 
 	if (GetAsyncKeyState('A') & 0x8000)
-		gameObject->Translate(-deltaTime, 0.0f, 0.0f, SELF);
+		rightScale = -1;
 
 	if (GetAsyncKeyState('S') & 0x8000)
-		gameObject->Translate(0.0f, 0.0f, -deltaTime, SELF);
+		forwardScale = -1;
 
 	if (GetAsyncKeyState('D') & 0x8000)
-		gameObject->Translate(deltaTime, 0.0f, 0.0f, SELF);
+		rightScale = 1;
 
-	//if (GetAsyncKeyState(VK_SPACE) & 0x8000)
-	//	gameObject->Translate(0.0f, deltaTime, 0.0f, SELF);
+	XMVECTOR forward = gameObject->GetForwardVector();
+	XMVECTOR flatForward = XMVector3Normalize(XMVectorMultiply(forward, XMVectorSet(1, 0, 1, 1)));
 
-	//if (GetAsyncKeyState('X') & 0x8000)
-	//	gameObject->Translate(0.0f, -deltaTime, 0.0f, SELF);
+	XMVECTOR right = gameObject->GetRightVector();
+	XMVECTOR flatRight = XMVector3Normalize(XMVectorMultiply(right, XMVectorSet(1, 0, 1, 1)));
+
+	XMVECTOR forwardOffset = flatForward * speed * forwardScale * deltaTime;
+	XMVECTOR rightOffset = flatRight * speed * rightScale * deltaTime;
+	gameObject->SetPosition(XMVectorAdd(gameObject->GetPosition(), XMVectorAdd(forwardOffset, rightOffset)));
+
 }
