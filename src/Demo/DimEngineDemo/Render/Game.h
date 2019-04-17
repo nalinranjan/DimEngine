@@ -90,4 +90,6 @@ private:
 
 
 	ID3D11DepthStencilState* zPrepassDepthStencilState;
+
+	ID3D11DepthStencilState* portalDepthStencilState;
 };

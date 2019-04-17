@@ -14,7 +14,6 @@ void Portal::Update(f32 deltaTime, f32 gameTime)
 		exit->GetGameObject()->GetPosition(),
 		XMVector3Rotate(offset, rotOffset));
 
-
 	viewCamera->GetGameObject()->SetPosition(portalCamPos);
 	viewCamera->GetGameObject()->SetRotation(XMQuaternionMultiply(
 		mainCamera->GetGameObject()->GetRotation(),

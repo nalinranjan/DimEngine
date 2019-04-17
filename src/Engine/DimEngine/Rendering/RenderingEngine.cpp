@@ -337,5 +337,7 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 
 			++j;
 		} while (j < J && renderableAllocator[j].material == material);
+
+		//pixelShader->SetShaderResourceView("TexAlbedo", nullptr);
 	}
 }
