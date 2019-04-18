@@ -371,7 +371,7 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	const float color[4] = { 0.69f, 0.88f, 0.9f, 0.0f };
 
-	//context->OMSetDepthStencilState(nullptr, 0);
+	context->OMSetDepthStencilState(nullptr, 0);
 	context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
 	context->ClearRenderTargetView(backBufferRTV, color);
 	context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
