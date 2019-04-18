@@ -86,7 +86,7 @@ namespace DimEngine
 			void PerformZPrepass(SimpleVertexShader* shader, ID3D11DeviceContext* context);
 			void DrawForward(ID3D11DeviceContext* context);
 			void DrawForward(ID3D11DeviceContext* context, Camera* camera);
-			void DrawPortals(ID3D11DeviceContext* context, Camera* camera);
+			void DrawPortals(ID3D11DeviceContext* context, Camera* camera, ID3D11DepthStencilState* pass1DSS, ID3D11DepthStencilState* pass2DSS, ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv);
 		};
 	}
 }

@@ -389,26 +389,24 @@ void Game::Draw(float deltaTime, float totalTime)
 	renderingEngine->UpdateLightSources();
 	renderingEngine->SortRenderables();
 
-	portalCamera1->RenderToRenderTarget(context);
-	portalCamera2->RenderToRenderTarget(context);
-	portalCamera3->RenderToRenderTarget(context);
-	portalCamera4->RenderToRenderTarget(context);
+	//portalCamera1->RenderToRenderTarget(context);
+	//portalCamera2->RenderToRenderTarget(context);
+	//portalCamera3->RenderToRenderTarget(context);
+	//portalCamera4->RenderToRenderTarget(context);
 
-	const float color[4] = { 0.69f, 0.88f, 0.9f, 0.0f };
-	context->ClearRenderTargetView(backBufferRTV, color);
+	//const float color[4] = { 0.69f, 0.88f, 0.9f, 0.0f };
+	//context->ClearRenderTargetView(backBufferRTV, color);
 
-	context->OMSetDepthStencilState(portalPass1DepthStencilState, 1);
-	context->OMSetRenderTargets(0, nullptr, depthStencilView);
-	context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	//renderingEngine->DrawForward(context, camera);/* , portalCamera1);
-	//renderingEngine->DrawForward(context, portalCamera2);*/
-	renderingEngine->DrawPortals(context, camera);
+	//context->OMSetDepthStencilState(portalPass1DepthStencilState, 1);
+	//context->OMSetRenderTargets(0, nullptr, depthStencilView);
+	//context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	renderingEngine->DrawPortals(context, camera, portalPass1DepthStencilState, portalPass2DepthStencilState, backBufferRTV, depthStencilView);
 
 	
 	//context->OMSetDepthStencilState(nullptr, 0);
-	context->OMSetDepthStencilState(portalPass2DepthStencilState, 1);
-	context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
-	renderingEngine->DrawForward(context, portalCamera1);
+	//context->OMSetDepthStencilState(portalPass2DepthStencilState, 1);
+	//context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
+	//renderingEngine->DrawForward(context, portalCamera1);
 	//renderingEngine->DrawForward(context, portalCamera2);
 
 

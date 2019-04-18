@@ -371,7 +371,7 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 	}
 }
 
-void DimEngine::Rendering::RenderingEngine::DrawPortals(ID3D11DeviceContext* context, Camera* camera)
+void DimEngine::Rendering::RenderingEngine::DrawPortals(ID3D11DeviceContext* context, Camera* camera, ID3D11DepthStencilState* pass1DSS, ID3D11DepthStencilState* pass2DSS, ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv)
 {
 	Viewer& viewer = viewerAllocator[camera->viewer];
 
@@ -383,9 +383,16 @@ void DimEngine::Rendering::RenderingEngine::DrawPortals(ID3D11DeviceContext* con
 	context->PSSetShader(nullptr, nullptr, 0);
 
 	Renderer* portal = portalList;
+	
+	const float color[4] = { 0.69f, 0.88f, 0.9f, 0.0f };
+	context->ClearRenderTargetView(rtv, color);
 
 	while (portal)
 	{
+		context->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+		context->OMSetDepthStencilState(pass1DSS, 1);
+		context->OMSetRenderTargets(0, nullptr, dsv);
+
 		auto material = portal->material;
 		auto vertexShader = material->GetVertexShader();
 		auto vertexShaderData = material->GetVertexShaderData();
@@ -417,6 +424,10 @@ void DimEngine::Rendering::RenderingEngine::DrawPortals(ID3D11DeviceContext* con
 		context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		context->DrawIndexed(mesh->GetIndexCount(), 0, 0);
+
+		context->OMSetDepthStencilState(pass2DSS, 1);
+		context->OMSetRenderTargets(1, &rtv, dsv);
+		DrawForward(context, portal->GetGameObject()->GetParent()->GetComponent<Portal>()->GetViewCamera());
 
 		portal = portal->next;
 	}
