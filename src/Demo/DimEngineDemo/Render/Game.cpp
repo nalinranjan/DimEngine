@@ -202,12 +202,16 @@ void Game::CreateScene()
 	rockTexture = new Texture((wchar_t*)L"../Assets/Textures/rock.jpg", D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_ANISOTROPIC, D3D11_FLOAT32_MAX, device, context);
 	portalTexture1 = new RenderTexture(device, 1280u, 720u);
 	portalTexture2 = new RenderTexture(device, 1280u, 720u);
+	portalTexture3 = new RenderTexture(device, 1280u, 720u);
+	portalTexture4 = new RenderTexture(device, 1280u, 720u);
 
 	grassMaterial = new Material(vertexShader, pixelShader, grassTexture->GetResourceView(), grassTexture->GetSamplerState());
 	wallMaterial = new Material(vertexShader, pixelShader, wallTexture->GetResourceView(), wallTexture->GetSamplerState());
 	rockMaterial = new Material(vertexShader, pixelShader, rockTexture->GetResourceView(), rockTexture->GetSamplerState());
 	portalMaterial1 = new Material(vsPortal, psPortal, portalTexture1->GetResourceView(), portalTexture1->GetSamplerState());
 	portalMaterial2 = new Material(vsPortal, psPortal, portalTexture2->GetResourceView(), portalTexture2->GetSamplerState());
+	portalMaterial3 = new Material(vsPortal, psPortal, portalTexture3->GetResourceView(), portalTexture3->GetSamplerState());
+	portalMaterial4 = new Material(vsPortal, psPortal, portalTexture4->GetResourceView(), portalTexture4->GetSamplerState());
 	
 	GameObject* directionalLightObject = new GameObject();
 	directionalLightObject->SetRotation(45, 0, 0);
@@ -226,7 +230,6 @@ void Game::CreateScene()
 	go->SetLocalRotation(45, 0, 0);
 	go->Translate(0, 0, 0);
 	camera = go->AddComponent<Camera>();
-	
 
 	portalCamera1 = (new GameObject())->AddComponent<Camera>();
 	portalCamera1->SetRenderTexture(portalTexture1);
@@ -236,8 +239,18 @@ void Game::CreateScene()
 	portalCamera2->SetRenderTexture(portalTexture2);
 	portalCamera2->SetRatio((float)width / height);
 
-	portal1 = __CreatePortal(portalMaterial1, -10, 0, 10, 0, 270, 0);
-	portal2 = __CreatePortal(portalMaterial2, 10, 0, 10, 0, 90, 0);
+	portalCamera3 = (new GameObject())->AddComponent<Camera>();
+	portalCamera3->SetRenderTexture(portalTexture3);
+	portalCamera3->SetRatio((float)width / height);
+
+	portalCamera4 = (new GameObject())->AddComponent<Camera>();
+	portalCamera4->SetRenderTexture(portalTexture3);
+	portalCamera4->SetRatio((float)width / height);
+
+	portal1 = __CreatePortal(portalMaterial1, -15, 0, 0, 0, 0, 0);
+	portal2 = __CreatePortal(portalMaterial2, 5, 0, 0, 0, 180, 0);
+	portal3 = __CreatePortal(portalMaterial3, -15, 0, 10, 0, 180, 0);
+	portal4 = __CreatePortal(portalMaterial4, 5, 0, 20, 0, 0, 0);
 
 	portal1->SetExit(portal2);
 	portal1->SetMainCamera(camera);
@@ -247,11 +260,22 @@ void Game::CreateScene()
 	portal2->SetMainCamera(camera);
 	portal2->SetViewCamera(portalCamera2);
 
+	portal3->SetExit(portal4);
+	portal3->SetMainCamera(camera);
+	portal3->SetViewCamera(portalCamera3);
+
+	portal4->SetExit(portal3);
+	portal4->SetMainCamera(camera);
+	portal4->SetViewCamera(portalCamera4);
+
 	portalCamera1->GetGameObject()->SetParent(portal2->GetGameObject());
 	portalCamera1->GetGameObject()->SetLocalPosition(0, 0, 0);
 	portalCamera2->GetGameObject()->SetParent(portal1->GetGameObject());
 	portalCamera2->GetGameObject()->SetLocalPosition(0, 0, 0);
-
+	portalCamera3->GetGameObject()->SetParent(portal4->GetGameObject());
+	portalCamera3->GetGameObject()->SetLocalPosition(0, 0, 0);
+	portalCamera4->GetGameObject()->SetParent(portal3->GetGameObject());
+	portalCamera4->GetGameObject()->SetLocalPosition(0, 0, 0);
 
 	floor = new GameObject();
 	floor->SetPosition(0, -2, 0);
@@ -259,20 +283,15 @@ void Game::CreateScene()
 	floor->SetRotation(-90, 0, 0);
 	floor->AddComponent<Renderer>(grassMaterial, floorMesh);
 	
-	/*tunnel1 = new GameObject();
-	tunnel1->SetPosition(-10, -2, 10);
-	tunnel1->SetLocalScale(2, 2, 4);
+	tunnel1 = new GameObject();
+	tunnel1->SetPosition(-15, -2, 5);
+	tunnel1->SetLocalScale(2, 2, 5);
 	tunnel1->AddComponent<Renderer>(rockMaterial, tunnelMesh);
 
 	tunnel2 = new GameObject();
-	tunnel2->SetPosition(10, -2, 10);
-	tunnel2->SetLocalScale(2, 2, 8);
-	tunnel2->AddComponent<Renderer>(rockMaterial, tunnelMesh);*/
-
-	cube = new GameObject();
-	cube->SetParent(portal2->GetGameObject());
-	cube->SetLocalPosition(0, 0, 5);
-	cube->AddComponent<Renderer>(rockMaterial, cubeMesh);
+	tunnel2->SetPosition(5, -2, 10);
+	tunnel2->SetLocalScale(2, 2, 10);
+	tunnel2->AddComponent<Renderer>(rockMaterial, tunnelMesh);
 
 }
 
@@ -282,12 +301,12 @@ __forceinline Portal* Game::__CreatePortal(Material* material, f32 x, f32 y, f32
 
 	GameObject* portalArea1 = new GameObject();
 	portalArea1->SetParent(portal);
-	portalArea1->SetLocalRotation(0, 0, 90);
-	portalArea1->SetLocalScale(2.5f, 2.5f, 1);
+	portalArea1->SetLocalRotation(0, 0, 0);
+	portalArea1->SetLocalScale(1.2f, 2.0f, 1);
 	portalArea1->AddComponent<Renderer>(material, quadMesh);
 	portalArea1->AddComponent<BoxCollider>(2, 2, 0.1f);
 
-	GameObject* pillar1L = new GameObject();
+	/*GameObject* pillar1L = new GameObject();
 	pillar1L->SetParent(portal);
 	pillar1L->SetLocalPosition(-2.5f, 0, 0);
 	pillar1L->SetLocalScale(0.2f, 5, 0.2f);
@@ -297,7 +316,7 @@ __forceinline Portal* Game::__CreatePortal(Material* material, f32 x, f32 y, f32
 	pillar1R->SetParent(portal);
 	pillar1R->SetLocalPosition(2.5f, 0, 0);
 	pillar1R->SetLocalScale(0.2f, 5, 0.2f);
-	pillar1R->AddComponent<Renderer>(wallMaterial, cubeMesh);
+	pillar1R->AddComponent<Renderer>(wallMaterial, cubeMesh);*/
 
 	portal->SetLocalPosition(x, y, z);
 	portal->SetLocalRotation(rx, ry, rz);
@@ -334,6 +353,8 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	portalCamera1->RenderToRenderTarget(context);
 	portalCamera2->RenderToRenderTarget(context);
+	portalCamera3->RenderToRenderTarget(context);
+	portalCamera4->RenderToRenderTarget(context);
 
 	D3D11_VIEWPORT viewport = {};
 	viewport.TopLeftX = 0;

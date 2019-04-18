@@ -66,12 +66,16 @@ private:
 	Texture* rockTexture;
 	RenderTexture* portalTexture1;
 	RenderTexture* portalTexture2;
+	RenderTexture* portalTexture3;
+	RenderTexture* portalTexture4;
 
 	Material* grassMaterial;
 	Material* wallMaterial;
 	Material* rockMaterial;
 	Material* portalMaterial1;
 	Material* portalMaterial2;
+	Material* portalMaterial3;
+	Material* portalMaterial4;
 
 
 	DirectionalLight* directionalLight;
@@ -83,9 +87,13 @@ private:
 
 	Camera* portalCamera1;
 	Camera* portalCamera2;
+	Camera* portalCamera3;
+	Camera* portalCamera4;
 
 	Portal* portal1;
 	Portal* portal2;
+	Portal* portal3;
+	Portal* portal4;
 
 	GameObject* floor;
 	GameObject* cube;

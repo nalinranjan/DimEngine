@@ -4,6 +4,9 @@
 
 void Portal::Update(f32 deltaTime, f32 gameTime)
 {
+
+	// Replace main camera with focused camera for recursive rendering
+
 	XMVECTOR offset = XMVectorSubtract(mainCamera->GetGameObject()->GetPosition(), gameObject->GetPosition());
 	offset = XMVector4Transform(offset, XMMatrixRotationQuaternion(XMQuaternionInverse(gameObject->GetRotation())));
 	offset = -offset;

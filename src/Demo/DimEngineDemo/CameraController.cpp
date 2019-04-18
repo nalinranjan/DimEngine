@@ -10,7 +10,7 @@ CameraController::CameraController()
 #include <iostream>
 void CameraController::Update(f32 deltaTime, f32 totalTime)
 {
-	float speed = 5;
+	float speed = 6;
 	float forwardScale = 0;
 	float rightScale = 0;
 
@@ -44,8 +44,10 @@ void CameraController::OnBeginOverlapping(GameObject* other)
 	{
 		exitPortal = other->GetParent()->GetComponent<Portal>()->GetExit()->GetGameObject();
 
-		gameObject->SetPosition(exitPortal->GetPosition());
-		gameObject->SetForwardVector(exitPortal->GetForwardVector());
+		XMVECTOR offset = XMVectorSubtract(GetGameObject()->GetPosition(), other->GetPosition());
+
+		gameObject->SetPosition(XMVectorAdd(exitPortal->GetPosition(), offset));
+		//gameObject->SetForwardVector(exitPortal->GetForwardVector());
 	}
 }
 
