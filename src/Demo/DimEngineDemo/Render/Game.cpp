@@ -297,8 +297,11 @@ __forceinline Portal* Game::__CreatePortal(Material* material, f32 x, f32 y, f32
 	portalArea1->SetParent(portal);
 	portalArea1->SetLocalRotation(0, 0, 90);
 	portalArea1->SetLocalScale(2.5f, 2.5f, 1);
-	portalArea1->AddComponent<Renderer>(material, quadMesh);
+	auto portalRenderer = portalArea1->AddComponent<Renderer>(material, quadMesh);
 	portalArea1->AddComponent<BoxCollider>(2, 2, 0.1f);
+
+	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
+	renderingEngine->AddPortal(portalRenderer);
 
 	GameObject* pillar1L = new GameObject();
 	pillar1L->SetParent(portal);
@@ -351,8 +354,9 @@ void Game::Draw(float deltaTime, float totalTime)
 	context->OMSetDepthStencilState(portalDepthStencilState, 1);
 	context->OMSetRenderTargets(0, nullptr, depthStencilView);
 	context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	renderingEngine->DrawForward(context);/* , portalCamera1);
-	renderingEngine->DrawForward(context, portalCamera2);*/
+	//renderingEngine->DrawForward(context, camera);/* , portalCamera1);
+	//renderingEngine->DrawForward(context, portalCamera2);*/
+	renderingEngine->DrawPortals(context, camera);
 
 
 	D3D11_VIEWPORT viewport = {};
@@ -367,6 +371,7 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	const float color[4] = { 0.69f, 0.88f, 0.9f, 0.0f };
 
+	//context->OMSetDepthStencilState(nullptr, 0);
 	context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
 	context->ClearRenderTargetView(backBufferRTV, color);
 	context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
