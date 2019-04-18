@@ -49,7 +49,7 @@ void DimEngine::Rendering::RenderingEngine::AddRenderer(Renderer* renderer)
 
 	if (rendererList)
 		rendererList->previous = renderer;
-	
+
 	rendererList = renderer;
 }
 
@@ -60,7 +60,7 @@ void DimEngine::Rendering::RenderingEngine::AddCamera(Camera* camera)
 
 	if (cameraList)
 		cameraList->previous = camera;
-	
+
 	cameraList = camera;
 }
 
@@ -71,7 +71,7 @@ void DimEngine::Rendering::RenderingEngine::AddLight(Light* light)
 
 	if (lightList)
 		lightList->previous = light;
-	
+
 	lightList = light;
 }
 
@@ -134,7 +134,7 @@ void DimEngine::Rendering::RenderingEngine::RemoveLight(Light* light)
 		lightList = next;
 
 	if (next)
-		next->previous = previous;	
+		next->previous = previous;
 }
 
 void DimEngine::Rendering::RenderingEngine::RemovePortal(Renderer* portal)
@@ -327,7 +327,7 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 		}
 
 		pixelShader->CopyAllBufferData();
-		
+
 		u32 stride = sizeof(Vertex);
 		u32 offset = 0;
 		u32 indexCount = 0;
@@ -381,7 +381,7 @@ void DimEngine::Rendering::RenderingEngine::DrawPortals(ID3D11DeviceContext* con
 	XMVECTOR cameraPosition = viewer.position;
 
 	context->PSSetShader(nullptr, nullptr, 0);
-	
+
 	Renderer* portal = portalList;
 
 	while (portal)
@@ -393,7 +393,8 @@ void DimEngine::Rendering::RenderingEngine::DrawPortals(ID3D11DeviceContext* con
 		vertexShader->SetMatrix4x4("view", viewMatrix);
 		vertexShader->SetMatrix4x4("projection", projectionMatrix);
 		vertexShader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
-		vertexShader->SetMatrix4x4("world", portal->GetGameObject()->GetWorldMatrix());
+		vertexShader->SetMatrix4x4("world", XMMatrixTranspose(
+			portal->GetGameObject()->GetWorldMatrix()));
 
 		for (auto it = vertexShaderData.begin(); it != vertexShaderData.end(); ++it) {
 			vertexShader->SetData(it->first, it->second.first, it->second.second);
