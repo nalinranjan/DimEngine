@@ -56,7 +56,10 @@ private:
 
 	Mesh* sphereMesh;
 	Mesh* cubeMesh;
+	Mesh* floorMesh;
 	Mesh* quadMesh;
+	Mesh* tunnelMesh;
+	Mesh* coneMesh;
 
 	Texture* grassTexture;
 	Texture* wallTexture;
@@ -86,7 +89,8 @@ private:
 
 	GameObject* floor;
 	GameObject* cube;
-	GameObject* sphere;
+	GameObject* tunnel1;
+	GameObject* tunnel2;
 
 
 	ID3D11DepthStencilState* zPrepassDepthStencilState;

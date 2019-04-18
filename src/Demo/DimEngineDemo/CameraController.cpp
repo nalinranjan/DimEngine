@@ -7,7 +7,7 @@ CameraController::CameraController()
 {
 	exitPortal = nullptr;
 }
-
+#include <iostream>
 void CameraController::Update(f32 deltaTime, f32 totalTime)
 {
 	float speed = 5;

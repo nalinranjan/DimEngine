@@ -195,15 +195,15 @@ xcopy /y /d "..\..\Engine\$(IntDir)*.cso" "$(OutDir)"</Command>
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="DimEngineDemo.rc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Engine\DimEngine\DimEngine.vcxproj">
       <Project>{a1aefb90-ed2e-4c13-b496-b59ec8445500}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

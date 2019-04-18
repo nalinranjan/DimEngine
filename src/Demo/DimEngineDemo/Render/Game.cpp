@@ -62,7 +62,6 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 
 	floor = nullptr;
 	cube = nullptr;
-	sphere = nullptr;
 
 
 	zPrepassDepthStencilState = nullptr;
@@ -193,9 +192,12 @@ void Game::CreateScene()
 {
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
+	floorMesh = new Mesh(device, (char*)"../Assets/Models/floor.obj");
 	quadMesh = new Mesh(device, (char*)"../Assets/Models/quad.obj");
+	coneMesh = new Mesh(device, (char*)"../Assets/Models/cone.obj");
+	tunnelMesh = new Mesh(device, (char*)"../Assets/Models/tunnel.obj");
 
-	grassTexture = new Texture((wchar_t*)L"../Assets/Textures/greengrass.jpg", D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_ANISOTROPIC, D3D11_FLOAT32_MAX, device, context);
+	grassTexture = new Texture((wchar_t*)L"../Assets/Textures/checkered-ground.png", D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_MIN_MAG_MIP_POINT, D3D11_FLOAT32_MAX, device, context);
 	wallTexture = new Texture((wchar_t*)L"../Assets/Textures/wall.jpg", D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_ANISOTROPIC, D3D11_FLOAT32_MAX, device, context);
 	rockTexture = new Texture((wchar_t*)L"../Assets/Textures/rock.jpg", D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_ANISOTROPIC, D3D11_FLOAT32_MAX, device, context);
 	portalTexture1 = new RenderTexture(device, 1280u, 720u);
@@ -217,6 +219,7 @@ void Game::CreateScene()
 	//cameraObject->AddComponent<Renderer>(rockMaterial, sphereMesh);
 	cameraObject->AddComponent<SphereCollider>();
 	cameraObject->AddComponent<CameraController>();
+	cameraObject->SetPosition(0, 0, 0);
 
 	GameObject* go = new GameObject();
 	go->SetParent(cameraObject);
@@ -233,8 +236,8 @@ void Game::CreateScene()
 	portalCamera2->SetRenderTexture(portalTexture2);
 	portalCamera2->SetRatio((float)width / height);
 
-	portal1 = __CreatePortal(portalMaterial1, -5, 0, 8);
-	portal2 = __CreatePortal(portalMaterial2, 5, 0, 8, 0, -90, 0);
+	portal1 = __CreatePortal(portalMaterial1, -10, 0, 10, 0, 270, 0);
+	portal2 = __CreatePortal(portalMaterial2, 10, 0, 10, 0, 90, 0);
 
 	portal1->SetExit(portal2);
 	portal1->SetMainCamera(camera);
@@ -252,16 +255,25 @@ void Game::CreateScene()
 
 	floor = new GameObject();
 	floor->SetPosition(0, -2, 0);
-	floor->SetLocalScale(100, 0.1f, 100);
-	floor->AddComponent<Renderer>(grassMaterial, cubeMesh); 
+	floor->SetLocalScale(100, 100, 1);
+	floor->SetRotation(-90, 0, 0);
+	floor->AddComponent<Renderer>(grassMaterial, floorMesh);
 	
+	/*tunnel1 = new GameObject();
+	tunnel1->SetPosition(-10, -2, 10);
+	tunnel1->SetLocalScale(2, 2, 4);
+	tunnel1->AddComponent<Renderer>(rockMaterial, tunnelMesh);
+
+	tunnel2 = new GameObject();
+	tunnel2->SetPosition(10, -2, 10);
+	tunnel2->SetLocalScale(2, 2, 8);
+	tunnel2->AddComponent<Renderer>(rockMaterial, tunnelMesh);*/
+
 	cube = new GameObject();
-	cube->SetLocalPosition(0, 0, -15);
+	cube->SetParent(portal2->GetGameObject());
+	cube->SetLocalPosition(0, 0, 5);
 	cube->AddComponent<Renderer>(rockMaterial, cubeMesh);
 
-	sphere = new GameObject();
-	sphere->SetLocalPosition(-5, 0, 10);
-	sphere->AddComponent<Renderer>(rockMaterial, sphereMesh);
 }
 
 __forceinline Portal* Game::__CreatePortal(Material* material, f32 x, f32 y, f32 z, f32 rx, f32 ry, f32 rz)
