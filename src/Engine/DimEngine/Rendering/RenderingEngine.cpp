@@ -28,6 +28,7 @@ DimEngine::Rendering::RenderingEngine::RenderingEngine(i32 maxNumMaterials, i32 
 	rendererList = nullptr;
 	cameraList = nullptr;
 	lightList = nullptr;
+	portalList = nullptr;
 
 	//D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
 	//depthStencilDesc.DepthEnable = true;
@@ -74,6 +75,17 @@ void DimEngine::Rendering::RenderingEngine::AddLight(Light* light)
 	lightList = light;
 }
 
+void DimEngine::Rendering::RenderingEngine::AddPortal(Renderer* portal)
+{
+	portal->next = portalList;
+	portal->previous = nullptr;
+
+	if (portalList)
+		portalList->previous = portal;
+
+	portalList = portal;
+}
+
 void DimEngine::Rendering::RenderingEngine::RemoveRenderer(Renderer* renderer)
 {
 	if (!rendererList)
@@ -93,7 +105,7 @@ void DimEngine::Rendering::RenderingEngine::RemoveRenderer(Renderer* renderer)
 
 void DimEngine::Rendering::RenderingEngine::RemoveCamera(Camera * camera)
 {
-	if (!rendererList)
+	if (!rendererList)			// cameraList?
 		return;
 
 	Camera* next = camera->next;
@@ -110,7 +122,7 @@ void DimEngine::Rendering::RenderingEngine::RemoveCamera(Camera * camera)
 
 void DimEngine::Rendering::RenderingEngine::RemoveLight(Light* light)
 {
-	if (!rendererList)
+	if (!rendererList)			// lightList?
 		return;
 
 	Light* next = light->next;
@@ -123,6 +135,23 @@ void DimEngine::Rendering::RenderingEngine::RemoveLight(Light* light)
 
 	if (next)
 		next->previous = previous;	
+}
+
+void DimEngine::Rendering::RenderingEngine::RemovePortal(Renderer* portal)
+{
+	if (!portalList)
+		return;
+
+	Renderer* next = portal->next;
+	Renderer* previous = portal->previous;
+
+	if (previous)
+		previous->next = next;
+	else
+		portalList = next;
+
+	if (next)
+		next->previous = previous;
 }
 
 void DimEngine::Rendering::RenderingEngine::DestroyRenderable(i32 id)
@@ -339,5 +368,55 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 		} while (j < J && renderableAllocator[j].material == material);
 
 		//pixelShader->SetShaderResourceView("TexAlbedo", nullptr);
+	}
+}
+
+void DimEngine::Rendering::RenderingEngine::DrawPortals(ID3D11DeviceContext* context, Camera* camera)
+{
+	Viewer& viewer = viewerAllocator[camera->viewer];
+
+	XMMATRIX viewMatrix = viewer.viewMatrix;
+	XMMATRIX projectionMatrix = viewer.projectionMatrix;
+	XMMATRIX viewProjectionMatrix = XMMatrixMultiply(projectionMatrix, viewMatrix);
+	XMVECTOR cameraPosition = viewer.position;
+
+	context->PSSetShader(nullptr, nullptr, 0);
+	
+	Renderer* portal = portalList;
+
+	while (portal)
+	{
+		auto material = portal->material;
+		auto vertexShader = material->GetVertexShader();
+		auto vertexShaderData = material->GetVertexShaderData();
+
+		vertexShader->SetMatrix4x4("view", viewMatrix);
+		vertexShader->SetMatrix4x4("projection", projectionMatrix);
+		vertexShader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
+		vertexShader->SetMatrix4x4("world", portal->GetGameObject()->GetWorldMatrix());
+
+		for (auto it = vertexShaderData.begin(); it != vertexShaderData.end(); ++it) {
+			vertexShader->SetData(it->first, it->second.first, it->second.second);
+		}
+
+		vertexShader->CopyAllBufferData();
+		vertexShader->SetShader();
+
+		u32 stride = sizeof(Vertex);
+		u32 offset = 0;
+		u32 indexCount = 0;
+
+		Mesh* mesh = portal->mesh;
+
+		ID3D11Buffer* vertexBuffer = mesh->GetVertexBuffer();
+		ID3D11Buffer* indexBuffer = mesh->GetIndexBuffer();
+
+		context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		context->DrawIndexed(mesh->GetIndexCount(), 0, 0);
+
+		portal = portal->next;
 	}
 }

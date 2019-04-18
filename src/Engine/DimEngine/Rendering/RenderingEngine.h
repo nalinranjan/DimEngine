@@ -51,6 +51,7 @@ namespace DimEngine
 			Renderer* rendererList;
 			Camera* cameraList;
 			Light* lightList;
+			Renderer* portalList;
 
 			//SimpleVertexShader* vsZPrepass;
 			//ID3D11DepthStencilState* zPrepassDepthState;
@@ -74,6 +75,9 @@ namespace DimEngine
 		public:
 			static RenderingEngine* GetSingleton();
 
+			void AddPortal(Renderer* portal);		// Potentially add Portal as a friend class 
+			void RemovePortal(Renderer* portal);	// and make these private.
+
 			void UpdateRenderables();
 			void UpdateViewers();
 			void UpdateLightSources();
@@ -82,6 +86,7 @@ namespace DimEngine
 			void PerformZPrepass(SimpleVertexShader* shader, ID3D11DeviceContext* context);
 			void DrawForward(ID3D11DeviceContext* context);
 			void DrawForward(ID3D11DeviceContext* context, Camera* camera);
+			void DrawPortals(ID3D11DeviceContext* context, Camera* camera);
 		};
 	}
 }
