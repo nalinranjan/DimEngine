@@ -3,6 +3,8 @@
 
 #include "RenderingEngine.h"
 #include "SimpleShader.h"
+#include "Portal.h"
+
 DimEngine::Rendering::RenderingEngine* DimEngine::Rendering::RenderingEngine::singleton = nullptr;
 
 DimEngine::Rendering::RenderingEngine* DimEngine::Rendering::RenderingEngine::GetSingleton()

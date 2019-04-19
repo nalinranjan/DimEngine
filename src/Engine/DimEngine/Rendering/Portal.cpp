@@ -1,6 +1,6 @@
 #include "Portal.h"
 
-#include "Core/GameObject.h"
+#include "../Core/GameObject.h"
 
 void Portal::Update(f32 deltaTime, f32 gameTime)
 {
@@ -21,6 +21,11 @@ void Portal::Update(f32 deltaTime, f32 gameTime)
 __inline Portal* Portal::GetExit()
 {
 	return exit;
+}
+
+__inline Camera* Portal::GetViewCamera()
+{
+	return viewCamera;
 }
 
 __inline void Portal::SetMainCamera(Camera* camera)

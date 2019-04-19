@@ -3,8 +3,6 @@
 #include <DirectXMath.h>
 #include <vector>
 
-#include "../Portal.h"
-
 #include "Core/GameObject.h"
 #include "Rendering/Camera.h"
 #include "Rendering/Light.h"
@@ -12,6 +10,7 @@
 #include "Rendering/Mesh.h"
 #include "Rendering/SimpleShader.h"
 #include "Rendering/Vertex.h"
+#include "Rendering/Portal.h"
 
 #include "Core/ResourceManager.h"
 

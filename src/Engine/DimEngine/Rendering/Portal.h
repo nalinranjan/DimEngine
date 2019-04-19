@@ -2,9 +2,9 @@
 
 #include <DirectXMath.h>
 
-#include "Core/GameComponent.h"
+#include "../Core/GameComponent.h"
 
-#include "Rendering/Camera.h"
+#include "Camera.h"
 
 using namespace DimEngine;
 using namespace DirectX;
@@ -33,6 +33,7 @@ public:
 	};
 
 	Portal* GetExit();
+	Camera* GetViewCamera();
 
 	void SetMainCamera(Camera* camera);
 	void SetViewCamera(Camera* camera);

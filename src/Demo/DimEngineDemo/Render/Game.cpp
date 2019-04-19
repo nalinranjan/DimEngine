@@ -1,7 +1,6 @@
 ﻿#include <string>
 
 #include "../CameraController.h"
-#include "../Portal.h"
 
 #include "Core/Global.h"
 #include "Core/Scene.h"
@@ -423,7 +422,7 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	//context->OMSetDepthStencilState(nullptr, 0);
 	//context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
-	//context->ClearRenderTargetView(backBufferRTV, color);
+	////context->ClearRenderTargetView(backBufferRTV, color);
 	//context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	
