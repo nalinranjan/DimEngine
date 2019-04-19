@@ -373,7 +373,7 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 	}
 }
 
-void DimEngine::Rendering::RenderingEngine::DrawPortals(ID3D11DeviceContext* context, Camera* camera, ID3D11DepthStencilState* pass1DSS, ID3D11DepthStencilState* pass2DSS, ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv)
+void DimEngine::Rendering::RenderingEngine::DrawPortalsRecursive(ID3D11DeviceContext* context, Camera* camera, ID3D11DepthStencilState* pass1DSS, ID3D11DepthStencilState* pass2DSS, ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv)
 {
 	Viewer& viewer = viewerAllocator[camera->viewer];
 
@@ -430,6 +430,57 @@ void DimEngine::Rendering::RenderingEngine::DrawPortals(ID3D11DeviceContext* con
 		context->OMSetDepthStencilState(pass2DSS, 1);
 		context->OMSetRenderTargets(1, &rtv, dsv);
 		DrawForward(context, portal->GetGameObject()->GetParent()->GetComponent<Portal>()->GetViewCamera());
+
+		portal = portal->next;
+	}
+}
+
+void DimEngine::Rendering::RenderingEngine::DrawPortalsToDepthBuffer(ID3D11DeviceContext * context, Camera * camera)
+{
+	Viewer& viewer = viewerAllocator[camera->viewer];
+
+	XMMATRIX viewMatrix = viewer.viewMatrix;
+	XMMATRIX projectionMatrix = viewer.projectionMatrix;
+	XMMATRIX viewProjectionMatrix = XMMatrixMultiply(projectionMatrix, viewMatrix);
+	XMVECTOR cameraPosition = viewer.position;
+
+	context->PSSetShader(nullptr, nullptr, 0);
+
+	Renderer* portal = portalList;
+
+	while (portal)
+	{
+		auto material = portal->material;
+		auto vertexShader = material->GetVertexShader();
+		auto vertexShaderData = material->GetVertexShaderData();
+
+		vertexShader->SetMatrix4x4("view", viewMatrix);
+		vertexShader->SetMatrix4x4("projection", projectionMatrix);
+		vertexShader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
+		vertexShader->SetMatrix4x4("world", XMMatrixTranspose(
+			portal->GetGameObject()->GetWorldMatrix()));
+
+		for (auto it = vertexShaderData.begin(); it != vertexShaderData.end(); ++it) {
+			vertexShader->SetData(it->first, it->second.first, it->second.second);
+		}
+
+		vertexShader->CopyAllBufferData();
+		vertexShader->SetShader();
+
+		u32 stride = sizeof(Vertex);
+		u32 offset = 0;
+		u32 indexCount = 0;
+
+		Mesh* mesh = portal->mesh;
+
+		ID3D11Buffer* vertexBuffer = mesh->GetVertexBuffer();
+		ID3D11Buffer* indexBuffer = mesh->GetIndexBuffer();
+
+		context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		context->DrawIndexed(mesh->GetIndexCount(), 0, 0);
 
 		portal = portal->next;
 	}

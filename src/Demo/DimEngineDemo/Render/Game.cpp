@@ -393,41 +393,17 @@ void Game::Draw(float deltaTime, float totalTime)
 	//portalCamera3->RenderToRenderTarget(context);
 	//portalCamera4->RenderToRenderTarget(context);
 
-	//const float color[4] = { 0.69f, 0.88f, 0.9f, 0.0f };
-	//context->ClearRenderTargetView(backBufferRTV, color);
+	renderingEngine->DrawPortalsRecursive(context, camera, portalPass1DepthStencilState, portalPass2DepthStencilState, backBufferRTV, depthStencilView);
 
-	//context->OMSetDepthStencilState(portalPass1DepthStencilState, 1);
-	//context->OMSetRenderTargets(0, nullptr, depthStencilView);
-	//context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	renderingEngine->DrawPortals(context, camera, portalPass1DepthStencilState, portalPass2DepthStencilState, backBufferRTV, depthStencilView);
+	context->OMSetDepthStencilState(nullptr, 0);
+	context->OMSetRenderTargets(0, nullptr, depthStencilView);
+	context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	renderingEngine->DrawPortalsToDepthBuffer(context, camera);
 
-	
-	//context->OMSetDepthStencilState(nullptr, 0);
-	//context->OMSetDepthStencilState(portalPass2DepthStencilState, 1);
-	//context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
-	//renderingEngine->DrawForward(context, portalCamera1);
-	//renderingEngine->DrawForward(context, portalCamera2);
+	context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
+	renderingEngine->DrawForward(context, camera);
 
-
-	//D3D11_VIEWPORT viewport = {};
-	//viewport.TopLeftX = 0;
-	//viewport.TopLeftY = 0;
-	//viewport.Width = (float)width;
-	//viewport.Height = (float)height;
-	//viewport.MinDepth = 0.0f;
-	//viewport.MaxDepth = 1.0f;
-	//context->RSSetViewports(1, &viewport);
-
-
-
-	//context->OMSetDepthStencilState(nullptr, 0);
-	//context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
-	////context->ClearRenderTargetView(backBufferRTV, color);
-	//context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-	
 	//renderingEngine->PerformZPrepass(vsZPrepass, context);
-
 	//context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
 	//renderingEngine->DrawForward(context);
 	//context->OMSetDepthStencilState(nullptr, 0);
