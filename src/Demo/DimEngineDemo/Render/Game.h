@@ -2,6 +2,7 @@
 
 #include <DirectXMath.h>
 #include <vector>
+#include <array>
 
 #include "Core/GameObject.h"
 #include "Rendering/Camera.h"
@@ -38,6 +39,7 @@ public:
 
 private:
 	void LoadShaders();
+	void CreateDepthStencilStates();
 	void CreateScene();
 
 	Portal* __CreatePortal(Material* material, f32 x = 0, f32 y = 0, f32 z = 0, f32 rx = 0, f32 ry = 0, f32 rz = 0);
@@ -99,9 +101,16 @@ private:
 	GameObject* tunnel1;
 	GameObject* tunnel2;
 
-
 	ID3D11DepthStencilState* zPrepassDepthStencilState;
 
-	ID3D11DepthStencilState* portalPass1DepthStencilState;
-	ID3D11DepthStencilState* portalPass2DepthStencilState;
+	enum PortalDSStates
+	{
+		IncrementStencil,
+		DecrementStencil,
+		DrawToDepth,
+		DrawAtMaxRecursion,
+		DrawAtCurrentRecursion,
+		NumStates
+	};
+	std::array<ID3D11DepthStencilState*, NumStates> portalDepthStencilStates = {};
 };

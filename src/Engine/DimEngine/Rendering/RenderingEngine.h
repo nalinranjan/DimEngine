@@ -2,6 +2,8 @@
 #define RENDERING_ENGINE_H
 #pragma once
 
+#include <array>
+
 #include "../Common/Settings.h"
 #include "../Common/Typedefs.h"
 #include "../Memory/DynamicPoolAllocator.hpp"
@@ -86,7 +88,7 @@ namespace DimEngine
 			void PerformZPrepass(SimpleVertexShader* shader, ID3D11DeviceContext* context);
 			void DrawForward(ID3D11DeviceContext* context);
 			void DrawForward(ID3D11DeviceContext* context, Camera* camera);
-			void DrawPortalsRecursive(ID3D11DeviceContext* context, Camera* camera, ID3D11DepthStencilState* pass1DSS, ID3D11DepthStencilState* pass2DSS, ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv);
+			void DrawPortals(ID3D11DeviceContext* context, Camera* camera, const std::array<ID3D11DepthStencilState*, 5>& portalDepthStencilStates, ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, int maxRecursion, int recursionLevel=0);
 			void DrawPortalsToDepthBuffer(ID3D11DeviceContext* context, Camera* camera);
 		};
 	}

@@ -373,7 +373,7 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 	}
 }
 
-void DimEngine::Rendering::RenderingEngine::DrawPortalsRecursive(ID3D11DeviceContext* context, Camera* camera, ID3D11DepthStencilState* pass1DSS, ID3D11DepthStencilState* pass2DSS, ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv)
+void DimEngine::Rendering::RenderingEngine::DrawPortals(ID3D11DeviceContext* context, Camera* camera, const std::array<ID3D11DepthStencilState*, 5>& portalDepthStencilStates, ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, int maxRecursion, int recursionLevel)
 {
 	Viewer& viewer = viewerAllocator[camera->viewer];
 
@@ -386,13 +386,10 @@ void DimEngine::Rendering::RenderingEngine::DrawPortalsRecursive(ID3D11DeviceCon
 
 	Renderer* portal = portalList;
 	
-	const float color[4] = { 0.69f, 0.88f, 0.9f, 0.0f };
-	context->ClearRenderTargetView(rtv, color);
-
 	while (portal)
 	{
-		context->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-		context->OMSetDepthStencilState(pass1DSS, 1);
+		// Draw to stencil buffer
+		context->OMSetDepthStencilState(portalDepthStencilStates.at(0), recursionLevel);
 		context->OMSetRenderTargets(0, nullptr, dsv);
 
 		auto material = portal->material;
@@ -427,15 +424,61 @@ void DimEngine::Rendering::RenderingEngine::DrawPortalsRecursive(ID3D11DeviceCon
 
 		context->DrawIndexed(mesh->GetIndexCount(), 0, 0);
 
-		context->OMSetDepthStencilState(pass2DSS, 1);
-		context->OMSetRenderTargets(1, &rtv, dsv);
-		DrawForward(context, portal->GetGameObject()->GetParent()->GetComponent<Portal>()->GetViewCamera());
+		auto portalCamera = portal->GetGameObject()->GetParent()->GetComponent<Portal>()->GetViewCamera();
+
+		// Render inside portal
+		if (recursionLevel == maxRecursion)
+		{
+			context->OMSetDepthStencilState(portalDepthStencilStates.at(3), recursionLevel + 1);
+			context->OMSetRenderTargets(1, &rtv, dsv);
+			context->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH, 1.0f, 0);
+			DrawForward(context, portalCamera);
+		}
+		// Recurse if not at max depth
+		else
+		{
+			DrawPortals(context, portalCamera, portalDepthStencilStates, rtv, dsv, maxRecursion, recursionLevel + 1);
+		}
+
+		// Decrement stencil value for already-drawn inner portals
+		context->OMSetDepthStencilState(portalDepthStencilStates.at(1), recursionLevel + 1);
+		context->OMSetRenderTargets(0, nullptr, dsv);
+		
+		vertexShader->SetMatrix4x4("view", viewMatrix);
+		vertexShader->SetMatrix4x4("projection", projectionMatrix);
+		vertexShader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
+		vertexShader->SetMatrix4x4("world", XMMatrixTranspose(
+			portal->GetGameObject()->GetWorldMatrix()));
+
+		for (auto it = vertexShaderData.begin(); it != vertexShaderData.end(); ++it) {
+			vertexShader->SetData(it->first, it->second.first, it->second.second);
+		}
+
+		vertexShader->CopyAllBufferData();
+		vertexShader->SetShader();
+
+		context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		context->DrawIndexed(mesh->GetIndexCount(), 0, 0);
 
 		portal = portal->next;
 	}
+
+	// Draw portals to depth buffer
+	context->OMSetDepthStencilState(portalDepthStencilStates.at(2), 0);
+	context->OMSetRenderTargets(0, nullptr, dsv);
+	context->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	DrawPortalsToDepthBuffer(context, camera);
+
+	// Draw objects at current recursion level
+	context->OMSetDepthStencilState(portalDepthStencilStates.at(4), recursionLevel);
+	context->OMSetRenderTargets(1, &rtv, dsv);
+	DrawForward(context, camera);
 }
 
-void DimEngine::Rendering::RenderingEngine::DrawPortalsToDepthBuffer(ID3D11DeviceContext * context, Camera * camera)
+void DimEngine::Rendering::RenderingEngine::DrawPortalsToDepthBuffer(ID3D11DeviceContext* context, Camera* camera)
 {
 	Viewer& viewer = viewerAllocator[camera->viewer];
 

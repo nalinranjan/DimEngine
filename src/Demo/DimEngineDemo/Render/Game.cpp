@@ -64,8 +64,6 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 
 
 	zPrepassDepthStencilState = nullptr;
-	portalPass1DepthStencilState = nullptr;
-	portalPass2DepthStencilState = nullptr;
 
 	Global::SetScreenRatio(1280.0f / 720.0f);
 
@@ -133,12 +131,11 @@ Game::~Game()
 	if (zPrepassDepthStencilState)
 		zPrepassDepthStencilState->Release();
 
-	if (portalPass1DepthStencilState)
-		portalPass1DepthStencilState->Release();
-
-	if (portalPass2DepthStencilState)
-		portalPass2DepthStencilState->Release();
-
+	for (auto& depthStencilState : portalDepthStencilStates)
+	{
+		if (depthStencilState)
+			depthStencilState->Release();
+	}
 
 	Scene::UnloadAll();
 
@@ -154,6 +151,7 @@ void Game::Init()
 	rm->Initialize(device, context);
 	
 	LoadShaders();
+	CreateDepthStencilStates();
 	CreateScene();
 }
 
@@ -192,8 +190,10 @@ void Game::LoadShaders()
 	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 
 	device->CreateDepthStencilState(&depthStencilDesc, &zPrepassDepthStencilState);
+}
 
-
+void Game::CreateDepthStencilStates()
+{
 	D3D11_DEPTH_STENCIL_DESC portalDSDesc = {};
 	portalDSDesc.DepthEnable = true;
 	portalDSDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
@@ -203,23 +203,32 @@ void Game::LoadShaders()
 	portalDSDesc.StencilReadMask = 0xFF;
 	portalDSDesc.StencilWriteMask = 0xFF;
 
-	portalDSDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	portalDSDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_INCR;
 	portalDSDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
-	portalDSDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
-	portalDSDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+	portalDSDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	portalDSDesc.FrontFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL;
 
 	portalDSDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 	portalDSDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
 	portalDSDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	portalDSDesc.BackFace.StencilFunc = D3D11_COMPARISON_NEVER;
 
-	device->CreateDepthStencilState(&portalDSDesc, &portalPass1DepthStencilState);
+	device->CreateDepthStencilState(&portalDSDesc, &portalDepthStencilStates.at(IncrementStencil));
+
+	portalDSDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_DECR;
+	device->CreateDepthStencilState(&portalDSDesc, &portalDepthStencilStates.at(DecrementStencil));
 
 	portalDSDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	portalDSDesc.StencilWriteMask = 0;
-	portalDSDesc.FrontFace.StencilFunc = D3D11_COMPARISON_LESS_EQUAL;
+	portalDSDesc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;
+	device->CreateDepthStencilState(&portalDSDesc, &portalDepthStencilStates.at(DrawAtMaxRecursion));
 
-	device->CreateDepthStencilState(&portalDSDesc, &portalPass2DepthStencilState);
+	portalDSDesc.FrontFace.StencilFunc = D3D11_COMPARISON_LESS_EQUAL;
+	device->CreateDepthStencilState(&portalDSDesc, &portalDepthStencilStates.at(DrawAtCurrentRecursion));
+
+	portalDSDesc.StencilEnable = false;
+	portalDSDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;
+	device->CreateDepthStencilState(&portalDSDesc, &portalDepthStencilStates.at(DrawToDepth));
 }
 
 void Game::CreateScene()
@@ -388,25 +397,11 @@ void Game::Draw(float deltaTime, float totalTime)
 	renderingEngine->UpdateLightSources();
 	renderingEngine->SortRenderables();
 
-	//portalCamera1->RenderToRenderTarget(context);
-	//portalCamera2->RenderToRenderTarget(context);
-	//portalCamera3->RenderToRenderTarget(context);
-	//portalCamera4->RenderToRenderTarget(context);
+	const float color[4] = { 0.69f, 0.88f, 0.9f, 0.0f };
+	context->ClearRenderTargetView(backBufferRTV, color);
+	context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	renderingEngine->DrawPortalsRecursive(context, camera, portalPass1DepthStencilState, portalPass2DepthStencilState, backBufferRTV, depthStencilView);
-
-	context->OMSetDepthStencilState(nullptr, 0);
-	context->OMSetRenderTargets(0, nullptr, depthStencilView);
-	context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-	renderingEngine->DrawPortalsToDepthBuffer(context, camera);
-
-	context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
-	renderingEngine->DrawForward(context, camera);
-
-	//renderingEngine->PerformZPrepass(vsZPrepass, context);
-	//context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
-	//renderingEngine->DrawForward(context);
-	//context->OMSetDepthStencilState(nullptr, 0);
+	renderingEngine->DrawPortals(context, camera, portalDepthStencilStates, backBufferRTV, depthStencilView, 1);
 
 	swapChain->Present(0, 0);
 }
