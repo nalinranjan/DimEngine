@@ -65,10 +65,10 @@ private:
 	Texture* grassTexture;
 	Texture* wallTexture;
 	Texture* rockTexture;
-	RenderTexture* portalTexture1;
-	RenderTexture* portalTexture2;
-	RenderTexture* portalTexture3;
-	RenderTexture* portalTexture4;
+	//RenderTexture* portalTexture1;
+	//RenderTexture* portalTexture2;
+	//RenderTexture* portalTexture3;
+	//RenderTexture* portalTexture4;
 
 	Material* grassMaterial;
 	Material* wallMaterial;
