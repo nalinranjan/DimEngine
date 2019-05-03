@@ -73,11 +73,11 @@ private:
 	Material* grassMaterial;
 	Material* wallMaterial;
 	Material* rockMaterial;
-	Material* portalMaterial1;
-	Material* portalMaterial2;
-	Material* portalMaterial3;
-	Material* portalMaterial4;
-
+	//Material* portalMaterial1;
+	//Material* portalMaterial2;
+	//Material* portalMaterial3;
+	//Material* portalMaterial4;
+	Material* portalMaterial;
 
 	DirectionalLight* directionalLight;
 

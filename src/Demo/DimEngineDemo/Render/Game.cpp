@@ -44,10 +44,11 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	wallMaterial = nullptr;
 	rockMaterial = nullptr;
 	
-	portalMaterial1 = nullptr;
-	portalMaterial2 = nullptr;
-	portalMaterial3 = nullptr;
-	portalMaterial4 = nullptr;
+	//portalMaterial1 = nullptr;
+	//portalMaterial2 = nullptr;
+	//portalMaterial3 = nullptr;
+	//portalMaterial4 = nullptr;
+	portalMaterial = nullptr;
 
 
 	directionalLight = nullptr;
@@ -123,18 +124,20 @@ Game::~Game()
 	if (rockMaterial)
 		delete rockMaterial;
 
-	if (portalMaterial1)
-		delete portalMaterial1;
+	//if (portalMaterial1)
+	//	delete portalMaterial1;
 
-	if (portalMaterial2)
-		delete portalMaterial2;
+	//if (portalMaterial2)
+	//	delete portalMaterial2;
 
-	if (portalMaterial3)
-		delete portalMaterial3;
+	//if (portalMaterial3)
+	//	delete portalMaterial3;
 
-	if (portalMaterial4)
-		delete portalMaterial4;
-
+	//if (portalMaterial4)
+	//	delete portalMaterial4;
+	
+	if (portalMaterial)
+		delete portalMaterial;
 
 	if (zPrepassDepthStencilState)
 		zPrepassDepthStencilState->Release();
@@ -259,10 +262,7 @@ void Game::CreateScene()
 	grassMaterial = new Material(vertexShader, pixelShader, grassTexture->GetResourceView(), grassTexture->GetSamplerState());
 	wallMaterial = new Material(vertexShader, pixelShader, wallTexture->GetResourceView(), wallTexture->GetSamplerState());
 	rockMaterial = new Material(vertexShader, pixelShader, rockTexture->GetResourceView(), rockTexture->GetSamplerState());
-	portalMaterial1 = new Material(vsPortal, psPortal, nullptr, nullptr);
-	portalMaterial2 = new Material(vsPortal, psPortal, nullptr, nullptr);
-	portalMaterial3 = new Material(vsPortal, psPortal, nullptr, nullptr);
-	portalMaterial4 = new Material(vsPortal, psPortal, nullptr, nullptr);
+	portalMaterial = new Material(vsPortal, psPortal, nullptr, nullptr);
 	//portalMaterial1 = new Material(vsPortal, psPortal, portalTexture1->GetResourceView(), portalTexture1->GetSamplerState());
 	//portalMaterial2 = new Material(vsPortal, psPortal, portalTexture2->GetResourceView(), portalTexture2->GetSamplerState());
 	//portalMaterial3 = new Material(vsPortal, psPortal, portalTexture3->GetResourceView(), portalTexture3->GetSamplerState());
@@ -302,10 +302,10 @@ void Game::CreateScene()
 	//portalCamera4->SetRenderTexture(portalTexture3);
 	portalCamera4->SetRatio((float)width / height);
 
-	portal1 = __CreatePortal(portalMaterial1, -15, 0, 0, 0, 0, 0);
-	portal2 = __CreatePortal(portalMaterial2, 5, 0, 0, 0, 180, 0);
-	portal3 = __CreatePortal(portalMaterial3, -15, 0, 10, 0, 180, 0);
-	portal4 = __CreatePortal(portalMaterial4, 5, 0, 20, 0, 0, 0);
+	portal1 = __CreatePortal(portalMaterial, -15, 0, 0, 0, 0, 0);
+	portal2 = __CreatePortal(portalMaterial, 5, 0, 0, 0, 180, 0);
+	portal3 = __CreatePortal(portalMaterial, -15, 0, 10, 0, 180, 0);
+	portal4 = __CreatePortal(portalMaterial, 5, 0, 20, 0, 0, 0);
 
 	portal1->SetExit(portal2);
 	portal1->SetMainCamera(camera);
