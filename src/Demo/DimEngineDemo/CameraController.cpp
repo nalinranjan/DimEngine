@@ -5,6 +5,7 @@
 
 CameraController::CameraController()
 {
+	colliedWithWall = false;
 	exitPortal = nullptr;
 }
 #include <iostream>
@@ -31,23 +32,26 @@ void CameraController::Update(f32 deltaTime, f32 totalTime)
 
 	XMVECTOR right = gameObject->GetRightVector();
 	XMVECTOR flatRight = XMVector3Normalize(XMVectorMultiply(right, XMVectorSet(1, 0, 1, 1)));
-
-	XMVECTOR forwardOffset = flatForward * speed * forwardScale * deltaTime;
-	XMVECTOR rightOffset = flatRight * speed * rightScale * deltaTime;
-
-	gameObject->SetPosition(XMVectorAdd(gameObject->GetPosition(), XMVectorAdd(forwardOffset, rightOffset)));
+	previousPos = gameObject->GetPosition();
+	if (!colliedWithWall) {
+		XMVECTOR forwardOffset = flatForward * speed * forwardScale * deltaTime;
+		XMVECTOR rightOffset = flatRight * speed * rightScale * deltaTime;
+		gameObject->SetPosition(XMVectorAdd(gameObject->GetPosition(), XMVectorAdd(forwardOffset, rightOffset)));
+	}
 }
 
 void CameraController::OnBeginOverlapping(GameObject* other)
 {
-	if (other->GetParent() != exitPortal)
+	if (other->tag == "Portal" && other->GetParent() != exitPortal)
 	{
 		exitPortal = other->GetParent()->GetComponent<Portal>()->GetExit()->GetGameObject();
-
 		XMVECTOR offset = XMVectorSubtract(GetGameObject()->GetPosition(), other->GetPosition());
-
 		gameObject->SetPosition(XMVectorAdd(exitPortal->GetPosition(), offset));
-		//gameObject->SetForwardVector(exitPortal->GetForwardVector());
+		gameObject->SetForwardVector(exitPortal->GetForwardVector());
+	}
+	else if (other->tag == "Wall") {
+		gameObject->SetPosition(previousPos);
+		colliedWithWall = true;
 	}
 }
 
@@ -55,4 +59,7 @@ void CameraController::OnEndOverlapping(GameObject* other)
 {
 	if (other->GetParent() == exitPortal)
 		exitPortal = nullptr;
+
+	else if (other->tag == "Wall") 
+		colliedWithWall = false;
 }

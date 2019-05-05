@@ -227,7 +227,6 @@ __inline f32 DimEngine::SphereCollider::GetRadius() const
 //			//printf("v2:  %f,  %f,  %f \n", v2.m128_f32[0], v2.m128_f32[1], v2.m128_f32[2]);
 //			if (abs(XMVector3Dot(v1, v2).m128_f32[0]) == 1)
 //			{
-//				// 两线平行
 //				//printf("line parallel \n ");
 //				continue;
 //			}
@@ -237,13 +236,11 @@ __inline f32 DimEngine::SphereCollider::GetRadius() const
 //			XMVECTOR vecS2 = XMVector3Cross(diag, v2); // 有向面积2
 //			float num = XMVector3Dot(diag, vecS1).m128_f32[0];
 //
-//			// 判断两这直线是否共面
 //			//if (num >= 1E-05f || num <= -1E-05f)
 //			//{
 //			//	continue;
 //			//}
 //
-//			// 有向面积比值，利用点乘是因为结果可能是正数或者负数
 //			float num2 = (XMVector3Dot(vecS2, vecS1) / XMVector3LengthSq(vecS1)).m128_f32[0];
 //			XMVECTOR point = start + v1 * num2;
 //				

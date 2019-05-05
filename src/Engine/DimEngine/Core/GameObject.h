@@ -75,9 +75,12 @@ namespace DimEngine
 		GameObject(XMVECTOR position, XMVECTOR rotation, XMVECTOR scale);
 		~GameObject();
 
+		string tag;
+
 
 		GameObject* GetParent();
 		GameObject* GetChild(size_t index);
+		void SetTag(string _tag);
 		template<class T> T* GetComponent();
 		bool IsActive();
 		bool IsActiveSelf();

@@ -11,7 +11,8 @@ private:
 	//float xRot;
 
 	GameObject* exitPortal;
-
+	XMVECTOR previousPos;
+	bool colliedWithWall;
 
 public:
 	CameraController();

@@ -221,9 +221,10 @@ void Game::CreateScene()
 	cameraObject = new GameObject();
 	cameraObject->SetRotation(camRotX, camRotY, 0);
 	//cameraObject->AddComponent<Renderer>(rockMaterial, sphereMesh);
-	cameraObject->AddComponent<SphereCollider>();
+	cameraObject->AddComponent<SphereCollider>(0.5f);
 	cameraObject->AddComponent<CameraController>();
 	cameraObject->SetPosition(0, 0, 0);
+	cameraObject->SetTag("Player");
 
 	GameObject* go = new GameObject();
 	go->SetParent(cameraObject);
@@ -288,10 +289,46 @@ void Game::CreateScene()
 	tunnel1->SetLocalScale(2, 2, 5);
 	tunnel1->AddComponent<Renderer>(rockMaterial, tunnelMesh);
 
+	GameObject* wallCollider1L = new GameObject();
+	wallCollider1L->SetParent(tunnel1);
+	wallCollider1L->SetLocalPosition(0, 0, 0);
+	wallCollider1L->AddComponent<BoxCollider>(XMVECTOR{ 0.4, 8, 10 }, XMVECTOR{ -1.5,0,0 });
+	wallCollider1L->SetTag("Wall");
+
+	GameObject* wallCollider1R = new GameObject();
+	wallCollider1R->SetParent(tunnel1);
+	wallCollider1R->SetLocalPosition(0, 0, 0);
+	wallCollider1R->AddComponent<BoxCollider>(XMVECTOR{ 0.4, 8, 10 }, XMVECTOR{ 1.5,0,0 });
+	wallCollider1R->SetTag("Wall");
+
+	//GameObject* temp = new GameObject();
+	//temp->SetPosition(-13.5, -2, 5);
+	//temp->SetLocalScale(0.55, 8, 10);
+	//temp->AddComponent<Renderer>(grassMaterial, cubeMesh);
+
+	//tunnel1 = new GameObject();
+	//tunnel1->SetPosition(-16.4, -2, 5);
+	//tunnel1->SetLocalScale(0.5, 8, 10);
+	//tunnel1->AddComponent<Renderer>(grassMaterial, cubeMesh);
+
 	tunnel2 = new GameObject();
 	tunnel2->SetPosition(5, -2, 10);
 	tunnel2->SetLocalScale(2, 2, 10);
 	tunnel2->AddComponent<Renderer>(rockMaterial, tunnelMesh);
+
+
+	GameObject* wallCollider2L = new GameObject();
+	wallCollider2L->SetParent(tunnel2);
+	wallCollider2L->SetLocalPosition(0, 0, 0);
+	wallCollider2L->AddComponent<BoxCollider>(XMVECTOR{ 0.4, 8, 20 }, XMVECTOR{ 1.5,0,0 });
+	wallCollider2L->SetTag("Wall");
+
+
+	GameObject* wallCollider2R = new GameObject();
+	wallCollider2R->SetParent(tunnel2);
+	wallCollider2R->SetLocalPosition(0, 0, 0);
+	wallCollider2R->AddComponent<BoxCollider>(XMVECTOR{ 0.4, 8, 20 }, XMVECTOR{ -1.5,0,0 });
+	wallCollider2R->SetTag("Wall");
 
 }
 
@@ -305,7 +342,7 @@ __forceinline Portal* Game::__CreatePortal(Material* material, f32 x, f32 y, f32
 	portalArea1->SetLocalScale(1.2f, 2.0f, 1);
 	portalArea1->AddComponent<Renderer>(material, quadMesh);
 	portalArea1->AddComponent<BoxCollider>(2, 2, 0.1f);
-
+	portalArea1->SetTag("Portal");
 	/*GameObject* pillar1L = new GameObject();
 	pillar1L->SetParent(portal);
 	pillar1L->SetLocalPosition(-2.5f, 0, 0);

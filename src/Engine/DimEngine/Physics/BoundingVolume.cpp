@@ -154,9 +154,9 @@ void DimEngine::Physics::OrientedBoundingBox::SetData(XMMATRIX worldMatrix, XMVE
 
 	XMVECTOR halfSize = XMVectorScale(size, 0.5f);
 
-	f32 x = halfSize.m128_f32[0];
-	f32 y = halfSize.m128_f32[1];
-	f32 z = halfSize.m128_f32[2];
+	f32 x = halfSize.m128_f32[0] + offset.m128_f32[0];
+	f32 y = halfSize.m128_f32[1] + offset.m128_f32[1];
+	f32 z = halfSize.m128_f32[2] + offset.m128_f32[2];
 
 	A = XMVector3Transform({-x, -y, -z}, worldMatrix);
 	B = XMVector3Transform({-x, -y, z}, worldMatrix);
