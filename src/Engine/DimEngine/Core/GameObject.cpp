@@ -50,9 +50,16 @@ __inline GameObject* DimEngine::GameObject::GetChild(size_t index)
 	return static_cast<GameObject*>(Transform::GetChild(index));
 }
 
-void DimEngine::GameObject::SetTag(string _tag)
+bool DimEngine::GameObject::ContainTag(string _tag)
 {
-	tag = _tag;
+	auto it = tags.find(_tag);
+	if (it == tags.end()) return false;
+	return true;
+}
+
+void DimEngine::GameObject::AddTag(string _tag)
+{
+	tags.insert(_tag);
 }
 
 __inline bool DimEngine::GameObject::IsActive()

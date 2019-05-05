@@ -75,12 +75,13 @@ namespace DimEngine
 		GameObject(XMVECTOR position, XMVECTOR rotation, XMVECTOR scale);
 		~GameObject();
 
-		string tag;
+		unordered_set<string> tags;
 
 
 		GameObject* GetParent();
 		GameObject* GetChild(size_t index);
-		void SetTag(string _tag);
+		void AddTag(string _tag);
+		bool ContainTag(string _tag);
 		template<class T> T* GetComponent();
 		bool IsActive();
 		bool IsActiveSelf();

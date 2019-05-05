@@ -3,6 +3,10 @@
 #include "../CameraController.h"
 #include "../Portal.h"
 
+
+#include "../Trigger.h"
+#include "../TriggerTarget.h"
+
 #include "Core/Global.h"
 #include "Core/Scene.h"
 
@@ -224,7 +228,7 @@ void Game::CreateScene()
 	cameraObject->AddComponent<SphereCollider>(0.5f);
 	cameraObject->AddComponent<CameraController>();
 	cameraObject->SetPosition(0, 0, 0);
-	cameraObject->SetTag("Player");
+	cameraObject->AddTag("Player");
 
 	GameObject* go = new GameObject();
 	go->SetParent(cameraObject);
@@ -293,13 +297,13 @@ void Game::CreateScene()
 	wallCollider1L->SetParent(tunnel1);
 	wallCollider1L->SetLocalPosition(0, 0, 0);
 	wallCollider1L->AddComponent<BoxCollider>(XMVECTOR{ 0.4, 8, 10 }, XMVECTOR{ -1.5,0,0 });
-	wallCollider1L->SetTag("Wall");
+	wallCollider1L->AddTag("Wall");
 
 	GameObject* wallCollider1R = new GameObject();
 	wallCollider1R->SetParent(tunnel1);
 	wallCollider1R->SetLocalPosition(0, 0, 0);
 	wallCollider1R->AddComponent<BoxCollider>(XMVECTOR{ 0.4, 8, 10 }, XMVECTOR{ 1.5,0,0 });
-	wallCollider1R->SetTag("Wall");
+	wallCollider1R->AddTag("Wall");
 
 	//GameObject* temp = new GameObject();
 	//temp->SetPosition(-13.5, -2, 5);
@@ -321,15 +325,41 @@ void Game::CreateScene()
 	wallCollider2L->SetParent(tunnel2);
 	wallCollider2L->SetLocalPosition(0, 0, 0);
 	wallCollider2L->AddComponent<BoxCollider>(XMVECTOR{ 0.4, 8, 20 }, XMVECTOR{ 1.5,0,0 });
-	wallCollider2L->SetTag("Wall");
+	wallCollider2L->AddTag("Wall");
 
 
 	GameObject* wallCollider2R = new GameObject();
 	wallCollider2R->SetParent(tunnel2);
 	wallCollider2R->SetLocalPosition(0, 0, 0);
 	wallCollider2R->AddComponent<BoxCollider>(XMVECTOR{ 0.4, 8, 20 }, XMVECTOR{ -1.5,0,0 });
-	wallCollider2R->SetTag("Wall");
+	wallCollider2R->AddTag("Wall");
 
+
+
+	GameObject* button = new GameObject();
+	button->SetPosition(-4, -2, 2);
+	button->SetLocalScale(2, 2, 2);
+	button->AddComponent<BoxCollider>(XMVECTOR{ 2, 2, 2 }, XMVECTOR{ 0,0,0 });
+	button->AddTag("Wall");
+
+
+	GameObject* triggerBox = new GameObject();
+	triggerBox->SetPosition(-4, -2, 2);
+	triggerBox->SetLocalScale(2, 2, 2);
+	triggerBox->AddComponent<BoxCollider>(XMVECTOR{ 3, 3, 3}, XMVECTOR{ 0,0,0 });
+	triggerBox->AddComponent<Renderer>(rockMaterial, cubeMesh);
+	triggerBox->AddTag("TriggerBox");
+
+	GameObject* panel = new GameObject();
+	panel->SetPosition(-15, 0, 0);
+	panel->SetLocalScale(4, 5, 0.5);
+	panel->AddComponent<BoxCollider>(XMVECTOR{ 1, 1, 1 }, XMVECTOR{ 0,0,0 });
+	panel->AddComponent<Renderer>(rockMaterial, cubeMesh);
+	panel->AddTag("Wall");
+	panel->AddTag("TriggerPanel");
+	panel->AddComponent<TriggerTarget>(XMVECTOR{ -15, 5, 0 });
+
+	triggerBox->AddComponent<Trigger>(panel->GetComponent<TriggerTarget>(), XMVECTOR{ -4, -2.5f, 2 });
 }
 
 __forceinline Portal* Game::__CreatePortal(Material* material, f32 x, f32 y, f32 z, f32 rx, f32 ry, f32 rz)
@@ -342,7 +372,7 @@ __forceinline Portal* Game::__CreatePortal(Material* material, f32 x, f32 y, f32
 	portalArea1->SetLocalScale(1.2f, 2.0f, 1);
 	portalArea1->AddComponent<Renderer>(material, quadMesh);
 	portalArea1->AddComponent<BoxCollider>(2, 2, 0.1f);
-	portalArea1->SetTag("Portal");
+	portalArea1->AddTag("Portal");
 	/*GameObject* pillar1L = new GameObject();
 	pillar1L->SetParent(portal);
 	pillar1L->SetLocalPosition(-2.5f, 0, 0);
