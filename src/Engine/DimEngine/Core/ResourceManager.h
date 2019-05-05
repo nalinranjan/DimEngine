@@ -36,7 +36,7 @@ namespace DimEngine {
 		Rendering::Texture* CreateTexture(std::string _id, wchar_t* _filepath, D3D11_TEXTURE_ADDRESS_MODE _addressMode, D3D11_FILTER _filterMode, float _maxLOD);
 		Rendering::Texture* GetTexture(std::string _id);
 
-		Rendering::Material* CreateMaterial(std::string _id, SimpleVertexShader* _vertexShader, SimplePixelShader* _pixelShader, Rendering::Texture* _texture);
+		Rendering::Material* CreateMaterial(std::string _id, SimpleVertexShader* _vertexShader, SimplePixelShader* _pixelShader, ID3D11SamplerState* _sampler);
 		Rendering::Material* GetMaterial(std::string _id);
 
 	};

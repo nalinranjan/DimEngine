@@ -1,3 +1,5 @@
+//#include "../Core/Game.h"
+
 #include "Renderer.h"
 #include "RenderingEngine.h"
 
@@ -23,4 +25,14 @@ DimEngine::Renderer::~Renderer()
 		RenderingEngine::GetSingleton()->DestroyRenderable(renderable);
 
 	RenderingEngine::GetSingleton()->RemoveRenderer(this);
+}
+
+void DimEngine::Renderer::OnBeginOverlapping(GameObject * other)
+{
+	//material = Game::redMaterial;
+}
+
+void DimEngine::Renderer::OnEndOverlapping(GameObject * other)
+{
+	//material = Game::greenMaterial;
 }

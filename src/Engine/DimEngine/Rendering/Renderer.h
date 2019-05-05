@@ -25,14 +25,20 @@ namespace DimEngine
 		Renderer* next;
 		Renderer* previous;
 
+
 	public:
 		Renderer();
 		Renderer(Material* material, Mesh* mesh);
 		~Renderer();
+
+
+	private:
+		void OnBeginOverlapping(GameObject* other);
+		void OnEndOverlapping(GameObject* other);
 	};
 
 
-	class __declspec(dllexport) ForwardRenderer : public Renderer
+	class __declspec(dllexport) ForwardRenderer final : public Renderer
 	{
 	};
 }

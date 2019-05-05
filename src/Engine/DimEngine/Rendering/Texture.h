@@ -1,26 +1,33 @@
+#ifndef TEXTURE_H
+#define TEXTURE_H
 #pragma once
 
 #include <WICTextureLoader.h>
 
 #include "../Common/Typedefs.h"
 
-namespace DimEngine {
-	namespace Rendering {
 
-		class __declspec(dllexport) Texture {
+namespace DimEngine
+{
+	namespace Rendering
+	{
+		class __declspec(dllexport) Texture
+		{
 		protected:
-			ID3D11ShaderResourceView* resourceView;
 			ID3D11SamplerState* samplerState;
+			ID3D11ShaderResourceView* shaderResourceView;
 
 			Texture();
 
 
 		public:
-			Texture(wchar_t* _filepath, D3D11_TEXTURE_ADDRESS_MODE _addressMode, D3D11_FILTER _filterMode, f32 _maxLOD, ID3D11Device* _device, ID3D11DeviceContext* _context);
+			Texture(wchar_t* _filepath, D3D11_TEXTURE_ADDRESS_MODE _addressMode, D3D11_FILTER _filterMode, f32 _maxLOD);
 			~Texture();
 
-			ID3D11ShaderResourceView* GetResourceView() { return resourceView; }
-			ID3D11SamplerState* GetSamplerState() { return samplerState; }
+
+		private:
+			ID3D11ShaderResourceView* GetShaderResourceView();
+			ID3D11SamplerState* GetSamplerState();
 		};
 
 
@@ -35,12 +42,37 @@ namespace DimEngine {
 
 
 		public:
-			RenderTexture(ID3D11Device* device, u32 size);
-			RenderTexture(ID3D11Device* device, u32 width, u32 height);
+			RenderTexture(u32 size);
+			RenderTexture(u32 width, u32 height);
 			~RenderTexture();
 
+
+		private:
 			ID3D11RenderTargetView* GetRenderTargetView();
 			ID3D11DepthStencilView* GetDepthStencilView();
 		};
+
+
+		inline ID3D11ShaderResourceView* DimEngine::Rendering::Texture::GetShaderResourceView()
+		{
+			return shaderResourceView;
+		}
+
+		inline ID3D11SamplerState* DimEngine::Rendering::Texture::GetSamplerState()
+		{
+			return samplerState;
+		}
+
+
+		inline ID3D11RenderTargetView* DimEngine::Rendering::RenderTexture::GetRenderTargetView()
+		{
+			return renderTargetView;
+		}
+
+		inline ID3D11DepthStencilView* DimEngine::Rendering::RenderTexture::GetDepthStencilView()
+		{
+			return depthStencilView;
+		}
 	}
 }
+#endif // !TEXTURE_H

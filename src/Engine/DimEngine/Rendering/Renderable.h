@@ -13,8 +13,6 @@ namespace DimEngine
 		{
 			friend class RenderingEngine;
 
-			friend bool SortRenderables(Renderable, Renderable);
-
 
 		private:
 			Mesh* mesh;

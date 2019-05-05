@@ -1,6 +1,8 @@
-#ifndef RENDERING_ENGINE_H
+﻿#ifndef RENDERING_ENGINE_H
 #define RENDERING_ENGINE_H
 #pragma once
+
+#include <string>
 
 #include "../Common/Settings.h"
 #include "../Common/Typedefs.h"
@@ -9,26 +11,45 @@
 #include "../Memory/PoolAllocator.hpp"
 
 #include "Camera.h"
+#include "CubeMap.h"
 #include "Light.h"
 #include "LightSource.h"
 #include "Mesh.h"
 #include "Renderable.h"
 #include "Renderer.h"
+#include "ShadowMap.h"
+#include "Texture.h"
 #include "Viewer.h"
 
 using namespace DimEngine;
 using namespace DimEngine::Memory;
 
+
 namespace DimEngine
 {
 	namespace Rendering
 	{
+		struct RenderingEngineConfig
+		{
+			ID3D11Device* device = nullptr;
+			ID3D11DeviceContext* deviceContext = nullptr;
+
+			i32 maxNumMaterials = DEFAULT_MAX_NUM_MATERIALS;
+			i32 maxNumMeshes = DEFAULT_MAX_NUM_MESHES;
+			i32 initialNumRenderables = 128;
+			i32 initialNumViews = 2;
+			i32 initialNumLightSources = 8;
+		};
+
+
 		class __declspec(dllexport) RenderingEngine
 		{
 			friend class Camera;
 			friend class Light;
 			friend struct Mesh;
 			friend class Renderer;
+			friend class RenderTexture;
+			friend class Texture;
 
 
 		private:
@@ -36,11 +57,20 @@ namespace DimEngine
 
 
 		public:
-			static void Initialize(i32 maxNumMaterials = DEFAULT_MAX_NUM_MATERIALS, i32 maxNumMeshes = DEFAULT_MAX_NUM_MESHES, i32 defaultNumRenderables = 128, i32 defaultNumViews = 4);
-			static void Stop();
+			static RenderingEngine* GetSingleton();
+
+			static void Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
+			static void Initialize(RenderingEngineConfig config);
+			static void Terminate();
 
 
 		private:
+			ID3D11Device* device;
+			ID3D11DeviceContext* deviceContext;
+
+			SimpleVertexShader* vsDepthOnly;
+			ID3D11DepthStencilState* dssLessEqual;
+
 			PoolAllocator<sizeof(Material)> materialAllocator;
 			PoolAllocator<sizeof(Mesh)> meshAllocator;
 
@@ -51,14 +81,12 @@ namespace DimEngine
 			Renderer* rendererList;
 			Camera* cameraList;
 			Light* lightList;
+			ShadowMap* shadow;
+			bool hasZPrepass;
 
-			//SimpleVertexShader* vsZPrepass;
-			//ID3D11DepthStencilState* zPrepassDepthState;
 
-
-			RenderingEngine(i32 maxNumMaterials, i32 maxNumMeshes, i32 defaultNumRenderables, i32 defaultNumCameraProxies);
+			RenderingEngine(RenderingEngineConfig config);
 			~RenderingEngine();
-
 
 			void AddRenderer(Renderer* renderer);
 			void AddCamera(Camera* camera);
@@ -67,22 +95,54 @@ namespace DimEngine
 			void RemoveRenderer(Renderer* renderer);
 			void RemoveCamera(Camera* camera);
 			void RemoveLight(Light* light);
+
 			void DestroyRenderable(i32 id);
 			void DestroyViewer(i32 id);
 
+			/*XMMATRIX shadowView;
+			XMMATRIX shadowProjection;*/
+			XMFLOAT4X4 shadowViewProjectionMat;
+
 
 		public:
-			static RenderingEngine* GetSingleton();
-
 			void UpdateRenderables();
 			void UpdateViewers();
 			void UpdateLightSources();
 			void SortRenderables();
-			void UpdateGlobalData(float screenWidth, float screenHeight);
-			void PerformZPrepass(SimpleVertexShader* shader, ID3D11DeviceContext* context);
-			void DrawForward(ID3D11DeviceContext* context);
-			void DrawForward(ID3D11DeviceContext* context, Camera* camera);
+			void PerformZPrepass();
+			void DrawForward();
+			bool RenderShadowMap();
+			void SetShadowMap(ShadowMap* _shadow);
+			void RenderCubeMap(CubeMap* cubeMap);
 		};
+
+
+		inline RenderingEngine* RenderingEngine::GetSingleton()
+		{
+			return singleton;
+		}
+
+		inline void RenderingEngine::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
+		{
+			RenderingEngineConfig config;
+			config.device = device;
+			config.deviceContext = deviceContext;
+
+			singleton = new RenderingEngine(config);
+
+			
+		}
+
+		inline void RenderingEngine::Initialize(RenderingEngineConfig config)
+		{
+			singleton = new RenderingEngine(config);
+		}
+
+		inline void RenderingEngine::Terminate()
+		{
+			if (singleton)
+				delete singleton;
+		}
 	}
 }
 #endif

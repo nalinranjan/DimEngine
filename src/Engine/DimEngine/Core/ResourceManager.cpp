@@ -81,7 +81,7 @@ Rendering::Mesh* ResourceManager::GetMesh(std::string _id) {
 Rendering::Texture* ResourceManager::CreateTexture(std::string _id, wchar_t* _filepath, D3D11_TEXTURE_ADDRESS_MODE _addressMode, D3D11_FILTER _filterMode, float _maxLOD) {
 
 	if (textures.find(_id) == textures.end()) {
-		Rendering::Texture* tex = new Rendering::Texture(_filepath, _addressMode, _filterMode, _maxLOD, device, context);
+		Rendering::Texture* tex = new Rendering::Texture(_filepath, _addressMode, _filterMode, _maxLOD);
 		textures.insert(std::pair<std::string, Rendering::Texture*>(_id, tex));
 		return tex;
 	}
@@ -104,10 +104,10 @@ Rendering::Texture* ResourceManager::GetTexture(std::string _id) {
 
 // MATERIALS
 
-Rendering::Material* ResourceManager::CreateMaterial(std::string _id, SimpleVertexShader* _vertexShader, SimplePixelShader* _pixelShader, Rendering::Texture* _texture) {
+Rendering::Material* ResourceManager::CreateMaterial(std::string _id, SimpleVertexShader* _vertexShader, SimplePixelShader* _pixelShader, ID3D11SamplerState* _sampler) {
 
 	if (materials.find(_id) == materials.end()) {
-		Rendering::Material* mat = new Rendering::Material(_vertexShader, _pixelShader, _texture);
+		Rendering::Material* mat = new Rendering::Material(_vertexShader, _pixelShader, _sampler);
 		materials.insert(std::pair<std::string, Rendering::Material*>(_id, mat));
 		return mat;
 	}

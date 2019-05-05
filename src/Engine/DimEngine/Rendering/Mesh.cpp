@@ -6,9 +6,8 @@ DimEngine::Rendering::Mesh::Mesh(Vertex* vertices, int verticesNumber, unsigned 
 	CreateMesh(vertices, verticesNumber, indices, indicesNumber, device);
 }
 
-DimEngine::Rendering::Mesh::Mesh(
-	ID3D11Device* device,
-	const char* filename) {
+DimEngine::Rendering::Mesh::Mesh(ID3D11Device* device, const char* filename)
+{
 	// File input object
 	std::ifstream obj(filename);
 
@@ -177,10 +176,14 @@ DimEngine::Rendering::Mesh::Mesh(
 	CreateMesh(&verts[0], verticesNumber, &indices[0], indicesNumber, device);
 }
 
-DimEngine::Rendering::Mesh::~Mesh() {
+DimEngine::Rendering::Mesh::~Mesh()
+{
 	//release vertex buffer and index buffer
-	if (vertexBuffer) { vertexBuffer->Release(); }
-	if (indexBuffer) { indexBuffer->Release(); }
+	if (vertexBuffer)
+		vertexBuffer->Release();
+
+	if (indexBuffer)
+		indexBuffer->Release();
 }
 
 void* DimEngine::Rendering::Mesh::operator new(size_t size)
@@ -193,16 +196,59 @@ void DimEngine::Rendering::Mesh::operator delete(void * p)
 	RenderingEngine::GetSingleton()->materialAllocator.Free(p);
 }
 
-ID3D11Buffer* DimEngine::Rendering::Mesh::GetVertexBuffer() { return vertexBuffer; }
-ID3D11Buffer* DimEngine::Rendering::Mesh::GetIndexBuffer() { return indexBuffer; }
+ID3D11Buffer* DimEngine::Rendering::Mesh::GetVertexBuffer()
+{
+	return vertexBuffer;
+}
 
-int DimEngine::Rendering::Mesh::GetIndexCount() { return indicesNum; }
+ID3D11Buffer* DimEngine::Rendering::Mesh::GetIndexBuffer()
+{
+	return indexBuffer;
+}
 
-void DimEngine::Rendering::Mesh::CreateMesh(Vertex* vertices,
-	int verticesNumber,
-	unsigned int* indices,
-	int indicesNumber,
-	ID3D11Device* device) {
+int DimEngine::Rendering::Mesh::GetIndexCount()
+{
+	return indicesNum;
+}
+
+//use assimp lib to load obj & mtl files
+bool DimEngine::Rendering::Mesh::loadFile(ID3D11Device * device, const std::string & filename) {
+	/*Assimp::Importer import;
+	const aiScene *scene = import.ReadFile(filename, aiProcess_Triangulate | aiProcess_FlipUVs);
+
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+		printf("ERROR::ASSIMP::%s", import.GetErrorString());
+		return false;
+	}*/
+
+	//// process all the node's meshes (if any)
+	//for (unsigned int i = 0; i < node->mNumMeshes; i++)
+	//{
+	//	aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+	//	meshes.push_back(processMesh(mesh, scene));
+	//}
+	//// then do the same for each of its children
+	//for (unsigned int i = 0; i < node->mNumChildren; i++)
+	//{
+	//	processNode(node->mChildren[i], scene);
+	//}
+
+	/*aiNode* node = scene->mRootNode;
+
+	for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+		aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+		
+	}*/
+	
+	
+	
+	
+	return false;
+}
+
+void DimEngine::Rendering::Mesh::CreateMesh(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber, ID3D11Device* device)
+{
+	ComputeTangent(vertices, verticesNumber, indices, indicesNumber);
 
 	//initialize vertex buffer
 	D3D11_BUFFER_DESC vbd;
@@ -234,4 +280,70 @@ void DimEngine::Rendering::Mesh::CreateMesh(Vertex* vertices,
 
 	//initialize indicesNum
 	indicesNum = indicesNumber;
+}
+
+void DimEngine::Rendering::Mesh::ComputeTangent(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber)
+{
+	for (int i = 0; i < verticesNumber; i++) {
+		vertices[i].tangent = XMFLOAT3(0, 0, 0);
+	}
+
+	for (int i = 0; i < indicesNumber; i += 3) {
+		Vertex v0 = vertices[indices[i]];
+		Vertex v1 = vertices[indices[i + 1]];
+		Vertex v2 = vertices[indices[i + 2]];
+
+		float positionX0 = v0.Position.x;
+		float positionY0 = v0.Position.y;
+		float positionZ0 = v0.Position.z;
+
+		float positionX1 = v1.Position.x;
+		float positionY1 = v1.Position.y;
+		float positionZ1 = v1.Position.z;
+
+		float positionX2 = v2.Position.x;
+		float positionY2 = v2.Position.y;
+		float positionZ2 = v2.Position.z;
+
+		float U0 = v0.UV.x;
+		float V0 = v0.UV.y;
+
+		float U1 = v1.UV.x;
+		float V1 = v1.UV.y;
+
+		float U2 = v2.UV.x;
+		float V2 = v2.UV.y;
+
+		float deltaPosX1 = positionX1 - positionX0;
+		float deltaPosY1 = positionY1 - positionY0;
+		float deltaPosZ1 = positionZ1 - positionZ0;
+
+		float deltaPosX2 = positionX2 - positionX0;
+		float deltaPosY2 = positionY2 - positionY0;
+		float deltaPosZ2 = positionZ2 - positionZ0;
+
+		float deltaU1 = U1 - U0;
+		float deltaV1 = V1 - V0;
+
+		float deltaU2 = U2 - U0;
+		float deltaV2 = V2 - V0;
+
+		float r = 1.0f / (deltaU1 * deltaV2 - deltaV1 * deltaU2);
+
+		float x = (deltaPosX1 * deltaV2 - deltaPosX2 * deltaV1) * r;
+		float y = (deltaPosY1 * deltaV2 - deltaPosY2 * deltaV1) * r;
+		float z = (deltaPosZ1 * deltaV2 - deltaPosZ2 * deltaV1) * r;
+
+		vertices[indices[i]].tangent.x += x;
+		vertices[indices[i]].tangent.y += y;
+		vertices[indices[i]].tangent.z += z;
+
+		vertices[indices[i + 1]].tangent.x += x;
+		vertices[indices[i + 1]].tangent.y += y;
+		vertices[indices[i + 1]].tangent.z += z;
+
+		vertices[indices[i + 2]].tangent.x += x;
+		vertices[indices[i + 2]].tangent.y += y;
+		vertices[indices[i + 2]].tangent.z += z;
+	}
 }

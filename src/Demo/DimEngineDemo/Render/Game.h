@@ -1,9 +1,8 @@
 #pragma once
 
+#include <DDSTextureLoader.h>
 #include <DirectXMath.h>
 #include <vector>
-
-#include "../Portal.h"
 
 #include "Core/GameObject.h"
 #include "Rendering/Camera.h"
@@ -12,82 +11,95 @@
 #include "Rendering/Mesh.h"
 #include "Rendering/SimpleShader.h"
 #include "Rendering/Vertex.h"
-
-#include "Core/ResourceManager.h"
+//#include "Multithreading/Barrier.h"
+#include "Rendering/ShadowMap.h"
+#include "Rendering/CubeMap.h"
 
 #include "DXCore.h"
 
-//using namespace Colliders;
+
+#include "Core/ResourceManager.h"
+
 using namespace DimEngine::Rendering;
+//using namespace DimEngine::Multithreading;
 
-class Game : public DXCore
+namespace DimEngine
 {
-public:
-	Game(HINSTANCE hInstance, char* name);
-	~Game();
+	class __declspec(dllexport) Game final : public DXCore
+	{
+	public:
+		Game(HINSTANCE hInstance, char* name);
+		~Game();
 
-	void Init();
-	void OnResize();
-	void Update(float deltaTime, float totalTime);
-	void Draw(float deltaTime, float totalTime);
+		void Init();
+		void OnResize();
+		void Update();
+		void Draw();
 
-	void OnMouseDown(WPARAM buttonState, int x, int y);
-	void OnMouseUp(WPARAM buttonState, int x, int y);
-	void OnMouseMove(WPARAM buttonState, int x, int y);
-	void OnMouseWheel(float wheelDelta, int x, int y);
+		void OnMouseDown(WPARAM buttonState, int x, int y);
+		void OnMouseUp(WPARAM buttonState, int x, int y);
+		void OnMouseMove(WPARAM buttonState, int x, int y);
+		void OnMouseWheel(float wheelDelta, int x, int y);
 
+	private:
+		void LoadShaders();
+		void CreateMatrces();
+		void CreateBasicGeometry();
+		void CreateAllMaps();
 
-private:
-	void LoadShaders();
-	void CreateScene();
+		POINT prevMousePos;
 
-	Portal* __CreatePortal(Material* material, f32 x = 0, f32 y = 0, f32 z = 0, f32 rx = 0, f32 ry = 0, f32 rz = 0);
+		f32 camX;
+		f32 camY;
 
-	ResourceManager* rm;
+		SimpleVertexShader* vsZPrepass;
+		SimpleVertexShader* vertexShader;
+		SimplePixelShader* pixelShader;
+		SimplePixelShader* pixelShaderPBR;
 
-	POINT prevMousePos;
+		ID3D11DepthStencilState* zPrepassDepthStencilState;
 
-	SimpleVertexShader* vsZPrepass;
-	SimpleVertexShader* vertexShader;
-	SimplePixelShader* pixelShader;
-	SimpleVertexShader* vsPortal;
-	SimplePixelShader* psPortal;
+		Material* pbrMaterial;
 
+		Mesh* sphereMesh;
+		Mesh* cubeMesh;
 
-	Mesh* sphereMesh;
-	Mesh* cubeMesh;
-	Mesh* quadMesh;
+		ID3D11SamplerState* sampler;
+		D3D11_SAMPLER_DESC samplerDesc;
 
-	Texture* grassTexture;
-	Texture* wallTexture;
-	Texture* rockTexture;
-	RenderTexture* portalTexture1;
-	RenderTexture* portalTexture2;
+		ID3D11ShaderResourceView* texture;
+		ID3D11ShaderResourceView* normalMap;
 
-	Material* grassMaterial;
-	Material* wallMaterial;
-	Material* rockMaterial;
-	Material* portalMaterial1;
-	Material* portalMaterial2;
+		DirectionalLight* directionalLight;
+		GameObject* camera;
+		GameObject* go1;
+		GameObject* go2;
+		GameObject* go4;
+		GameObject* go5;
+		GameObject* go6;
+		GameObject* go7;
+		GameObject* go9;
+		GameObject* go10;
 
-
-	DirectionalLight* directionalLight;
-
-	GameObject* cameraObject;
-	Camera* camera;
-	f32 camRotX = 0;
-	f32 camRotY = 0;
-
-	Camera* portalCamera1;
-	Camera* portalCamera2;
-
-	Portal* portal1;
-	Portal* portal2;
-
-	GameObject* floor;
-	GameObject* cube;
-	GameObject* sphere;
+		//Barrier frameBarrier;
 
 
-	ID3D11DepthStencilState* zPrepassDepthStencilState;
-};
+		//final shadow map
+		ShadowMap* shadow;
+		D3D11_VIEWPORT shadowViewport;
+		float shadowMapSize;
+		SimpleVertexShader* shadowShader;
+
+		//cube map
+		CubeMap* cubeMap;
+
+		//PBR textures
+		ID3D11ShaderResourceView* roughnessMap;
+		ID3D11ShaderResourceView* metalnessMap;
+
+		
+	public:
+		//static Material* greenMaterial;
+		//static Material* redMaterial;
+	};
+}

@@ -1,16 +1,9 @@
-#include "../Core/Global.h"
-
 #include "Camera.h"
 #include "RenderingEngine.h"
 
 DimEngine::Camera::Camera()
 {
-	renderTexture = nullptr;
-
-	sColor = { 0.69f, 0.88f, 0.9f, 0.0f };
-
 	fov = 0.25f * 3.1415926535f;
-	ratio = 0;
 	nearZ = 0.1f;
 	farZ = 100;
 
@@ -25,60 +18,6 @@ DimEngine::Camera::~Camera()
 		RenderingEngine::GetSingleton()->DestroyViewer(viewer);
 
 	RenderingEngine::GetSingleton()->RemoveCamera(this);
-}
-
-void DimEngine::Camera::SetRenderTexture(RenderTexture* renderTexture)
-{
-	this->renderTexture = renderTexture;
-}
-
-void DimEngine::Camera::SetFov(f32 value)
-{
-	fov = value;
-}
-
-void DimEngine::Camera::SetRatio(f32 value)
-{
-	ratio = value;
-}
-
-void DimEngine::Camera::SetNearZ(f32 value)
-{
-	nearZ = value;
-}
-
-void DimEngine::Camera::SetFarZ(f32 value)
-{
-	farZ = value;
-}
-
-void DimEngine::Camera::RenderToRenderTarget(ID3D11DeviceContext* context)
-{
-	if (renderTexture)
-	{
-		D3D11_VIEWPORT rtViewport = {};
-		rtViewport.TopLeftX = 0;
-		rtViewport.TopLeftY = 0;
-		rtViewport.Width = 1280;
-		rtViewport.Height = 720;
-		rtViewport.MinDepth = 0.0f;
-		rtViewport.MaxDepth = 1.0f;
-		context->RSSetViewports(1, &rtViewport);
-		
-
-		ID3D11RenderTargetView* renderTargetView = renderTexture->GetRenderTargetView();
-		ID3D11DepthStencilView* depthStencilView = renderTexture->GetDepthStencilView();
-
-		context->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
-		context->ClearRenderTargetView(renderTargetView, color);
-		context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-
-		RenderingEngine::GetSingleton()->DrawForward(context, this);
-
-
-		context->OMSetRenderTargets(0, nullptr, nullptr);
-	}
 }
 
 //void Camera::SetRotationX(float _rotationX) {
