@@ -7,9 +7,10 @@
 
 using namespace std;
 
+
 // Define the static instance variable so our OS-level 
 // message handling function below can talk to our object
-DimEngine::DXCore* DimEngine::DXCore::DXCoreInstance = 0;
+DXCore* DXCore::DXCoreInstance = 0;
 
 // --------------------------------------------------------
 // The global callback function for handling windows OS-level messages.
@@ -17,7 +18,7 @@ DimEngine::DXCore* DimEngine::DXCore::DXCoreInstance = 0;
 // This needs to be a global function (not part of a class), but we want
 // to forward the parameters to our class to properly handle them.
 // --------------------------------------------------------
-LRESULT DimEngine::DXCore::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT DXCore::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	return DXCoreInstance->ProcessMessage(hWnd, uMsg, wParam, lParam);
 }
@@ -31,7 +32,7 @@ LRESULT DimEngine::DXCore::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 // windowHeight - Height of the window's client (internal) area
 // debugTitleBarStats - Show debug stats in the title bar, like FPS?
 // --------------------------------------------------------
-DimEngine::DXCore::DXCore(
+DXCore::DXCore(
 	HINSTANCE hInstance,		// The application's handle
 	char* titleBarText,			// Text for the window's title bar
 	unsigned int windowWidth,	// Width of the window's client area
@@ -70,7 +71,7 @@ DimEngine::DXCore::DXCore(
 // --------------------------------------------------------
 // Destructor - Clean up (release) all DirectX references
 // --------------------------------------------------------
-DimEngine::DXCore::~DXCore()
+DXCore::~DXCore()
 {
 	// Release all DirectX resources
 	if (context) { context->ClearState(); }
@@ -99,7 +100,7 @@ DimEngine::DXCore::~DXCore()
 // --------------------------------------------------------
 // Created the actual window for our application
 // --------------------------------------------------------
-HRESULT DimEngine::DXCore::InitWindow()
+HRESULT DXCore::InitWindow()
 {
 	// Start window creation by filling out the
 	// appropriate window class struct
@@ -179,7 +180,7 @@ HRESULT DimEngine::DXCore::InitWindow()
 // also creates several DirectX objects we'll need to start
 // drawing things to the screen.
 // --------------------------------------------------------
-HRESULT DimEngine::DXCore::InitDirectX()
+HRESULT DXCore::InitDirectX()
 {
 	// This will hold options for DirectX initialization
 	unsigned int deviceFlags = 0;
@@ -295,7 +296,7 @@ HRESULT DimEngine::DXCore::InitDirectX()
 // resolution won't match up.  This can result in odd
 // stretching/skewing.
 // --------------------------------------------------------
-void DimEngine::DXCore::OnResize()
+void DXCore::OnResize()
 {
 	// Release existing DirectX views and buffers
 	if (depthStencilView) { depthStencilView->Release(); }
@@ -359,7 +360,7 @@ void DimEngine::DXCore::OnResize()
 //  - OS-level messages coming in from Windows itself
 //  - Calling update & draw back and forth, forever
 // --------------------------------------------------------
-HRESULT DimEngine::DXCore::Run()
+HRESULT DXCore::Run()
 {
 	isRunning = true;
 
@@ -408,7 +409,7 @@ HRESULT DimEngine::DXCore::Run()
 // Sends an OS-level window close message to our process, which
 // will be handled by our message processing function
 // --------------------------------------------------------
-void DimEngine::DXCore::Quit()
+void DXCore::Quit()
 {
 	PostMessage(this->hWnd, WM_CLOSE, NULL, NULL);
 }
@@ -418,7 +419,7 @@ void DimEngine::DXCore::Quit()
 // Uses high resolution time stamps to get very accurate
 // timing information, and calculates useful time stats
 // --------------------------------------------------------
-void DimEngine::DXCore::UpdateTimer()
+void DXCore::UpdateTimer()
 {
 	// Grab the current time
 	__int64 now;
@@ -445,7 +446,7 @@ void DimEngine::DXCore::UpdateTimer()
 //  - The current FPS and ms/frame
 //  - The version of DirectX actually being used (usually 11)
 // --------------------------------------------------------
-void DimEngine::DXCore::UpdateTitleBarStats()
+void DXCore::UpdateTitleBarStats()
 {
 	fpsFrameCount++;
 
@@ -493,7 +494,7 @@ void DimEngine::DXCore::UpdateTitleBarStats()
 // windowLines   - Number of lines visible at once in the window
 // windowColumns - Number of columns visible at once in the window
 // --------------------------------------------------------
-void DimEngine::DXCore::CreateConsoleWindow(int bufferLines, int bufferColumns, int windowLines, int windowColumns)
+void DXCore::CreateConsoleWindow(int bufferLines, int bufferColumns, int windowLines, int windowColumns)
 {
 	// Our temp console info struct
 	CONSOLE_SCREEN_BUFFER_INFO coninfo;
@@ -529,7 +530,7 @@ void DimEngine::DXCore::CreateConsoleWindow(int bufferLines, int bufferColumns, 
 // our program to hang and Windows would think it was
 // unresponsive.
 // --------------------------------------------------------
-LRESULT DimEngine::DXCore::ProcessMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT DXCore::ProcessMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	// Check the incoming message and handle any we care about
 	switch (uMsg)
@@ -596,4 +597,3 @@ LRESULT DimEngine::DXCore::ProcessMessage(HWND hWnd, UINT uMsg, WPARAM wParam, L
 	// Let Windows handle any messages we're not touching
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
-

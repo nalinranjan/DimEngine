@@ -29,7 +29,7 @@ namespace DimEngine
 {
 	namespace Rendering
 	{
-		struct RenderingEngineConfig
+		struct __declspec(dllexport) RenderingEngineConfig
 		{
 			ID3D11Device* device = nullptr;
 			ID3D11DeviceContext* deviceContext = nullptr;
@@ -99,8 +99,6 @@ namespace DimEngine
 			void DestroyRenderable(i32 id);
 			void DestroyViewer(i32 id);
 
-			/*XMMATRIX shadowView;
-			XMMATRIX shadowProjection;*/
 			XMFLOAT4X4 shadowViewProjectionMat;
 
 
@@ -115,34 +113,7 @@ namespace DimEngine
 			void SetShadowMap(ShadowMap* _shadow);
 			void RenderCubeMap(CubeMap* cubeMap);
 		};
-
-
-		inline RenderingEngine* RenderingEngine::GetSingleton()
-		{
-			return singleton;
-		}
-
-		inline void RenderingEngine::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
-		{
-			RenderingEngineConfig config;
-			config.device = device;
-			config.deviceContext = deviceContext;
-
-			singleton = new RenderingEngine(config);
-
-			
-		}
-
-		inline void RenderingEngine::Initialize(RenderingEngineConfig config)
-		{
-			singleton = new RenderingEngine(config);
-		}
-
-		inline void RenderingEngine::Terminate()
-		{
-			if (singleton)
-				delete singleton;
-		}
 	}
 }
+
 #endif

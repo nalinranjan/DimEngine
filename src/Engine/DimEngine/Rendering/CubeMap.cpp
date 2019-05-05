@@ -1,4 +1,4 @@
-#include "CubeMap.h";
+#include "CubeMap.h"
 
 DimEngine::Rendering::CubeMap::CubeMap() {
 	//rasterizer desc

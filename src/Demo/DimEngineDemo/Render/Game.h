@@ -20,86 +20,86 @@
 
 #include "Core/ResourceManager.h"
 
+using namespace DimEngine;
 using namespace DimEngine::Rendering;
 //using namespace DimEngine::Multithreading;
 
-namespace DimEngine
+
+class __declspec(dllexport) Game final : public DXCore
 {
-	class __declspec(dllexport) Game final : public DXCore
-	{
-	public:
-		Game(HINSTANCE hInstance, char* name);
-		~Game();
+public:
+	Game(HINSTANCE hInstance, char* name);
+	~Game();
 
-		void Init();
-		void OnResize();
-		void Update();
-		void Draw();
+	void Init();
+	void OnResize();
+	void Update();
+	void Draw();
 
-		void OnMouseDown(WPARAM buttonState, int x, int y);
-		void OnMouseUp(WPARAM buttonState, int x, int y);
-		void OnMouseMove(WPARAM buttonState, int x, int y);
-		void OnMouseWheel(float wheelDelta, int x, int y);
-
-	private:
-		void LoadShaders();
-		void CreateMatrces();
-		void CreateBasicGeometry();
-		void CreateAllMaps();
-
-		POINT prevMousePos;
-
-		f32 camX;
-		f32 camY;
-
-		SimpleVertexShader* vsZPrepass;
-		SimpleVertexShader* vertexShader;
-		SimplePixelShader* pixelShader;
-		SimplePixelShader* pixelShaderPBR;
-
-		ID3D11DepthStencilState* zPrepassDepthStencilState;
-
-		Material* pbrMaterial;
-
-		Mesh* sphereMesh;
-		Mesh* cubeMesh;
-
-		ID3D11SamplerState* sampler;
-		D3D11_SAMPLER_DESC samplerDesc;
-
-		ID3D11ShaderResourceView* texture;
-		ID3D11ShaderResourceView* normalMap;
-
-		DirectionalLight* directionalLight;
-		GameObject* camera;
-		GameObject* go1;
-		GameObject* go2;
-		GameObject* go4;
-		GameObject* go5;
-		GameObject* go6;
-		GameObject* go7;
-		GameObject* go9;
-		GameObject* go10;
-
-		//Barrier frameBarrier;
+	void OnMouseDown(WPARAM buttonState, int x, int y);
+	void OnMouseUp(WPARAM buttonState, int x, int y);
+	void OnMouseMove(WPARAM buttonState, int x, int y);
+	void OnMouseWheel(float wheelDelta, int x, int y);
 
 
-		//final shadow map
-		ShadowMap* shadow;
-		D3D11_VIEWPORT shadowViewport;
-		float shadowMapSize;
-		SimpleVertexShader* shadowShader;
+private:
+	void LoadShaders();
+	void CreateMatrces();
+	void CreateBasicGeometry();
+	void CreateAllMaps();
 
-		//cube map
-		CubeMap* cubeMap;
+	POINT prevMousePos;
 
-		//PBR textures
-		ID3D11ShaderResourceView* roughnessMap;
-		ID3D11ShaderResourceView* metalnessMap;
+	f32 camX;
+	f32 camY;
+
+	SimpleVertexShader* vsZPrepass;
+	SimpleVertexShader* vertexShader;
+	SimplePixelShader* pixelShader;
+	SimplePixelShader* pixelShaderPBR;
+
+	ID3D11DepthStencilState* zPrepassDepthStencilState;
+
+	Material* pbrMaterial;
+
+	Mesh* sphereMesh;
+	Mesh* cubeMesh;
+
+	ID3D11SamplerState* sampler;
+	D3D11_SAMPLER_DESC samplerDesc;
+
+	ID3D11ShaderResourceView* texture;
+	ID3D11ShaderResourceView* normalMap;
+
+	DirectionalLight* directionalLight;
+	GameObject* camera;
+	GameObject* go1;
+	GameObject* go2;
+	GameObject* go4;
+	GameObject* go5;
+	GameObject* go6;
+	GameObject* go7;
+	GameObject* go9;
+	GameObject* go10;
+
+	//Barrier frameBarrier;
+
+
+	//final shadow map
+	ShadowMap* shadow;
+	D3D11_VIEWPORT shadowViewport;
+	float shadowMapSize;
+	SimpleVertexShader* shadowShader;
+
+	//cube map
+	CubeMap* cubeMap;
+
+	//PBR textures
+	ID3D11ShaderResourceView* roughnessMap;
+	ID3D11ShaderResourceView* metalnessMap;
 
 		
-	public:
-		//static Material* greenMaterial;
-		//static Material* redMaterial;
-	};
-}
+public:
+	//static Material* greenMaterial;
+	//static Material* redMaterial;
+};

@@ -4,7 +4,8 @@
 
 using namespace DimEngine;
 
-class CameraController : public GameComponent
+
+class __declspec(dllexport) CameraController : public GameComponent
 {
 private:
 	//float yRot;

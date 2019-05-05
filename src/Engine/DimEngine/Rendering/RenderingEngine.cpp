@@ -4,8 +4,37 @@
 #include "RenderingEngine.h"
 #include "SimpleShader.h"
 
-DimEngine::Rendering::RenderingEngine* DimEngine::Rendering::RenderingEngine::singleton = nullptr;
 
+RenderingEngine* DimEngine::Rendering::RenderingEngine::GetSingleton()
+{
+	return singleton;
+}
+
+void DimEngine::Rendering::RenderingEngine::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
+{
+	if (!singleton)
+	{
+		RenderingEngineConfig config;
+		config.device = device;
+		config.deviceContext = deviceContext;
+
+		singleton = new RenderingEngine(config);
+	}
+}
+
+void DimEngine::Rendering::RenderingEngine::Initialize(RenderingEngineConfig config)
+{
+	if (!singleton)
+		singleton = new RenderingEngine(config);
+}
+
+void DimEngine::Rendering::RenderingEngine::Terminate()
+{
+	if (singleton)
+		delete singleton;
+}
+
+DimEngine::Rendering::RenderingEngine* DimEngine::Rendering::RenderingEngine::singleton = nullptr;
 
 DimEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig config) : materialAllocator(config.maxNumMeshes), meshAllocator(config.maxNumMeshes), renderableAllocator(config.initialNumRenderables), viewerAllocator(config.initialNumRenderables), lightSourceAllocator(config.initialNumLightSources)
 {

@@ -18,7 +18,7 @@ using namespace DimEngine::Rendering;
 //Material* DimEngine::Game::greenMaterial = nullptr;
 //Material* DimEngine::Game::redMaterial = nullptr;
 
-DimEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720, true)
+Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720, true)
 {
 	vertexShader = nullptr;
 	pixelShader = nullptr;
@@ -68,7 +68,7 @@ DimEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name,
 #endif
 }
 
-DimEngine::Game::~Game() {
+Game::~Game() {
 	if (vertexShader)
 		delete vertexShader;
 
@@ -129,7 +129,7 @@ DimEngine::Game::~Game() {
 	RenderingEngine::Terminate();
 }
 
-void DimEngine::Game::Init()
+void Game::Init()
 {
 	PhysicsEngine::Initialize();
 	RenderingEngine::Initialize(device, context);
@@ -145,7 +145,7 @@ void DimEngine::Game::Init()
 	camY = 0;
 }
 
-void DimEngine::Game::LoadShaders()
+void Game::LoadShaders()
 {
 	char buffer[MAX_PATH];
 	GetModuleFileName(NULL, buffer, MAX_PATH);
@@ -182,7 +182,7 @@ void DimEngine::Game::LoadShaders()
 	device->CreateDepthStencilState(&depthStencilDesc, &zPrepassDepthStencilState);
 }
 
-void DimEngine::Game::CreateAllMaps()
+void Game::CreateAllMaps()
 {
 	//shadow map setup
 	shadow->setUp(device);
@@ -199,12 +199,12 @@ void DimEngine::Game::CreateAllMaps()
 	//end of cube map
 }
 
-void DimEngine::Game::CreateMatrces()
+void Game::CreateMatrces()
 {
 
 }
 
-void DimEngine::Game::CreateBasicGeometry()
+void Game::CreateBasicGeometry()
 {
 	device->CreateSamplerState(&samplerDesc, &sampler);
 
@@ -323,14 +323,14 @@ void DimEngine::Game::CreateBasicGeometry()
 	go12->AddComponent<Renderer>(pbrMaterial, sphereMesh);
 }
 
-void DimEngine::Game::OnResize()
+void Game::OnResize()
 {
 	DXCore::OnResize();
 
 	Global::SetScreenRatio((float)width / height);
 }
 
-void DimEngine::Game::Update()
+void Game::Update()
 {
 	while (isRunning)
 	{
@@ -382,7 +382,7 @@ void DimEngine::Game::Update()
 	}
 }
 
-void DimEngine::Game::Draw()
+void Game::Draw()
 {
 	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
 
@@ -443,7 +443,7 @@ void DimEngine::Game::Draw()
 // from the OS-level messages anyway, so these helpers have
 // been created to provide basic mouse input if you want it.
 // --------------------------------------------------------
-void DimEngine::Game::OnMouseDown(WPARAM buttonState, int x, int y)
+void Game::OnMouseDown(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
 
@@ -460,7 +460,7 @@ void DimEngine::Game::OnMouseDown(WPARAM buttonState, int x, int y)
 // --------------------------------------------------------
 // Helper method for mouse release
 // --------------------------------------------------------
-void DimEngine::Game::OnMouseUp(WPARAM buttonState, int x, int y)
+void Game::OnMouseUp(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
 
@@ -474,7 +474,7 @@ void DimEngine::Game::OnMouseUp(WPARAM buttonState, int x, int y)
 // if the mouse is currently over the window, or if we're 
 // currently capturing the mouse.
 // --------------------------------------------------------
-void DimEngine::Game::OnMouseMove(WPARAM buttonState, int x, int y)
+void Game::OnMouseMove(WPARAM buttonState, int x, int y)
 {
 	if (buttonState & 0x0002)
 	{
@@ -495,7 +495,7 @@ void DimEngine::Game::OnMouseMove(WPARAM buttonState, int x, int y)
 // WheelDelta may be positive or negative, depending 
 // on the direction of the scroll
 // --------------------------------------------------------
-void DimEngine::Game::OnMouseWheel(float wheelDelta, int x, int y)
+void Game::OnMouseWheel(float wheelDelta, int x, int y)
 {
 	// Add any custom code here...
 }
