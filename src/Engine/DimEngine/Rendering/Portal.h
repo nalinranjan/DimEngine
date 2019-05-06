@@ -38,6 +38,7 @@ public:
 	void SetMainCamera(Camera* camera);
 	void SetViewCamera(Camera* camera);
 	void SetExit(Portal* portal);
+	void SetViewClipPlane();
 	
 	//static void Connect(Portal* a, Portal* b);
 	//static void Connect(Warp& a, Warp& b);

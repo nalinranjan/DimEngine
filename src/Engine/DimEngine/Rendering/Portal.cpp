@@ -36,9 +36,27 @@ __inline void Portal::SetMainCamera(Camera* camera)
 __inline void Portal::SetViewCamera(Camera* camera)
 {
 	viewCamera = camera;
+	SetViewClipPlane();
 }
 
 __inline void Portal::SetExit(Portal * portal)
 {
 	exit = portal;
+}
+
+void Portal::SetViewClipPlane()
+{
+	if (!exit || !viewCamera)
+		return;
+
+	//XMVECTOR normal = XMVector3Rotate({ 0, 0, 1 }, exit->GetGameObject()->GetRotation());
+	XMVECTOR normal = exit->GetGameObject()->GetForwardVector();
+
+	//XMFLOAT4 clipPlane;
+	//XMStoreFloat4(&clipPlane, normal);
+
+	//clipPlane.w = -XMVectorGetX(XMVector3Dot(normal, exit->GetGameObject()->GetPosition()));
+
+	//viewCamera->SetClipPlane(clipPlane);
+	viewCamera->SetClipPlane(normal, exit->GetGameObject()->GetPosition());
 }

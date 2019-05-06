@@ -16,6 +16,8 @@ DimEngine::Camera::Camera()
 
 	viewer = null_index;
 
+	useClipPlane = false;
+
 	RenderingEngine::GetSingleton()->AddCamera(this);
 }
 
@@ -50,6 +52,34 @@ void DimEngine::Camera::SetNearZ(f32 value)
 void DimEngine::Camera::SetFarZ(f32 value)
 {
 	farZ = value;
+}
+
+bool DimEngine::Camera::UseClipPlane() const
+{
+	return useClipPlane;
+}
+
+void DimEngine::Camera::SetClipPlane(XMVECTOR normal, XMVECTOR position, bool usePlane)
+{
+	clipPlaneNorm = normal;
+	clipPlanePos = position;
+	useClipPlane = usePlane;
+}
+
+//void DimEngine::Camera::SetClipPlane(XMFLOAT4 plane, bool usePlane)
+//{
+//	clipPlane = plane;
+//	useClipPlane = usePlane;
+//}
+
+//XMFLOAT4 DimEngine::Camera::GetClipPlane() const
+//{
+//	return clipPlane;
+//}
+
+std::pair<XMVECTOR, XMVECTOR> DimEngine::Camera::GetClipPlane() const
+{
+	return std::make_pair(clipPlaneNorm, clipPlanePos);
 }
 
 void DimEngine::Camera::RenderToRenderTarget(ID3D11DeviceContext* context)

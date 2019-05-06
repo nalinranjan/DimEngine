@@ -254,19 +254,11 @@ void Game::CreateScene()
 	grassTexture = new Texture((wchar_t*)L"../Assets/Textures/checkered-ground.png", D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_MIN_MAG_MIP_POINT, D3D11_FLOAT32_MAX, device, context);
 	wallTexture = new Texture((wchar_t*)L"../Assets/Textures/wall.jpg", D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_ANISOTROPIC, D3D11_FLOAT32_MAX, device, context);
 	rockTexture = new Texture((wchar_t*)L"../Assets/Textures/rock.jpg", D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_ANISOTROPIC, D3D11_FLOAT32_MAX, device, context);
-	//portalTexture1 = new RenderTexture(device, 1280u, 720u);
-	//portalTexture2 = new RenderTexture(device, 1280u, 720u);
-	//portalTexture3 = new RenderTexture(device, 1280u, 720u);
-	//portalTexture4 = new RenderTexture(device, 1280u, 720u);
 
 	grassMaterial = new Material(vertexShader, pixelShader, grassTexture->GetResourceView(), grassTexture->GetSamplerState());
 	wallMaterial = new Material(vertexShader, pixelShader, wallTexture->GetResourceView(), wallTexture->GetSamplerState());
 	rockMaterial = new Material(vertexShader, pixelShader, rockTexture->GetResourceView(), rockTexture->GetSamplerState());
 	portalMaterial = new Material(vsPortal, psPortal, nullptr, nullptr);
-	//portalMaterial1 = new Material(vsPortal, psPortal, portalTexture1->GetResourceView(), portalTexture1->GetSamplerState());
-	//portalMaterial2 = new Material(vsPortal, psPortal, portalTexture2->GetResourceView(), portalTexture2->GetSamplerState());
-	//portalMaterial3 = new Material(vsPortal, psPortal, portalTexture3->GetResourceView(), portalTexture3->GetSamplerState());
-	//portalMaterial4 = new Material(vsPortal, psPortal, portalTexture4->GetResourceView(), portalTexture4->GetSamplerState());
 	
 	GameObject* directionalLightObject = new GameObject();
 	directionalLightObject->SetRotation(45, 0, 0);
@@ -287,19 +279,15 @@ void Game::CreateScene()
 	camera = go->AddComponent<Camera>();
 
 	portalCamera1 = (new GameObject())->AddComponent<Camera>();
-	//portalCamera1->SetRenderTexture(portalTexture1);
 	portalCamera1->SetRatio((float)width / height);
 
 	portalCamera2 = (new GameObject())->AddComponent<Camera>();
-	//portalCamera2->SetRenderTexture(portalTexture2);
 	portalCamera2->SetRatio((float)width / height);
 
 	portalCamera3 = (new GameObject())->AddComponent<Camera>();
-	//portalCamera3->SetRenderTexture(portalTexture3);
 	portalCamera3->SetRatio((float)width / height);
 
 	portalCamera4 = (new GameObject())->AddComponent<Camera>();
-	//portalCamera4->SetRenderTexture(portalTexture3);
 	portalCamera4->SetRatio((float)width / height);
 
 	portal1 = __CreatePortal(portalMaterial, -15, 0, 0, 0, 0, 0);
