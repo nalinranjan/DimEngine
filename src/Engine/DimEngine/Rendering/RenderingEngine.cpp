@@ -242,13 +242,16 @@ void DimEngine::Rendering::RenderingEngine::UpdateViewers()
 
 			//	viewer.projectionMatrix.r[2] = clipPlane;
 			//}
+
 			if (camera->UseClipPlane())
 			{
 				auto clipPlane = camera->GetClipPlane();
 				XMVECTOR normal = clipPlane.first;
 				XMVECTOR pos = clipPlane.second;
 
-				normal = XMVector3Transform(normal, viewer.viewMatrix);
+				//normal = XMVector3NormalizeEst(XMVector3Transform(normal, viewer.viewMatrix));
+				normal = XMVector3NormalizeEst(XMVector3Transform(normal, 
+					XMMatrixTranspose(XMMatrixInverse(nullptr, viewer.viewMatrix))));
 				pos = XMVector3Transform(pos, viewer.viewMatrix);
 
 				XMFLOAT3 cnorm;
@@ -259,18 +262,19 @@ void DimEngine::Rendering::RenderingEngine::UpdateViewers()
 				XMFLOAT4X4 projection;
 				XMStoreFloat4x4(&projection, viewer.projectionMatrix);
 
-				/*XMVECTOR q = XMVectorSet(
-					(sgn(clip.x) - projection._13) / projection._11, 
-					(sgn(clip.y) - projection._23) / projection._22,
-					1.0f, 
-					(1.0f - projection._33) / projection._34
-				);*/
+				//XMVECTOR q = XMVectorSet(
+				//	(sgn(XMVectorGetX(plane)) + projection._13) / projection._11,
+				//	(sgn(XMVectorGetY(plane)) + projection._23) / projection._22,
+				//	1.0f,
+				//	(1.0f + projection._33) / projection._34
+				//);
 				XMVECTOR q = XMVectorSet(
-					(sgn(XMVectorGetX(plane)) + projection._13) / projection._11,
-					(sgn(XMVectorGetY(plane)) + projection._23) / projection._22,
+					-sgn(XMVectorGetX(plane)),
+					-sgn(XMVectorGetY(plane)),
 					-1.0f,
-					(1.0f + projection._33) / projection._34
+					1.0f
 				);
+				q = XMVector4Transform(q, XMMatrixInverse(nullptr, viewer.projectionMatrix));
 
 				plane *= (1.0f / XMVectorGetX(XMVector4Dot(plane, q)));
 

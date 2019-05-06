@@ -56,7 +56,9 @@ void Portal::SetViewClipPlane()
 	//XMStoreFloat4(&clipPlane, normal);
 
 	//clipPlane.w = -XMVectorGetX(XMVector3Dot(normal, exit->GetGameObject()->GetPosition()));
+	XMVECTOR position = exit->GetGameObject()->GetPosition();
+	position = XMVectorSetW(position, 1.0f);
 
 	//viewCamera->SetClipPlane(clipPlane);
-	viewCamera->SetClipPlane(normal, exit->GetGameObject()->GetPosition());
+	viewCamera->SetClipPlane(normal, position);
 }
