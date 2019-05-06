@@ -348,6 +348,10 @@ void Game::CreateScene()
 	tunnel2->SetLocalScale(2, 2, 10);
 	tunnel2->AddComponent<Renderer>(rockMaterial, tunnelMesh);
 
+	cube = new GameObject();
+	cube->SetPosition(-15, 0, -1);
+	cube->AddComponent<Renderer>(grassMaterial, cubeMesh);
+
 }
 
 __forceinline Portal* Game::__CreatePortal(Material* material, f32 x, f32 y, f32 z, f32 rx, f32 ry, f32 rz)
