@@ -24,7 +24,7 @@ namespace DimEngine
 			ID3D11Buffer* vertexBuffer;
 			ID3D11Buffer* indexBuffer;
 			i32 indicesNum;
-
+			void ComputeTangent(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber);
 
 		public:
 			Mesh(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber, ID3D11Device* device);

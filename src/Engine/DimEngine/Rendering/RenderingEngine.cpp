@@ -28,6 +28,13 @@ DimEngine::Rendering::RenderingEngine::RenderingEngine(i32 maxNumMaterials, i32 
 	rendererList = nullptr;
 	cameraList = nullptr;
 	lightList = nullptr;
+	shadow = nullptr;
+
+	XMMATRIX shadowView = XMMatrixTranspose(XMMatrixLookToLH(XMVectorSet(0, 10, 0, 0), XMVectorSet(0, -1, 1, 0), XMVectorSet(0, 0, 1, 0)));
+	XMMATRIX shadowProjection = XMMatrixTranspose(XMMatrixOrthographicLH(100, 100, 0.1f, 100));
+
+	XMStoreFloat4x4(&shadowViewProjectionMat, XMMatrixMultiply(shadowProjection, shadowView));
+
 
 	//D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
 	//depthStencilDesc.DepthEnable = true;
@@ -279,23 +286,43 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 		Material* material = renderableAllocator[j].material;
 		SimpleVertexShader* vertexShader = material->GetVertexShader();
 		SimplePixelShader* pixelShader = material->GetPixelShader();
-		std::unordered_map<std::string, std::pair<const void*, unsigned int>> pixelShaderData = material->GetPixelShaderData();
+		//std::unordered_map<std::string, std::pair<const void*, unsigned int>> pixelShaderData = material->GetPixelShaderData();
 
 		pixelShader->SetShader();
 
 		pixelShader->SetData("light", lightSourceAllocator.GetMemoryAddress(), sizeof(LightSource));
 		pixelShader->SetFloat4("cameraPosition", cameraPosition);
 
-		// Set up all data on pixel shader
-		for (auto it = pixelShaderData.begin(); it != pixelShaderData.end(); ++it) {
+		 //Set up all data on pixel shader
+		/*for (auto it = pixelShaderData.begin(); it != pixelShaderData.end(); ++it) {
 			pixelShader->SetData(it->first, it->second.first, it->second.second);
-		}
+		}*/
 
 		if (material->getTexture())
 		{
 			pixelShader->SetShaderResourceView("TexAlbedo", material->getTexture());
 			pixelShader->SetSamplerState("Sampler", material->getSampler());
+			
 		}
+
+		if (material->HasNormalMap()) {
+			pixelShader->SetShaderResourceView("normalMap", material->getNormalMap());
+		}
+
+		if (material->HasMetalnessMap()) {
+			pixelShader->SetShaderResourceView("metalnessMap", material->getMetalnessMap());
+		}
+
+		if (material->HasRoughnessMap()) {
+			pixelShader->SetShaderResourceView("roughnessMap", material->getRoughnessMap());
+		}
+
+		pixelShader->SetInt("hasNormalMap", material->HasNormalMap());
+
+		bool isOK = pixelShader->SetShaderResourceView("ShadowMap", shadow->getShadowSRV());
+		//if (!isOK) printf("shadowMap not imported.\n");
+		isOK = pixelShader->SetSamplerState("shadowSampler", shadow->getSampler());
+		//if (!isOK) printf("Shadow sampler not loaded.\n");
 
 		pixelShader->CopyAllBufferData();
 		
@@ -307,7 +334,7 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 		{
 			Renderable& renderable = renderableAllocator[j];
 
-			std::unordered_map<std::string, std::pair<const void*, unsigned int>> vertexShaderData = material->GetVertexShaderData();
+			//std::unordered_map<std::string, std::pair<const void*, unsigned int>> vertexShaderData = material->GetVertexShaderData();
 			vertexShader->SetShader();
 
 			vertexShader->SetMatrix4x4("view", viewMatrix);
@@ -316,9 +343,9 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 			vertexShader->SetMatrix4x4("world", renderable.worldMatrix);
 
 			// Set up all data on vertex shader
-			for (auto it = vertexShaderData.begin(); it != vertexShaderData.end(); ++it) {
+			/*for (auto it = vertexShaderData.begin(); it != vertexShaderData.end(); ++it) {
 				vertexShader->SetData(it->first, it->second.first, it->second.second);
-			}
+			}*/
 
 			vertexShader->CopyAllBufferData();
 
@@ -338,4 +365,65 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 			++j;
 		} while (j < J && renderableAllocator[j].material == material);
 	}
+}
+
+void DimEngine::Rendering::RenderingEngine::setShadow(ShadowMap * _shadow)
+{
+	shadow = _shadow;
+}
+
+
+
+bool DimEngine::Rendering::RenderingEngine::RenderShadowMap(ID3D11DeviceContext* deviceContext)
+{
+	deviceContext->OMSetRenderTargets(0, nullptr, shadow->getShadowDSV());
+	deviceContext->ClearDepthStencilView(shadow->getShadowDSV(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	deviceContext->RSSetState(shadow->getRasterizerState());
+
+	SimpleVertexShader* shader = shadow->getShadowShader();
+	//SimpleVertexShader* shader = shadow->getShadowShader();
+
+	shader->SetShader();
+
+	deviceContext->PSSetShader(0, 0, 0);
+
+	i32 j = 0;
+
+	while (j < renderableAllocator.GetNumAllocated())
+	{
+		Renderable& renderable = renderableAllocator[j];
+
+		bool isOK = shader->SetMatrix4x4("viewProjection", shadowViewProjectionMat);
+		//bool isOK = shader->SetMatrix4x4("shadowView", shadowViewProjectionMat);
+		//if (!isOK) printf("shadow view matrix error\n");
+
+		//isOK = shader->SetMatrix4x4("shadowProjection", shdaowProjectionMat);
+		//if (!isOK) printf("shadow projection matrix error");
+
+		isOK = shader->SetMatrix4x4("world", renderable.worldMatrix);
+		//if (!isOK) printf("world matrix in shadow map error\n");
+
+		shader->CopyAllBufferData();
+
+		Mesh* mesh = renderable.mesh;
+
+		ID3D11Buffer* vertexBuffer = mesh->GetVertexBuffer();
+		ID3D11Buffer* indexBuffer = mesh->GetIndexBuffer();
+
+		UINT stride = sizeof(Vertex);
+		UINT offset = 0;
+		UINT indexCount = 0;
+
+		deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		deviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		deviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		deviceContext->DrawIndexed(mesh->GetIndexCount(), 0, 0);
+
+		indexCount += mesh->GetIndexCount();
+
+		++j;
+	}
+
+	return true;
 }

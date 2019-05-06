@@ -15,6 +15,7 @@
 #include "Renderable.h"
 #include "Renderer.h"
 #include "Viewer.h"
+#include "ShadowMap.h"
 
 using namespace DimEngine;
 using namespace DimEngine::Memory;
@@ -52,6 +53,10 @@ namespace DimEngine
 			Camera* cameraList;
 			Light* lightList;
 
+			ShadowMap* shadow;
+
+			XMFLOAT4X4 shadowViewProjectionMat;
+
 			//SimpleVertexShader* vsZPrepass;
 			//ID3D11DepthStencilState* zPrepassDepthState;
 
@@ -81,7 +86,9 @@ namespace DimEngine
 			void UpdateGlobalData(float screenWidth, float screenHeight);
 			void PerformZPrepass(SimpleVertexShader* shader, ID3D11DeviceContext* context);
 			void DrawForward(ID3D11DeviceContext* context);
+			bool RenderShadowMap(ID3D11DeviceContext* context);
 			void DrawForward(ID3D11DeviceContext* context, Camera* camera);
+			void setShadow(ShadowMap* _shadow);
 		};
 	}
 }

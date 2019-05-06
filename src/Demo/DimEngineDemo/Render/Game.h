@@ -16,6 +16,7 @@
 #include "Core/ResourceManager.h"
 
 #include "DXCore.h"
+#include "Rendering/ShadowMap.h"
 
 //using namespace Colliders;
 using namespace DimEngine::Rendering;
@@ -99,6 +100,26 @@ private:
 	GameObject* cube;
 	GameObject* tunnel1;
 	GameObject* tunnel2;
+
+	ID3D11ShaderResourceView* texture;
+	ID3D11ShaderResourceView* normalMap;
+
+	ID3D11SamplerState* sampler;
+	D3D11_SAMPLER_DESC samplerDesc;
+
+	ShadowMap* shadow;
+
+	SimpleVertexShader* shadowShader;
+
+	D3D11_VIEWPORT shadowViewport;
+	float shadowMapSize;
+
+	ID3D11ShaderResourceView* metalnessMap;
+	ID3D11ShaderResourceView* roughnessMap;
+
+	SimplePixelShader* psPBR;
+
+
 
 
 	ID3D11DepthStencilState* zPrepassDepthStencilState;

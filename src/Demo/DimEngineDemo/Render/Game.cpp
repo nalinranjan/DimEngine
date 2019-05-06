@@ -70,6 +70,35 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 
 	zPrepassDepthStencilState = nullptr;
 
+	texture = nullptr;
+	normalMap = nullptr;
+
+	sampler = 0;
+	shadow = new ShadowMap();
+	shadowShader = 0;
+
+	samplerDesc = {};
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	samplerDesc.MaxAnisotropy = 16;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	shadowMapSize = 1024;
+
+	shadowViewport = {};
+	shadowViewport.Height = shadowMapSize;
+	shadowViewport.Width = shadowMapSize;
+	shadowViewport.MinDepth = 0.f;
+	shadowViewport.MaxDepth = 1.f;
+	shadowViewport.TopLeftX = 0;
+	shadowViewport.TopLeftY = 0;
+
+	roughnessMap = 0;
+	metalnessMap = 0;
+	psPBR = 0;
+
 
 	Global::SetScreenRatio(1280.0f / 720.0f);
 
@@ -137,6 +166,22 @@ Game::~Game()
 	if (zPrepassDepthStencilState)
 		zPrepassDepthStencilState->Release();
 
+	if (texture)
+		texture->Release();
+
+	if (normalMap)
+		normalMap->Release();
+
+	if (shadow) delete shadow;
+
+	if (shadowShader) delete shadowShader;
+
+	if (metalnessMap) metalnessMap->Release();
+
+	if (roughnessMap) roughnessMap->Release();
+
+	if (psPBR) delete psPBR;
+
 
 	Scene::UnloadAll();
 
@@ -183,6 +228,14 @@ void Game::LoadShaders()
 	psPortal = new SimplePixelShader(device, context);
 	psPortal->LoadShaderFile((wpath + std::wstring(L"/ps_portal.cso")).c_str());
 
+	shadowShader = new SimpleVertexShader(device, context);
+	bool isOK = shadowShader->LoadShaderFile((wpath + std::wstring(L"/shadowVS.cso")).c_str());
+	if (!isOK) printf("shadow shader not loaded.\n");
+
+	psPBR = new SimplePixelShader(device, context);
+	psPBR->LoadShaderFile((wpath + std::wstring(L"/PixelShaderPBR.cso")).c_str());
+	if (!isOK) printf("pbr ps not loaded.\n");
+
 
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
 	depthStencilDesc.DepthEnable = true;
@@ -216,6 +269,35 @@ void Game::CreateScene()
 	portalMaterial2 = new Material(vsPortal, psPortal, portalTexture2->GetResourceView(), portalTexture2->GetSamplerState());
 	portalMaterial3 = new Material(vsPortal, psPortal, portalTexture3->GetResourceView(), portalTexture3->GetSamplerState());
 	portalMaterial4 = new Material(vsPortal, psPortal, portalTexture4->GetResourceView(), portalTexture4->GetSamplerState());
+
+	//test for pbr
+	device->CreateSamplerState(&samplerDesc, &sampler);
+
+	HRESULT isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/floor_albedo.png", 0, &texture);
+	if (FAILED(isok)) printf("load albedo texture error\n");
+
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/floor_normals.png", 0, &normalMap);
+	if (FAILED(isok)) printf("load normal map error\n");
+
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/floor_roughness.png", 0, &roughnessMap);
+	if (FAILED(isok)) printf("load roughnessmap error\n");
+
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/floor_metal.png", 0, &metalnessMap);
+	if (FAILED(isok)) printf("load metalnessmap error\n");
+
+	Material* pbrMaterial = new Material(vertexShader, psPBR, texture ,sampler);
+	pbrMaterial->setTexture(texture);
+	pbrMaterial->setMetalnessMap(metalnessMap);
+	pbrMaterial->setRoughnessMap(roughnessMap);
+	//pbrMaterial.setMetalnessMap(metalnessMap);
+	pbrMaterial->setNormalMap(normalMap);
+	//pbrMaterial.setRoughnessMap(roughnessMap);
+
+	shadow->setUp(device);
+	shadow->setShader(shadowShader);
+	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
+	renderingEngine->setShadow(shadow);
+	//
 	
 	GameObject* directionalLightObject = new GameObject();
 	directionalLightObject->SetRotation(45, 0, 0);
@@ -344,10 +426,10 @@ void Game::CreateScene()
 
 
 	GameObject* triggerBox = new GameObject();
-	triggerBox->SetPosition(-4, -2, 2);
+	triggerBox->SetPosition(-4, 0, 2);
 	triggerBox->SetLocalScale(2, 2, 2);
 	triggerBox->AddComponent<BoxCollider>(XMVECTOR{ 3, 3, 3}, XMVECTOR{ 0,0,0 });
-	triggerBox->AddComponent<Renderer>(rockMaterial, cubeMesh);
+	triggerBox->AddComponent<Renderer>(pbrMaterial, cubeMesh);
 	triggerBox->AddTag("TriggerBox");
 
 	GameObject* panel = new GameObject();
@@ -439,12 +521,28 @@ void Game::Draw(float deltaTime, float totalTime)
 	context->ClearRenderTargetView(backBufferRTV, color);
 	context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	
+	shadowViewport.Height = shadowMapSize;
+	shadowViewport.Width = shadowMapSize;
+	context->RSSetViewports(1, &shadowViewport);
+
+	renderingEngine->RenderShadowMap(context);
+
+	context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
+
+	shadowViewport.Width = (float)width;
+	shadowViewport.Height = (float)height;
+
+	context->RSSetViewports(1, &shadowViewport);
+	context->RSSetState(0);
+
 	//renderingEngine->PerformZPrepass(vsZPrepass, context);
 
 	//context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
 	renderingEngine->DrawForward(context);
 	//context->OMSetDepthStencilState(nullptr, 0);
+
+	ID3D11ShaderResourceView* noSRV[16] = {};
+	context->PSSetShaderResources(0, 16, noSRV);
 
 	swapChain->Present(0, 0);
 }
