@@ -98,7 +98,7 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	roughnessMap = 0;
 	metalnessMap = 0;
 	psPBR = 0;
-
+	cubeMap = new CubeMap();
 
 	Global::SetScreenRatio(1280.0f / 720.0f);
 
@@ -182,6 +182,7 @@ Game::~Game()
 
 	if (psPBR) delete psPBR;
 
+	if (cubeMap) delete cubeMap;
 
 	Scene::UnloadAll();
 
@@ -235,6 +236,9 @@ void Game::LoadShaders()
 	psPBR = new SimplePixelShader(device, context);
 	psPBR->LoadShaderFile((wpath + std::wstring(L"/PixelShaderPBR.cso")).c_str());
 	if (!isOK) printf("pbr ps not loaded.\n");
+
+	cubeMap->setPS(device, context, (wpath + std::wstring(L"/cubePS.cso")).c_str());
+	cubeMap->setVS(device, context, (wpath + std::wstring(L"/cubeVS.cso")).c_str());
 
 
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
@@ -297,6 +301,11 @@ void Game::CreateScene()
 	shadow->setShader(shadowShader);
 	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
 	renderingEngine->setShadow(shadow);
+
+	cubeMap->setUp(device);
+	cubeMap->setMesh(cubeMesh);
+	cubeMap->setSampler(sampler);
+	cubeMap->setSRV(device, context, L"../Assets/Textures/CubeMaps/Skybox1.dds");
 	//
 	
 	GameObject* directionalLightObject = new GameObject();
@@ -540,6 +549,8 @@ void Game::Draw(float deltaTime, float totalTime)
 	//context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
 	renderingEngine->DrawForward(context);
 	//context->OMSetDepthStencilState(nullptr, 0);
+
+	//renderingEngine->RenderCubeMap(context, cubeMap);
 
 	ID3D11ShaderResourceView* noSRV[16] = {};
 	context->PSSetShaderResources(0, 16, noSRV);

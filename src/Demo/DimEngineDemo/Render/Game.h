@@ -17,6 +17,7 @@
 
 #include "DXCore.h"
 #include "Rendering/ShadowMap.h"
+#include "Rendering/CubeMap.h"
 
 //using namespace Colliders;
 using namespace DimEngine::Rendering;
@@ -118,6 +119,8 @@ private:
 	ID3D11ShaderResourceView* roughnessMap;
 
 	SimplePixelShader* psPBR;
+
+	CubeMap* cubeMap;
 
 
 

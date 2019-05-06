@@ -183,6 +183,9 @@
     <ClInclude Include="Rendering\ShadowMap.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="Rendering\CubeMap.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -263,6 +266,9 @@
     <ClCompile Include="Rendering\ShadowMap.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="Rendering\CubeMap.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Rendering\Shaders\PixelShader.hlsl">
@@ -284,6 +290,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Rendering\Shaders\PixelShaderPBR.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Rendering\Shaders\cubePS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Rendering\Shaders\cubeVS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

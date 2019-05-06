@@ -187,6 +187,7 @@
     <ClInclude Include="Physics\RigidBody.h" />
     <ClInclude Include="Physics\SphereCollider.h" />
     <ClInclude Include="Rendering\Camera.h" />
+    <ClInclude Include="Rendering\CubeMap.h" />
     <ClInclude Include="Rendering\LightSource.h" />
     <ClInclude Include="Rendering\ShadowMap.h" />
     <ClInclude Include="Rendering\Texture.h" />
@@ -221,6 +222,7 @@
     <ClCompile Include="Physics\RigidBody.cpp" />
     <ClCompile Include="Physics\SphereCollider.cpp" />
     <ClCompile Include="Rendering\Camera.cpp" />
+    <ClCompile Include="Rendering\CubeMap.cpp" />
     <ClCompile Include="Rendering\Light.cpp" />
     <ClCompile Include="Rendering\Renderer.cpp" />
     <ClCompile Include="Rendering\Material.cpp" />
@@ -231,6 +233,12 @@
     <ClCompile Include="Rendering\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Rendering\Shaders\cubePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Rendering\Shaders\cubeVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="Rendering\Shaders\PixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>

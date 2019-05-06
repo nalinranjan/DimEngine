@@ -16,6 +16,7 @@
 #include "Renderer.h"
 #include "Viewer.h"
 #include "ShadowMap.h"
+#include "CubeMap.h"
 
 using namespace DimEngine;
 using namespace DimEngine::Memory;
@@ -89,6 +90,7 @@ namespace DimEngine
 			bool RenderShadowMap(ID3D11DeviceContext* context);
 			void DrawForward(ID3D11DeviceContext* context, Camera* camera);
 			void setShadow(ShadowMap* _shadow);
+			void RenderCubeMap(ID3D11DeviceContext* deviceContext, CubeMap* cubeMap);
 		};
 	}
 }

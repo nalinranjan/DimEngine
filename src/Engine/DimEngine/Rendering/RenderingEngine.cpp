@@ -30,7 +30,7 @@ DimEngine::Rendering::RenderingEngine::RenderingEngine(i32 maxNumMaterials, i32 
 	lightList = nullptr;
 	shadow = nullptr;
 
-	XMMATRIX shadowView = XMMatrixTranspose(XMMatrixLookToLH(XMVectorSet(0, 10, 0, 0), XMVectorSet(0, -1, 1, 0), XMVectorSet(0, 0, 1, 0)));
+	XMMATRIX shadowView = XMMatrixTranspose(XMMatrixLookToLH(XMVectorSet(0, 10, 0, 0), XMVectorSet(0, 1, -1, 0), XMVectorSet(0, 0, 1, 0)));
 	XMMATRIX shadowProjection = XMMatrixTranspose(XMMatrixOrthographicLH(100, 100, 0.1f, 100));
 
 	XMStoreFloat4x4(&shadowViewProjectionMat, XMMatrixMultiply(shadowProjection, shadowView));
@@ -426,4 +426,38 @@ bool DimEngine::Rendering::RenderingEngine::RenderShadowMap(ID3D11DeviceContext*
 	}
 
 	return true;
+}
+
+void DimEngine::Rendering::RenderingEngine::RenderCubeMap(ID3D11DeviceContext* deviceContext, CubeMap* cubeMap)
+{
+	ID3D11Buffer* cubeVB = cubeMap->getVB();
+	ID3D11Buffer* cubeIB = cubeMap->getIB();
+
+	u32 stride = sizeof(Vertex);
+	u32 offset = 0;
+
+	deviceContext->IASetVertexBuffers(0, 1, &cubeVB, &stride, &offset);
+	deviceContext->IASetIndexBuffer(cubeIB, DXGI_FORMAT_R32_UINT, 0);
+
+	Viewer& viewer = viewerAllocator[cameraList->viewer];
+
+	XMMATRIX viewMatrix = viewer.viewMatrix;
+	XMMATRIX projectionMatrix = viewer.projectionMatrix;
+
+	SimpleVertexShader* cubeVS = cubeMap->getVS();
+	SimplePixelShader* cubePS = cubeMap->getPS();
+
+	cubeVS->SetMatrix4x4("view", viewMatrix);
+	cubeVS->SetMatrix4x4("projection", projectionMatrix);
+	cubeVS->CopyAllBufferData();
+	cubeVS->SetShader();
+
+	cubePS->SetShaderResourceView("cubeTexture", cubeMap->getSRV());
+	cubePS->SetSamplerState("basicSampler", cubeMap->getSampler());
+	cubePS->SetShader();
+
+	deviceContext->RSSetState(cubeMap->getRS());
+	deviceContext->OMSetDepthStencilState(cubeMap->getDSS(), 0);
+
+	deviceContext->DrawIndexed(cubeMap->getIndexCount(), 0, 0);
 }
