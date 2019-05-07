@@ -403,7 +403,7 @@ void Game::CreateScene()
 	GameObject* directionalLightObject = new GameObject();
 	directionalLightObject->SetRotation(45, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
-
+	directionalLightObject->GetComponent<DirectionalLight>()->SetAmbientColor(0.02,0.01,0.02);
 
 	cameraObject = new GameObject();
 	cameraObject->SetRotation(camRotX, camRotY, 0);

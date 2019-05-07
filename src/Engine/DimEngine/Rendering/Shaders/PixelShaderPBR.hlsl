@@ -132,7 +132,7 @@ float3 MicrofacetBRDF(float3 n, float3 wi, float3 wo, float roughness, float met
 }
 
 //function to calculate directional light pbr
-float3 directionalLightPBR(float3 normal, float3 wo, float3 wi, float roughness, float metalness, float3 surfaceColor, LightSource light) {
+float3 directionalLightPBR(float3 normal, float3 wo, float3 wi, float roughness, float metalness, float3 surfaceColor, LightSource light, float shadowAmount) {
 	//spec color
 	float3 specColor = MicrofacetBRDF(normal, wo, wi, roughness, metalness, surfaceColor);
 
@@ -140,7 +140,7 @@ float3 directionalLightPBR(float3 normal, float3 wo, float3 wi, float roughness,
 	float diffuse = diffusePBR(normal, wi);
 	float3 diffuseColor = DiffuseEnergyConserve(diffuse, specColor, metalness);
 
-	return (diffuseColor * surfaceColor + specColor);
+	return light.ambientColor + (diffuseColor * surfaceColor + specColor) * shadowAmount;
 }
 
 //End of PBR functions
@@ -190,7 +190,7 @@ float4 main(VertexToPixel input) : SV_TARGET {
 	shadowAmount = lerp(1.0f, shadowAmount, 1);
 
 	//calculate light
-	float3 result = directionalLightPBR(normal, wo, wi, roughness, metalness, surfaceColor.rgb, light) * shadowAmount;
+	float3 result = directionalLightPBR(normal, wo, wi, roughness, metalness, surfaceColor.rgb, light, shadowAmount);
 
 	//result = pow(result, 1.0 / 2.2);
 
