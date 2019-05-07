@@ -1,8 +1,8 @@
 #include "Portal.h"
 
-#include "Core/GameObject.h"
+#include "../Core/GameObject.h"
 
-void Portal::Update(f32 deltaTime, f32 gameTime)
+void Portal::LateUpdate(f32 deltaTime, f32 gameTime)
 {
 
 	// Replace main camera with focused camera for recursive rendering
@@ -16,11 +16,17 @@ void Portal::Update(f32 deltaTime, f32 gameTime)
 
 	viewCamera->GetGameObject()->SetLocalPosition(offset);
 	viewCamera->GetGameObject()->SetLocalRotation(rotation);
+
 }
 
 __inline Portal* Portal::GetExit()
 {
 	return exit;
+}
+
+__inline Camera* Portal::GetViewCamera()
+{
+	return viewCamera;
 }
 
 __inline void Portal::SetMainCamera(Camera* camera)
@@ -31,9 +37,29 @@ __inline void Portal::SetMainCamera(Camera* camera)
 __inline void Portal::SetViewCamera(Camera* camera)
 {
 	viewCamera = camera;
+	SetViewClipPlane();
 }
 
 __inline void Portal::SetExit(Portal * portal)
 {
 	exit = portal;
+}
+
+void Portal::SetViewClipPlane()
+{
+	if (!exit || !viewCamera)
+		return;
+
+	//XMVECTOR normal = XMVector3Rotate({ 0, 0, 1 }, exit->GetGameObject()->GetRotation());
+	XMVECTOR normal = exit->GetGameObject()->GetForwardVector();
+
+	//XMFLOAT4 clipPlane;
+	//XMStoreFloat4(&clipPlane, normal);
+
+	//clipPlane.w = -XMVectorGetX(XMVector3Dot(normal, exit->GetGameObject()->GetPosition()));
+	XMVECTOR position = exit->GetGameObject()->GetPosition();
+	position = XMVectorSetW(position, 1.0f);
+
+	//viewCamera->SetClipPlane(clipPlane);
+	viewCamera->SetClipPlane(normal, position);
 }

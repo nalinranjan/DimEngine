@@ -2,8 +2,7 @@
 
 #include <DirectXMath.h>
 #include <vector>
-
-#include "../Portal.h"
+#include <array>
 
 #include "Core/GameObject.h"
 #include "Rendering/Camera.h"
@@ -12,6 +11,7 @@
 #include "Rendering/Mesh.h"
 #include "Rendering/SimpleShader.h"
 #include "Rendering/Vertex.h"
+#include "Rendering/Portal.h"
 
 #include "Core/ResourceManager.h"
 
@@ -39,6 +39,7 @@ public:
 
 private:
 	void LoadShaders();
+	void CreateDepthStencilStates();
 	void CreateScene();
 
 	Portal* __CreatePortal(Material* material, f32 x = 0, f32 y = 0, f32 z = 0, f32 rx = 0, f32 ry = 0, f32 rz = 0);
@@ -64,19 +65,19 @@ private:
 	Texture* grassTexture;
 	Texture* wallTexture;
 	Texture* rockTexture;
-	RenderTexture* portalTexture1;
-	RenderTexture* portalTexture2;
-	RenderTexture* portalTexture3;
-	RenderTexture* portalTexture4;
+	//RenderTexture* portalTexture1;
+	//RenderTexture* portalTexture2;
+	//RenderTexture* portalTexture3;
+	//RenderTexture* portalTexture4;
 
 	Material* grassMaterial;
 	Material* wallMaterial;
 	Material* rockMaterial;
-	Material* portalMaterial1;
-	Material* portalMaterial2;
-	Material* portalMaterial3;
-	Material* portalMaterial4;
-
+	//Material* portalMaterial1;
+	//Material* portalMaterial2;
+	//Material* portalMaterial3;
+	//Material* portalMaterial4;
+	Material* portalMaterial;
 
 	DirectionalLight* directionalLight;
 
@@ -100,6 +101,16 @@ private:
 	GameObject* tunnel1;
 	GameObject* tunnel2;
 
-
 	ID3D11DepthStencilState* zPrepassDepthStencilState;
+
+	enum PortalDSStates
+	{
+		IncrementStencil,
+		DecrementStencil,
+		DrawToDepth,
+		DrawAtMaxRecursion,
+		DrawAtCurrentRecursion,
+		NumStates
+	};
+	std::array<ID3D11DepthStencilState*, NumStates> portalDepthStencilStates = {};
 };

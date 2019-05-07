@@ -188,6 +188,7 @@
     <ClInclude Include="Physics\SphereCollider.h" />
     <ClInclude Include="Rendering\Camera.h" />
     <ClInclude Include="Rendering\LightSource.h" />
+    <ClInclude Include="Rendering\Portal.h" />
     <ClInclude Include="Rendering\Texture.h" />
     <ClInclude Include="Rendering\Viewer.h" />
     <ClInclude Include="Rendering\Renderable.h" />
@@ -221,6 +222,7 @@
     <ClCompile Include="Physics\SphereCollider.cpp" />
     <ClCompile Include="Rendering\Camera.cpp" />
     <ClCompile Include="Rendering\Light.cpp" />
+    <ClCompile Include="Rendering\Portal.cpp" />
     <ClCompile Include="Rendering\Renderer.cpp" />
     <ClCompile Include="Rendering\Material.cpp" />
     <ClCompile Include="Rendering\Mesh.cpp" />

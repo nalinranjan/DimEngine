@@ -1,7 +1,6 @@
 ﻿#include <string>
 
 #include "../CameraController.h"
-#include "../Portal.h"
 
 
 #include "../Trigger.h"
@@ -41,16 +40,19 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	wallTexture = nullptr;
 	rockTexture = nullptr;
 	
-	portalTexture1 = nullptr;
-	portalTexture2 = nullptr;
+	//portalTexture1 = nullptr;
+	//portalTexture2 = nullptr;
 
 
 	grassMaterial = nullptr;
 	wallMaterial = nullptr;
 	rockMaterial = nullptr;
 	
-	portalMaterial1 = nullptr;
-	portalMaterial2 = nullptr;
+	//portalMaterial1 = nullptr;
+	//portalMaterial2 = nullptr;
+	//portalMaterial3 = nullptr;
+	//portalMaterial4 = nullptr;
+	portalMaterial = nullptr;
 
 
 	directionalLight = nullptr;
@@ -69,7 +71,6 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 
 
 	zPrepassDepthStencilState = nullptr;
-
 
 	Global::SetScreenRatio(1280.0f / 720.0f);
 
@@ -111,11 +112,11 @@ Game::~Game()
 	if (rockTexture)
 		delete rockTexture;
 
-	if (portalTexture1)
-		delete portalTexture1;
+	//if (portalTexture1)
+	//	delete portalTexture1;
 
-	if (portalTexture2)
-		delete portalTexture2;
+	//if (portalTexture2)
+	//	delete portalTexture2;
 
 
 	if (grassMaterial)
@@ -127,16 +128,29 @@ Game::~Game()
 	if (rockMaterial)
 		delete rockMaterial;
 
-	if (portalMaterial1)
-		delete portalMaterial1;
+	//if (portalMaterial1)
+	//	delete portalMaterial1;
 
-	if (portalMaterial2)
-		delete portalMaterial2;
+	//if (portalMaterial2)
+	//	delete portalMaterial2;
 
+	//if (portalMaterial3)
+	//	delete portalMaterial3;
+
+	//if (portalMaterial4)
+	//	delete portalMaterial4;
+	
+	if (portalMaterial)
+		delete portalMaterial;
 
 	if (zPrepassDepthStencilState)
 		zPrepassDepthStencilState->Release();
 
+	for (auto& depthStencilState : portalDepthStencilStates)
+	{
+		if (depthStencilState)
+			depthStencilState->Release();
+	}
 
 	Scene::UnloadAll();
 
@@ -152,6 +166,7 @@ void Game::Init()
 	rm->Initialize(device, context);
 	
 	LoadShaders();
+	CreateDepthStencilStates();
 	CreateScene();
 }
 
@@ -192,6 +207,45 @@ void Game::LoadShaders()
 	device->CreateDepthStencilState(&depthStencilDesc, &zPrepassDepthStencilState);
 }
 
+void Game::CreateDepthStencilStates()
+{
+	D3D11_DEPTH_STENCIL_DESC portalDSDesc = {};
+	portalDSDesc.DepthEnable = true;
+	portalDSDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	portalDSDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	portalDSDesc.StencilEnable = true;
+	portalDSDesc.StencilReadMask = 0xFF;
+	portalDSDesc.StencilWriteMask = 0xFF;
+
+	portalDSDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_INCR;
+	portalDSDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	portalDSDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	portalDSDesc.FrontFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL;
+
+	portalDSDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	portalDSDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	portalDSDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	portalDSDesc.BackFace.StencilFunc = D3D11_COMPARISON_NEVER;
+
+	device->CreateDepthStencilState(&portalDSDesc, &portalDepthStencilStates.at(IncrementStencil));
+
+	portalDSDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_DECR;
+	device->CreateDepthStencilState(&portalDSDesc, &portalDepthStencilStates.at(DecrementStencil));
+
+	portalDSDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	portalDSDesc.StencilWriteMask = 0;
+	portalDSDesc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;
+	device->CreateDepthStencilState(&portalDSDesc, &portalDepthStencilStates.at(DrawAtMaxRecursion));
+
+	portalDSDesc.FrontFace.StencilFunc = D3D11_COMPARISON_LESS_EQUAL;
+	device->CreateDepthStencilState(&portalDSDesc, &portalDepthStencilStates.at(DrawAtCurrentRecursion));
+
+	portalDSDesc.StencilEnable = false;
+	//portalDSDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;
+	device->CreateDepthStencilState(&portalDSDesc, &portalDepthStencilStates.at(DrawToDepth));
+}
+
 void Game::CreateScene()
 {
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
@@ -204,18 +258,11 @@ void Game::CreateScene()
 	grassTexture = new Texture((wchar_t*)L"../Assets/Textures/checkered-ground.png", D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_MIN_MAG_MIP_POINT, D3D11_FLOAT32_MAX, device, context);
 	wallTexture = new Texture((wchar_t*)L"../Assets/Textures/wall.jpg", D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_ANISOTROPIC, D3D11_FLOAT32_MAX, device, context);
 	rockTexture = new Texture((wchar_t*)L"../Assets/Textures/rock.jpg", D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_ANISOTROPIC, D3D11_FLOAT32_MAX, device, context);
-	portalTexture1 = new RenderTexture(device, 1280u, 720u);
-	portalTexture2 = new RenderTexture(device, 1280u, 720u);
-	portalTexture3 = new RenderTexture(device, 1280u, 720u);
-	portalTexture4 = new RenderTexture(device, 1280u, 720u);
 
 	grassMaterial = new Material(vertexShader, pixelShader, grassTexture->GetResourceView(), grassTexture->GetSamplerState());
 	wallMaterial = new Material(vertexShader, pixelShader, wallTexture->GetResourceView(), wallTexture->GetSamplerState());
 	rockMaterial = new Material(vertexShader, pixelShader, rockTexture->GetResourceView(), rockTexture->GetSamplerState());
-	portalMaterial1 = new Material(vsPortal, psPortal, portalTexture1->GetResourceView(), portalTexture1->GetSamplerState());
-	portalMaterial2 = new Material(vsPortal, psPortal, portalTexture2->GetResourceView(), portalTexture2->GetSamplerState());
-	portalMaterial3 = new Material(vsPortal, psPortal, portalTexture3->GetResourceView(), portalTexture3->GetSamplerState());
-	portalMaterial4 = new Material(vsPortal, psPortal, portalTexture4->GetResourceView(), portalTexture4->GetSamplerState());
+	portalMaterial = new Material(vsPortal, psPortal, nullptr, nullptr);
 	
 	GameObject* directionalLightObject = new GameObject();
 	directionalLightObject->SetRotation(45, 0, 0);
@@ -237,25 +284,21 @@ void Game::CreateScene()
 	camera = go->AddComponent<Camera>();
 
 	portalCamera1 = (new GameObject())->AddComponent<Camera>();
-	portalCamera1->SetRenderTexture(portalTexture1);
 	portalCamera1->SetRatio((float)width / height);
 
 	portalCamera2 = (new GameObject())->AddComponent<Camera>();
-	portalCamera2->SetRenderTexture(portalTexture2);
 	portalCamera2->SetRatio((float)width / height);
 
 	portalCamera3 = (new GameObject())->AddComponent<Camera>();
-	portalCamera3->SetRenderTexture(portalTexture3);
 	portalCamera3->SetRatio((float)width / height);
 
 	portalCamera4 = (new GameObject())->AddComponent<Camera>();
-	portalCamera4->SetRenderTexture(portalTexture3);
 	portalCamera4->SetRatio((float)width / height);
 
-	portal1 = __CreatePortal(portalMaterial1, -15, 0, 0, 0, 0, 0);
-	portal2 = __CreatePortal(portalMaterial2, 5, 0, 0, 0, 180, 0);
-	portal3 = __CreatePortal(portalMaterial3, -15, 0, 10, 0, 180, 0);
-	portal4 = __CreatePortal(portalMaterial4, 5, 0, 20, 0, 0, 0);
+	portal1 = __CreatePortal(portalMaterial, -15, 0, 0, 0, 0, 0);
+	portal2 = __CreatePortal(portalMaterial, 5, 0, 0, 0, 180, 0);
+	portal3 = __CreatePortal(portalMaterial, -15, 0, 10, 0, 180, 0);
+	portal4 = __CreatePortal(portalMaterial, 5, 0, 20, 0, 0, 0);
 
 	portal1->SetExit(portal2);
 	portal1->SetMainCamera(camera);
@@ -310,6 +353,10 @@ void Game::CreateScene()
 	tunnel2->SetLocalScale(2, 2, 10);
 	tunnel2->AddComponent<Renderer>(rockMaterial, tunnelMesh);
 
+	cube = new GameObject();
+	cube->SetPosition(-15, 0, -1);
+	cube->AddComponent<Renderer>(grassMaterial, cubeMesh);
+
 
 	GameObject* wallCollider2L = new GameObject();
 	wallCollider2L->SetParent(tunnel2);
@@ -343,7 +390,7 @@ void Game::CreateScene()
 	GameObject* panel = new GameObject();
 	panel->SetPosition(-15, 0, 0);
 	panel->SetLocalScale(4, 5, 0.5);
-	panel->AddComponent<BoxCollider>(XMVECTOR{ 1, 1, 1 }, XMVECTOR{ 0,0,0 });
+	//panel->AddComponent<BoxCollider>(XMVECTOR{ 1, 1, 1 }, XMVECTOR{ 0,0,0 });
 	panel->AddComponent<Renderer>(rockMaterial, cubeMesh);
 	panel->AddTag("Wall");
 	panel->AddTag("TriggerPanel");
@@ -360,9 +407,13 @@ __forceinline Portal* Game::__CreatePortal(Material* material, f32 x, f32 y, f32
 	portalArea1->SetParent(portal);
 	portalArea1->SetLocalRotation(0, 0, 0);
 	portalArea1->SetLocalScale(1.2f, 2.0f, 1);
-	portalArea1->AddComponent<Renderer>(material, quadMesh);
+	auto portalRenderer = portalArea1->AddComponent<Renderer>(material, quadMesh);
 	portalArea1->AddComponent<BoxCollider>(XMVECTOR{ 2, 2, 0.1f }, XMVECTOR{ 0,0,0 });
 	portalArea1->AddTag("Portal");
+
+	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
+	renderingEngine->AddPortal(portalRenderer);
+
 	/*GameObject* pillar1L = new GameObject();
 	pillar1L->SetParent(portal);
 	pillar1L->SetLocalPosition(-2.5f, 0, 0);
@@ -394,6 +445,7 @@ void Game::Update(float deltaTime, float totalTime)
 		Quit();
 
 	Scene::GetCurrentScene()->Update(deltaTime, totalTime);
+	Scene::GetCurrentScene()->LateUpdate(deltaTime, totalTime);
 
 	PhysicsEngine* physicsEngine = PhysicsEngine::GetSingleton();
 	physicsEngine->UpdateBoundingVolumes();
@@ -408,33 +460,11 @@ void Game::Draw(float deltaTime, float totalTime)
 	renderingEngine->UpdateLightSources();
 	renderingEngine->SortRenderables();
 
-	portalCamera1->RenderToRenderTarget(context);
-	portalCamera2->RenderToRenderTarget(context);
-	portalCamera3->RenderToRenderTarget(context);
-	portalCamera4->RenderToRenderTarget(context);
-
-	D3D11_VIEWPORT viewport = {};
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.Width = (float)width;
-	viewport.Height = (float)height;
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-	context->RSSetViewports(1, &viewport);
-
-
 	const float color[4] = { 0.69f, 0.88f, 0.9f, 0.0f };
-
-	context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
 	context->ClearRenderTargetView(backBufferRTV, color);
 	context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	
-	//renderingEngine->PerformZPrepass(vsZPrepass, context);
-
-	//context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
-	renderingEngine->DrawForward(context);
-	//context->OMSetDepthStencilState(nullptr, 0);
+	renderingEngine->DrawPortals(context, camera, portalDepthStencilStates, backBufferRTV, depthStencilView, 1);
 
 	swapChain->Present(0, 0);
 }

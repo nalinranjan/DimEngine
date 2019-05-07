@@ -1,7 +1,7 @@
 #include "Core/GameObject.h"
 
 #include "CameraController.h"
-#include "Portal.h"
+#include "Rendering/Portal.h"
 #include "Trigger.h"
 
 
