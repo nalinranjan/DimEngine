@@ -125,6 +125,17 @@ private:
 
 	ID3D11DepthStencilState* zPrepassDepthStencilState;
 
+	ID3D11ShaderResourceView* textureGrass;
+	ID3D11ShaderResourceView* normalMapGrass;
+	ID3D11ShaderResourceView* roughnessMapGrass;
+
+	ID3D11ShaderResourceView* textureRock;
+	ID3D11ShaderResourceView* normalMapRock;
+	ID3D11ShaderResourceView* roughnessMapRock;
+	ID3D11ShaderResourceView* metalnessMapRock;
+
+	
+
 	enum PortalDSStates
 	{
 		IncrementStencil,

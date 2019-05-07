@@ -1,3 +1,7 @@
+struct VertexToPixel {
+	float4 svPosition : SV_POSITION;
+};
+
 cbuffer GlobalData : register(b0)
 {
 	float2 screenSize;

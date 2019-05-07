@@ -41,7 +41,7 @@ DimEngine::Rendering::RenderingEngine::RenderingEngine(i32 maxNumMaterials, i32 
 	lightList = nullptr;
 	shadow = nullptr;
 
-	XMMATRIX shadowView = XMMatrixTranspose(XMMatrixLookToLH(XMVectorSet(0, 10, 0, 0), XMVectorSet(0, -1, 0, 0), XMVectorSet(0, 0, 1, 0)));
+	XMMATRIX shadowView = XMMatrixTranspose(XMMatrixLookToLH(XMVectorSet(0, 10, 0, 0), XMVectorSet(0, -1, 1, 0), XMVectorSet(0, 0, 1, 0)));
 	XMMATRIX shadowProjection = XMMatrixTranspose(XMMatrixOrthographicLH(100, 100, 0.1f, 100));
 
 	XMStoreFloat4x4(&shadowViewProjectionMat, XMMatrixMultiply(shadowProjection, shadowView));
@@ -402,6 +402,14 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 		}
 
 		pixelShader->SetInt("hasNormalMap", material->HasNormalMap());
+		pixelShader->SetInt("hasTexture", material->HasTexture());
+		pixelShader->SetInt("hasMetalnessMap", material->HasMetalnessMap());
+		pixelShader->SetInt("hasRoughnessMap", material->HasRoughnessMap());
+		/*	int hasTexture;
+		int hasNormalMap;
+		int hasShadowMap;
+		int hasMetalnessMap;
+		int hasRoughnessMap;*/
 
 		bool isOK = pixelShader->SetShaderResourceView("ShadowMap", shadow->getShadowSRV());
 		//if (!isOK) printf("shadowMap not imported.\n");
@@ -482,6 +490,7 @@ void DimEngine::Rendering::RenderingEngine::DrawPortals(ID3D11DeviceContext* con
 		vertexShader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
 		vertexShader->SetMatrix4x4("world", XMMatrixTranspose(
 			portal->GetGameObject()->GetWorldMatrix()));
+		vertexShader->SetMatrix4x4("shadowViewProjection", shadowViewProjectionMat);
 
 		for (auto it = vertexShaderData.begin(); it != vertexShaderData.end(); ++it) {
 			vertexShader->SetData(it->first, it->second.first, it->second.second);
@@ -620,6 +629,7 @@ void DimEngine::Rendering::RenderingEngine::setShadow(ShadowMap * _shadow)
 
 bool DimEngine::Rendering::RenderingEngine::RenderShadowMap(ID3D11DeviceContext* deviceContext)
 {
+	//deviceContext->PSSetShader(nullptr, nullptr, 0);
 	deviceContext->OMSetRenderTargets(0, nullptr, shadow->getShadowDSV());
 	deviceContext->ClearDepthStencilView(shadow->getShadowDSV(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	deviceContext->RSSetState(shadow->getRasterizerState());
@@ -629,7 +639,7 @@ bool DimEngine::Rendering::RenderingEngine::RenderShadowMap(ID3D11DeviceContext*
 
 	shader->SetShader();
 
-	deviceContext->PSSetShader(0, 0, 0);
+	deviceContext->PSSetShader(nullptr, nullptr, 0);
 
 	i32 j = 0;
 

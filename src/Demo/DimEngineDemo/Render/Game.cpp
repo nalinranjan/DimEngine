@@ -102,6 +102,15 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	psPBR = 0;
 	cubeMap = new CubeMap();
 
+	textureGrass = 0;
+	normalMapGrass = 0;
+	roughnessMapGrass = 0;
+
+	textureRock = 0;
+	normalMapRock = 0;
+	roughnessMapRock = 0;
+	metalnessMapRock = 0;
+
 	Global::SetScreenRatio(1280.0f / 720.0f);
 
 
@@ -132,6 +141,11 @@ Game::~Game()
 
 	if (cubeMesh)
 		delete cubeMesh;
+
+	if (floorMesh) delete floorMesh;
+	if (quadMesh) delete quadMesh;
+	if (coneMesh) delete coneMesh;
+	if (tunnelMesh) delete tunnelMesh;
 
 	if (grassTexture)
 		delete grassTexture;
@@ -200,7 +214,20 @@ Game::~Game()
 			depthStencilState->Release();
 	}
 
+	if (textureGrass) textureGrass->Release();
 
+	if (normalMapGrass) normalMapGrass->Release();
+
+	if (roughnessMapGrass) roughnessMapGrass->Release();
+
+	if (vsPortal) delete vsPortal;
+
+	if (sampler) sampler->Release();
+
+	if (textureRock) textureRock->Release();
+	if (normalMapRock) normalMapRock->Release();
+	if (metalnessMapRock) metalnessMapRock->Release();
+	if (roughnessMapRock) roughnessMapRock->Release();
 	Scene::UnloadAll();
 
 	RenderingEngine::Stop();
@@ -330,17 +357,40 @@ void Game::CreateScene()
 	//test for pbr
 	device->CreateSamplerState(&samplerDesc, &sampler);
 
-	HRESULT isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/floor_albedo.png", 0, &texture);
+	HRESULT isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/copper-rock1/copper-rock1-alb.png", 0, &texture);
 	if (FAILED(isok)) printf("load albedo texture error\n");
 
-	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/floor_normals.png", 0, &normalMap);
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/copper-rock1/copper-rock1-normal.png", 0, &normalMap);
 	if (FAILED(isok)) printf("load normal map error\n");
 
-	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/floor_roughness.png", 0, &roughnessMap);
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/copper-rock1/copper-rock1-rough.png", 0, &roughnessMap);
 	if (FAILED(isok)) printf("load roughnessmap error\n");
 
-	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/floor_metal.png", 0, &metalnessMap);
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/copper-rock1/copper-rock1-metal.png", 0, &metalnessMap);
 	if (FAILED(isok)) printf("load metalnessmap error\n");
+
+	//grass pbr material
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/grass1-albedo3.png", 0, &textureGrass);
+	if (FAILED(isok)) printf("load grass texture error\n");
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/grass1-normal1-dx.png", 0, &normalMapGrass);
+	if (FAILED(isok)) printf("load grass normalmap error\n");
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/grass1-rough.png", 0, &roughnessMapGrass);
+	if (FAILED(isok)) printf("load grass roughness map error\n");
+	Material* pbrGrass = new Material(vertexShader, psPBR, textureGrass, sampler);
+	pbrGrass->setTexture(textureGrass);
+	pbrGrass->setNormalMap(normalMapGrass);
+	pbrGrass->setRoughnessMap(roughnessMapGrass);
+
+	//rock pbr
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/rock-snow-ice1-2k-ue/rock-snow-ice1-2k_Base_Color.png", 0, &textureRock);
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/rock-snow-ice1-2k-ue/rock-snow-ice1-2k_Normal-dx.png", 0, &normalMapRock);
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/rock-snow-ice1-2k-ue/rock-snow-ice1-2k_Roughness.png", 0, &roughnessMapRock);
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/rock-snow-ice1-2k-ue/rock-snow-ice1-2k_Metallic.png", 0, &metalnessMapRock);
+	Material* pbrRock = new Material(vertexShader, psPBR, textureRock, sampler);
+	pbrRock->setTexture(textureRock);
+	pbrRock->setNormalMap(normalMapRock);
+	pbrRock->setRoughnessMap(roughnessMapRock);
+	pbrRock->setMetalnessMap(metalnessMapRock);
 
 	Material* pbrMaterial = new Material(vertexShader, psPBR, texture ,sampler);
 	pbrMaterial->setTexture(texture);
@@ -428,7 +478,7 @@ void Game::CreateScene()
 	floor->SetPosition(0, -2, 0);
 	floor->SetLocalScale(100, 100, 1);
 	floor->SetRotation(-90, 0, 0);
-	floor->AddComponent<Renderer>(grassMaterial, floorMesh);
+	floor->AddComponent<Renderer>(pbrGrass, floorMesh);
 	
 	tunnel1 = new GameObject();
 	tunnel1->SetPosition(-15, -2, 5);
@@ -454,7 +504,7 @@ void Game::CreateScene()
 
 	cube = new GameObject();
 	cube->SetPosition(-15, 0, -1);
-	cube->AddComponent<Renderer>(grassMaterial, cubeMesh);
+	cube->AddComponent<Renderer>(pbrGrass, cubeMesh);
 
 
 	GameObject* wallCollider2L = new GameObject();
@@ -490,7 +540,7 @@ void Game::CreateScene()
 	panel->SetPosition(-15, 0, 0);
 	panel->SetLocalScale(4, 5, 0.5);
 	//panel->AddComponent<BoxCollider>(XMVECTOR{ 1, 1, 1 }, XMVECTOR{ 0,0,0 });
-	panel->AddComponent<Renderer>(rockMaterial, cubeMesh);
+	panel->AddComponent<Renderer>(pbrRock, cubeMesh);
 	panel->AddTag("Wall");
 	panel->AddTag("TriggerPanel");
 	panel->AddComponent<TriggerTarget>(XMVECTOR{ -15, 5, 0 });
@@ -580,7 +630,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	//renderingEngine->PerformZPrepass(vsZPrepass, context);
 
 	//context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
-	renderingEngine->DrawForward(context);
+	//renderingEngine->DrawForward(context);
 	//context->OMSetDepthStencilState(nullptr, 0);
 	renderingEngine->DrawPortals(context, camera, portalDepthStencilStates, backBufferRTV, depthStencilView, 1);
 

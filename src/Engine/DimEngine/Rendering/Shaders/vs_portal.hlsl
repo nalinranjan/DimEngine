@@ -10,6 +10,11 @@ cbuffer ObjectData : register(b3)
 	matrix world;
 };
 
+struct VertexToPixel
+{
+	float4 svPosition : SV_POSITION;
+};
+
 
 float4 main(float3 position : POSITION) : SV_POSITION
 {
