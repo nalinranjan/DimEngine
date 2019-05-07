@@ -357,24 +357,24 @@ void Game::CreateScene()
 	//test for pbr
 	device->CreateSamplerState(&samplerDesc, &sampler);
 
-	HRESULT isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/copper-rock1/copper-rock1-alb.png", 0, &texture);
+	HRESULT isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/Rocks01_col.jpg", 0, &texture);
 	if (FAILED(isok)) printf("load albedo texture error\n");
 
-	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/copper-rock1/copper-rock1-normal.png", 0, &normalMap);
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/Rocks01_nrm.jpg", 0, &normalMap);
 	if (FAILED(isok)) printf("load normal map error\n");
 
-	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/copper-rock1/copper-rock1-rough.png", 0, &roughnessMap);
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/Rocks01_rgh.jpg", 0, &roughnessMap);
 	if (FAILED(isok)) printf("load roughnessmap error\n");
 
-	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/copper-rock1/copper-rock1-metal.png", 0, &metalnessMap);
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/Metal17_disp.jpg", 0, &metalnessMap);
 	if (FAILED(isok)) printf("load metalnessmap error\n");
 
 	//grass pbr material
-	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/grass1-albedo3.png", 0, &textureGrass);
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/Ground23_col.jpg", 0, &textureGrass);
 	if (FAILED(isok)) printf("load grass texture error\n");
-	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/grass1-normal1-dx.png", 0, &normalMapGrass);
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/Ground23_nrm.jpg", 0, &normalMapGrass);
 	if (FAILED(isok)) printf("load grass normalmap error\n");
-	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/grass1-rough.png", 0, &roughnessMapGrass);
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/Ground23_rgh.jpg", 0, &roughnessMapGrass);
 	if (FAILED(isok)) printf("load grass roughness map error\n");
 	Material* pbrGrass = new Material(vertexShader, psPBR, textureGrass, sampler);
 	pbrGrass->setTexture(textureGrass);
@@ -382,15 +382,15 @@ void Game::CreateScene()
 	pbrGrass->setRoughnessMap(roughnessMapGrass);
 
 	//rock pbr
-	CreateWICTextureFromFile(device, context, L"../Assets/Textures/rock-snow-ice1-2k-ue/rock-snow-ice1-2k_Base_Color.png", 0, &textureRock);
-	CreateWICTextureFromFile(device, context, L"../Assets/Textures/rock-snow-ice1-2k-ue/rock-snow-ice1-2k_Normal-dx.png", 0, &normalMapRock);
-	CreateWICTextureFromFile(device, context, L"../Assets/Textures/rock-snow-ice1-2k-ue/rock-snow-ice1-2k_Roughness.png", 0, &roughnessMapRock);
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/Bricks23_col.jpg", 0, &textureRock);
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/Bricks23_nrm.jpg", 0, &normalMapRock);
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/Bricks23_rgh.jpg", 0, &roughnessMapRock);
 	CreateWICTextureFromFile(device, context, L"../Assets/Textures/rock-snow-ice1-2k-ue/rock-snow-ice1-2k_Metallic.png", 0, &metalnessMapRock);
 	Material* pbrRock = new Material(vertexShader, psPBR, textureRock, sampler);
 	pbrRock->setTexture(textureRock);
 	pbrRock->setNormalMap(normalMapRock);
 	pbrRock->setRoughnessMap(roughnessMapRock);
-	pbrRock->setMetalnessMap(metalnessMapRock);
+	//pbrRock->setMetalnessMap(metalnessMapRock);
 
 	Material* pbrMaterial = new Material(vertexShader, psPBR, texture ,sampler);
 	pbrMaterial->setTexture(texture);
@@ -504,7 +504,7 @@ void Game::CreateScene()
 
 	cube = new GameObject();
 	cube->SetPosition(-15, 0, -1);
-	cube->AddComponent<Renderer>(pbrGrass, cubeMesh);
+	cube->AddComponent<Renderer>(pbrMaterial, cubeMesh);
 
 
 	GameObject* wallCollider2L = new GameObject();
@@ -538,7 +538,8 @@ void Game::CreateScene()
 
 	GameObject* panel = new GameObject();
 	panel->SetPosition(-15, 0, 0);
-	panel->SetLocalScale(4, 5, 0.5);
+	panel->SetLocalScale(5, 4, 0.5);
+	panel->SetLocalRotation(0, 0, 90);
 	//panel->AddComponent<BoxCollider>(XMVECTOR{ 1, 1, 1 }, XMVECTOR{ 0,0,0 });
 	panel->AddComponent<Renderer>(pbrRock, cubeMesh);
 	panel->AddTag("Wall");
