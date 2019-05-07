@@ -408,7 +408,7 @@ void Game::CreateScene()
 	cubeMap->setUp(device);
 	cubeMap->setMesh(cubeMesh);
 	cubeMap->setSampler(sampler);
-	cubeMap->setSRV(device, context, L"../Assets/Textures/CubeMaps/Skybox1.dds");
+	cubeMap->setSRV(device, context, L"../Assets/Textures/CubeMaps/SunnyCubeMap.dds");
 	//
 
 	portalMaterial = new Material(vsPortal, psPortal, nullptr, nullptr);
@@ -635,7 +635,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	//context->OMSetDepthStencilState(nullptr, 0);
 	renderingEngine->DrawPortals(context, camera, portalDepthStencilStates, backBufferRTV, depthStencilView, 1);
 
-	//renderingEngine->RenderCubeMap(context, cubeMap);
+	renderingEngine->RenderCubeMap(context, cubeMap);
 
 	ID3D11ShaderResourceView* noSRV[16] = {};
 	context->PSSetShaderResources(0, 16, noSRV);
