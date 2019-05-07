@@ -2,6 +2,8 @@
 #define RENDERING_ENGINE_H
 #pragma once
 
+#include <array>
+
 #include "../Common/Settings.h"
 #include "../Common/Typedefs.h"
 #include "../Memory/DynamicPoolAllocator.hpp"
@@ -53,6 +55,7 @@ namespace DimEngine
 			Renderer* rendererList;
 			Camera* cameraList;
 			Light* lightList;
+			Renderer* portalList;
 
 			ShadowMap* shadow;
 
@@ -80,6 +83,9 @@ namespace DimEngine
 		public:
 			static RenderingEngine* GetSingleton();
 
+			void AddPortal(Renderer* portal);		// Potentially add Portal as a friend class 
+			void RemovePortal(Renderer* portal);	// and make these private.
+
 			void UpdateRenderables();
 			void UpdateViewers();
 			void UpdateLightSources();
@@ -89,8 +95,12 @@ namespace DimEngine
 			void DrawForward(ID3D11DeviceContext* context);
 			bool RenderShadowMap(ID3D11DeviceContext* context);
 			void DrawForward(ID3D11DeviceContext* context, Camera* camera);
+
 			void setShadow(ShadowMap* _shadow);
 			void RenderCubeMap(ID3D11DeviceContext* deviceContext, CubeMap* cubeMap);
+
+			void DrawPortals(ID3D11DeviceContext* context, Camera* camera, const std::array<ID3D11DepthStencilState*, 5>& portalDepthStencilStates, ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, int maxRecursion, int recursionLevel=0);
+			void DrawPortalsToDepthBuffer(ID3D11DeviceContext* context, Camera* camera);
 		};
 	}
 }

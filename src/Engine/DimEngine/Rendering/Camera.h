@@ -2,6 +2,8 @@
 #define CAMERA_H
 #pragma once
 
+#include <utility>
+
 #include "../Core/GameComponent.h"
 
 #include "Mesh.h"
@@ -39,6 +41,11 @@ namespace DimEngine
 		
 		i32 viewer;
 
+		bool useClipPlane;
+		//XMFLOAT4 clipPlane;		// Near clip plane in world space
+		XMVECTOR clipPlaneNorm;
+		XMVECTOR clipPlanePos;
+
 		Camera* next;
 		Camera* previous;
 
@@ -52,6 +59,12 @@ namespace DimEngine
 		void SetRatio(f32 value);
 		void SetNearZ(f32 value);
 		void SetFarZ(f32 value);
+
+		bool UseClipPlane() const;
+		//void SetClipPlane(XMFLOAT4 plane, bool usePlane = true);
+		void SetClipPlane(XMVECTOR normal, XMVECTOR position, bool usePlane = true);
+		//XMFLOAT4 GetClipPlane() const;
+		std::pair<XMVECTOR, XMVECTOR> GetClipPlane() const;
 
 		void RenderToRenderTarget(ID3D11DeviceContext* context);
 	};

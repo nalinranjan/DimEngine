@@ -1,7 +1,7 @@
 #include "Core/GameObject.h"
 
 #include "CameraController.h"
-#include "Portal.h"
+#include "Rendering/Portal.h"
 #include "Trigger.h"
 
 
@@ -54,17 +54,21 @@ void CameraController::OnBeginOverlapping(GameObject* other)
 		exitPortal = other->GetParent()->GetComponent<Portal>()->GetExit()->GetGameObject();
 		XMVECTOR offset = XMVectorSubtract(GetGameObject()->GetPosition(), other->GetPosition());
 		gameObject->SetPosition(XMVectorAdd(exitPortal->GetPosition(), offset));
-		gameObject->SetForwardVector(exitPortal->GetForwardVector());
+		//gameObject->SetForwardVector(exitPortal->GetForwardVector());
+	}
+	else {
+		if (other->ContainTag("Wall")) {
+			gameObject->SetPosition(previousPos);
+			colliedWithWall = true;
+		}
+
+		if (other->ContainTag("TriggerBox")) {
+			trigger = other;
+		}
+	
 	}
 
-	if (other->ContainTag("Wall")) {
-		gameObject->SetPosition(previousPos);
-		colliedWithWall = true;
-	}
 
-	if (other->ContainTag("TriggerBox")) {
-		trigger = other;
-	}
 }
 
 void CameraController::OnOverlapping(GameObject * other)
@@ -77,9 +81,11 @@ void CameraController::OnEndOverlapping(GameObject* other)
 	if (other->ContainTag("Portal") && other->GetParent() == exitPortal)
 		exitPortal = nullptr;
 
-	if (other->ContainTag("Wall"))
-		colliedWithWall = false;
+	else {
+		if (other->ContainTag("Wall"))
+			colliedWithWall = false;
 
-	if (other->ContainTag("TriggerBox"))
-		trigger = nullptr;
+		if (other->ContainTag("TriggerBox"))
+			trigger = nullptr;
+	}
 }
