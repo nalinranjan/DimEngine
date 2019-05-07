@@ -2,6 +2,7 @@
 
 #include "../Core/GameObject.h"
 
+#include <iostream>
 void Portal::Update(f32 deltaTime, f32 gameTime)
 {
 
@@ -16,6 +17,9 @@ void Portal::Update(f32 deltaTime, f32 gameTime)
 
 	viewCamera->GetGameObject()->SetLocalPosition(offset);
 	viewCamera->GetGameObject()->SetLocalRotation(rotation);
+
+	std::cout << viewCamera->GetGameObject()->GetPosition().m128_f32[2] << std::endl;
+
 }
 
 __inline Portal* Portal::GetExit()
