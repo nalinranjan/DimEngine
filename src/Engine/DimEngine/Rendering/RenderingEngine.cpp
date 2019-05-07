@@ -30,7 +30,7 @@ DimEngine::Rendering::RenderingEngine::RenderingEngine(i32 maxNumMaterials, i32 
 	lightList = nullptr;
 	shadow = nullptr;
 
-	XMMATRIX shadowView = XMMatrixTranspose(XMMatrixLookToLH(XMVectorSet(0, 10, 0, 0), XMVectorSet(0, 1, -1, 0), XMVectorSet(0, 0, 1, 0)));
+	XMMATRIX shadowView = XMMatrixTranspose(XMMatrixLookToLH(XMVectorSet(0, 10, 0, 0), XMVectorSet(0, -1, 0, 0), XMVectorSet(0, 0, 1, 0)));
 	XMMATRIX shadowProjection = XMMatrixTranspose(XMMatrixOrthographicLH(100, 100, 0.1f, 100));
 
 	XMStoreFloat4x4(&shadowViewProjectionMat, XMMatrixMultiply(shadowProjection, shadowView));
@@ -341,6 +341,7 @@ void DimEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* con
 			vertexShader->SetMatrix4x4("projection", projectionMatrix);
 			vertexShader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
 			vertexShader->SetMatrix4x4("world", renderable.worldMatrix);
+			vertexShader->SetMatrix4x4("shadowViewProjection", shadowViewProjectionMat);
 
 			// Set up all data on vertex shader
 			/*for (auto it = vertexShaderData.begin(); it != vertexShaderData.end(); ++it) {
