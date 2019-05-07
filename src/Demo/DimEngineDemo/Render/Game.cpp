@@ -331,10 +331,7 @@ void Game::CreateScene()
 	grassMaterial = new Material(vertexShader, pixelShader, grassTexture->GetResourceView(), grassTexture->GetSamplerState());
 	wallMaterial = new Material(vertexShader, pixelShader, wallTexture->GetResourceView(), wallTexture->GetSamplerState());
 	rockMaterial = new Material(vertexShader, pixelShader, rockTexture->GetResourceView(), rockTexture->GetSamplerState());
-	/*portalMaterial1 = new Material(vsPortal, psPortal, portalTexture1->GetResourceView(), portalTexture1->GetSamplerState());
-	portalMaterial2 = new Material(vsPortal, psPortal, portalTexture2->GetResourceView(), portalTexture2->GetSamplerState());
-	portalMaterial3 = new Material(vsPortal, psPortal, portalTexture3->GetResourceView(), portalTexture3->GetSamplerState());
-	portalMaterial4 = new Material(vsPortal, psPortal, portalTexture4->GetResourceView(), portalTexture4->GetSamplerState());*/
+	portalMaterial = new Material(vsPortal, psPortal, nullptr, nullptr);
 
 	//test for pbr
 	device->CreateSamplerState(&samplerDesc, &sampler);
@@ -390,9 +387,7 @@ void Game::CreateScene()
 	pbrMaterial->setTexture(texture);
 	pbrMaterial->setMetalnessMap(metalnessMap);
 	pbrMaterial->setRoughnessMap(roughnessMap);
-	//pbrMaterial.setMetalnessMap(metalnessMap);
 	pbrMaterial->setNormalMap(normalMap);
-	//pbrMaterial.setRoughnessMap(roughnessMap);
 
 	shadow->setUp(device);
 	shadow->setShader(shadowShader);
@@ -405,8 +400,6 @@ void Game::CreateScene()
 	cubeMap->setSRV(device, context, L"../Assets/Textures/CubeMaps/SunnyCubeMap.dds");
 	//
 
-	portalMaterial = new Material(vsPortal, psPortal, nullptr, nullptr);
-	
 	GameObject* directionalLightObject = new GameObject();
 	directionalLightObject->SetRotation(45, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
@@ -588,6 +581,9 @@ void Game::Update(float deltaTime, float totalTime)
 	if (GetAsyncKeyState(VK_ESCAPE))
 		Quit();
 
+	if (GetAsyncKeyState('C') & 0x1)
+		Global::SetObliqueClipping(!Global::UseObliqueClipping());
+
 	Scene::GetCurrentScene()->Update(deltaTime, totalTime);
 	Scene::GetCurrentScene()->LateUpdate(deltaTime, totalTime);
 
@@ -622,11 +618,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	context->RSSetViewports(1, &shadowViewport);
 	context->RSSetState(0);
 
-	//renderingEngine->PerformZPrepass(vsZPrepass, context);
-
-	//context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
 	//renderingEngine->DrawForward(context);
-	//context->OMSetDepthStencilState(nullptr, 0);
 	renderingEngine->DrawPortals(context, camera, portalDepthStencilStates, backBufferRTV, depthStencilView, 1);
 
 	renderingEngine->RenderCubeMap(context, cubeMap);

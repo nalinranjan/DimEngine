@@ -220,7 +220,7 @@ void DimEngine::Rendering::RenderingEngine::UpdateViewers()
 			viewer.viewMatrix = XMMatrixLookToLH(viewer.position, XMVector3Transform({ 0, 0, 1 }, rotationMatrix), { 0, 1, 0 });
 			viewer.projectionMatrix = XMMatrixPerspectiveFovLH(camera->fov, camera->ratio == 0 ? screenRatio : camera->ratio, camera->nearZ, camera->farZ);
 
-			if (camera->UseClipPlane())
+			if (Global::UseObliqueClipping() && camera->UseClipPlane())
 			{
 				auto clipPlane = camera->GetClipPlane();
 				XMVECTOR normal = clipPlane.first;
@@ -258,7 +258,6 @@ void DimEngine::Rendering::RenderingEngine::UpdateViewers()
 				projection._43 = scaledClipPlane.w;
 
 				viewer.projectionMatrix = XMLoadFloat4x4(&projection);
-
 			}
 
 			viewer.viewMatrix = XMMatrixTranspose(viewer.viewMatrix);
@@ -515,7 +514,6 @@ void DimEngine::Rendering::RenderingEngine::DrawPortals(ID3D11DeviceContext* con
 		context->DrawIndexed(mesh->GetIndexCount(), 0, 0);
 
 		auto portalCamera = portal->GetGameObject()->GetParent()->GetComponent<Portal>()->GetViewCamera();
-		//portalCamera->SetClipPlane(NULL);
 
 		// Render inside portal
 		if (recursionLevel == maxRecursion)
