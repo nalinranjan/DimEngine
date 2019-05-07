@@ -40,18 +40,10 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	wallTexture = nullptr;
 	rockTexture = nullptr;
 	
-	//portalTexture1 = nullptr;
-	//portalTexture2 = nullptr;
-
 
 	grassMaterial = nullptr;
 	wallMaterial = nullptr;
 	rockMaterial = nullptr;
-	
-	//portalMaterial1 = nullptr;
-	//portalMaterial2 = nullptr;
-	//portalMaterial3 = nullptr;
-	//portalMaterial4 = nullptr;
 	portalMaterial = nullptr;
 
 
@@ -160,13 +152,6 @@ Game::~Game()
 	if (rockTexture)
 		delete rockTexture;
 
-	//if (portalTexture1)
-	//	delete portalTexture1;
-
-	//if (portalTexture2)
-	//	delete portalTexture2;
-
-
 	if (grassMaterial)
 		delete grassMaterial;
 
@@ -176,18 +161,6 @@ Game::~Game()
 	if (rockMaterial)
 		delete rockMaterial;
 
-	//if (portalMaterial1)
-	//	delete portalMaterial1;
-
-	//if (portalMaterial2)
-	//	delete portalMaterial2;
-
-	//if (portalMaterial3)
-	//	delete portalMaterial3;
-
-	//if (portalMaterial4)
-	//	delete portalMaterial4;
-	
 	if (portalMaterial)
 		delete portalMaterial;
 
@@ -358,10 +331,7 @@ void Game::CreateScene()
 	grassMaterial = new Material(vertexShader, pixelShader, grassTexture->GetResourceView(), grassTexture->GetSamplerState());
 	wallMaterial = new Material(vertexShader, pixelShader, wallTexture->GetResourceView(), wallTexture->GetSamplerState());
 	rockMaterial = new Material(vertexShader, pixelShader, rockTexture->GetResourceView(), rockTexture->GetSamplerState());
-	/*portalMaterial1 = new Material(vsPortal, psPortal, portalTexture1->GetResourceView(), portalTexture1->GetSamplerState());
-	portalMaterial2 = new Material(vsPortal, psPortal, portalTexture2->GetResourceView(), portalTexture2->GetSamplerState());
-	portalMaterial3 = new Material(vsPortal, psPortal, portalTexture3->GetResourceView(), portalTexture3->GetSamplerState());
-	portalMaterial4 = new Material(vsPortal, psPortal, portalTexture4->GetResourceView(), portalTexture4->GetSamplerState());*/
+	portalMaterial = new Material(vsPortal, psPortal, nullptr, nullptr);
 
 	//test for pbr
 	device->CreateSamplerState(&samplerDesc, &sampler);
@@ -417,9 +387,7 @@ void Game::CreateScene()
 	pbrMaterial->setTexture(texture);
 	pbrMaterial->setMetalnessMap(metalnessMap);
 	pbrMaterial->setRoughnessMap(roughnessMap);
-	//pbrMaterial.setMetalnessMap(metalnessMap);
 	pbrMaterial->setNormalMap(normalMap);
-	//pbrMaterial.setRoughnessMap(roughnessMap);
 
 	shadow->setUp(device);
 	shadow->setShader(shadowShader);
@@ -432,8 +400,6 @@ void Game::CreateScene()
 	cubeMap->setSRV(device, context, L"../Assets/Textures/CubeMaps/SunnyCubeMap.dds");
 	//
 
-	portalMaterial = new Material(vsPortal, psPortal, nullptr, nullptr);
-	
 	GameObject* directionalLightObject = new GameObject();
 	directionalLightObject->SetRotation(45, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
@@ -615,6 +581,9 @@ void Game::Update(float deltaTime, float totalTime)
 	if (GetAsyncKeyState(VK_ESCAPE))
 		Quit();
 
+	if (GetAsyncKeyState('C') & 0x1)
+		Global::SetObliqueClipping(!Global::UseObliqueClipping());
+
 	Scene::GetCurrentScene()->Update(deltaTime, totalTime);
 	Scene::GetCurrentScene()->LateUpdate(deltaTime, totalTime);
 
@@ -649,11 +618,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	context->RSSetViewports(1, &shadowViewport);
 	context->RSSetState(0);
 
-	//renderingEngine->PerformZPrepass(vsZPrepass, context);
-
-	//context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
 	//renderingEngine->DrawForward(context);
-	//context->OMSetDepthStencilState(nullptr, 0);
 	renderingEngine->DrawPortals(context, camera, portalDepthStencilStates, backBufferRTV, depthStencilView, 1);
 
 	renderingEngine->RenderCubeMap(context, cubeMap);
