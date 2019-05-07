@@ -134,7 +134,9 @@ private:
 	ID3D11ShaderResourceView* roughnessMapRock;
 	ID3D11ShaderResourceView* metalnessMapRock;
 
-	
+	ID3D11ShaderResourceView* textureTile1;
+	ID3D11ShaderResourceView* normalMapTile1;
+	ID3D11ShaderResourceView* roughnessTile1;
 
 	enum PortalDSStates
 	{

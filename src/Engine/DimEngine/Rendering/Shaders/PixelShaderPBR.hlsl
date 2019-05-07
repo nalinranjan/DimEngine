@@ -194,5 +194,6 @@ float4 main(VertexToPixel input) : SV_TARGET {
 
 	//result = pow(result, 1.0 / 2.2);
 
+	//result = shadowAmount.rrr;
 	return float4(result, 1.0f);
 }

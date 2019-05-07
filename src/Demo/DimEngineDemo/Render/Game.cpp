@@ -111,6 +111,10 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	roughnessMapRock = 0;
 	metalnessMapRock = 0;
 
+	textureTile1 = 0;
+	normalMapTile1 = 0;
+	roughnessTile1 = 0;
+
 	Global::SetScreenRatio(1280.0f / 720.0f);
 
 
@@ -228,6 +232,11 @@ Game::~Game()
 	if (normalMapRock) normalMapRock->Release();
 	if (metalnessMapRock) metalnessMapRock->Release();
 	if (roughnessMapRock) roughnessMapRock->Release();
+
+	if (textureTile1) textureTile1->Release();
+	if (normalMapTile1) normalMapTile1->Release();
+	if (roughnessTile1) roughnessTile1->Release();
+
 	Scene::UnloadAll();
 
 	RenderingEngine::Stop();
@@ -392,6 +401,18 @@ void Game::CreateScene()
 	pbrRock->setRoughnessMap(roughnessMapRock);
 	//pbrRock->setMetalnessMap(metalnessMapRock);
 
+	//rock pbr
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/Tiles32_col.jpg", 0, &textureTile1);
+	if (FAILED(isok)) printf("load grass texture error\n");
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/Tiles32_nrm.jpg", 0, &normalMapTile1);
+	if (FAILED(isok)) printf("load grass texture error\n");
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/Tiles32_rgh.jpg", 0, &roughnessTile1);
+	if (FAILED(isok)) printf("load grass texture error\n");
+	Material* pbrTile1 = new Material(vertexShader, psPBR, textureTile1, sampler);
+	pbrTile1->setTexture(textureTile1);
+	pbrTile1->setNormalMap(normalMapTile1);
+	pbrTile1->setRoughnessMap(roughnessTile1);
+
 	Material* pbrMaterial = new Material(vertexShader, psPBR, texture ,sampler);
 	pbrMaterial->setTexture(texture);
 	pbrMaterial->setMetalnessMap(metalnessMap);
@@ -483,7 +504,7 @@ void Game::CreateScene()
 	tunnel1 = new GameObject();
 	tunnel1->SetPosition(-15, -2, 5);
 	tunnel1->SetLocalScale(2, 2, 5);
-	tunnel1->AddComponent<Renderer>(rockMaterial, tunnelMesh);
+	tunnel1->AddComponent<Renderer>(pbrTile1, tunnelMesh);
 
 	GameObject* wallCollider1L = new GameObject();
 	wallCollider1L->SetParent(tunnel1);
@@ -500,7 +521,7 @@ void Game::CreateScene()
 	tunnel2 = new GameObject();
 	tunnel2->SetPosition(5, -2, 10);
 	tunnel2->SetLocalScale(2, 2, 10);
-	tunnel2->AddComponent<Renderer>(rockMaterial, tunnelMesh);
+	tunnel2->AddComponent<Renderer>(pbrTile1, tunnelMesh);
 
 	cube = new GameObject();
 	cube->SetPosition(-15, 0, -1);

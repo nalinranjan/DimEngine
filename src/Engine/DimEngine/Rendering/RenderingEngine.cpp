@@ -42,7 +42,7 @@ DimEngine::Rendering::RenderingEngine::RenderingEngine(i32 maxNumMaterials, i32 
 	shadow = nullptr;
 
 	XMMATRIX shadowView = XMMatrixTranspose(XMMatrixLookToLH(XMVectorSet(0, 10, 0, 0), XMVectorSet(0, -1, 1, 0), XMVectorSet(0, 0, 1, 0)));
-	XMMATRIX shadowProjection = XMMatrixTranspose(XMMatrixOrthographicLH(100, 100, 0.1f, 100));
+	XMMATRIX shadowProjection = XMMatrixTranspose(XMMatrixOrthographicLH(40, 40, 0.1f, 100));
 
 	XMStoreFloat4x4(&shadowViewProjectionMat, XMMatrixMultiply(shadowProjection, shadowView));
 
