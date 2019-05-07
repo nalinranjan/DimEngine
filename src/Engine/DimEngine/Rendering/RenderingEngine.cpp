@@ -210,9 +210,7 @@ void DimEngine::Rendering::RenderingEngine::UpdateViewers()
 			XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(gameObject->GetRotation());
 
 			viewer.position = gameObject->GetPosition();
-			//viewer.viewMatrix = XMMatrixTranspose(XMMatrixLookToLH(viewer.position, XMVector3Transform({ 0, 0, 1 }, rotationMatrix), { 0, 1, 0 }));
 			viewer.viewMatrix = XMMatrixLookToLH(viewer.position, XMVector3Transform({ 0, 0, 1 }, rotationMatrix), { 0, 1, 0 });
-			//viewer.projectionMatrix = XMMatrixTranspose(XMMatrixPerspectiveFovLH(camera->fov, camera->ratio == 0 ? screenRatio : camera->ratio, camera->nearZ, camera->farZ));
 			viewer.projectionMatrix = XMMatrixPerspectiveFovLH(camera->fov, camera->ratio == 0 ? screenRatio : camera->ratio, camera->nearZ, camera->farZ);
 
 			if (camera->UseClipPlane())
@@ -221,7 +219,6 @@ void DimEngine::Rendering::RenderingEngine::UpdateViewers()
 				XMVECTOR normal = clipPlane.first;
 				XMVECTOR pos = clipPlane.second;
 
-				//normal = XMVector3NormalizeEst(XMVector3Transform(normal, viewer.viewMatrix));
 				normal = XMVector3NormalizeEst(XMVector3Transform(normal, 
 					XMMatrixTranspose(XMMatrixInverse(nullptr, viewer.viewMatrix))));
 				pos = XMVector3Transform(pos, viewer.viewMatrix);
@@ -245,10 +242,13 @@ void DimEngine::Rendering::RenderingEngine::UpdateViewers()
 
 				plane *= (1.0f / XMVectorGetX(XMVector4Dot(plane, q)));
 
-				projection._13 = XMVectorGetX(plane);
-				projection._23 = XMVectorGetY(plane);
-				projection._33 = XMVectorGetZ(plane);
-				projection._43 = XMVectorGetW(plane);
+				XMFLOAT4 scaledClipPlane;
+				XMStoreFloat4(&scaledClipPlane, plane);
+
+				projection._13 = scaledClipPlane.x;
+				projection._23 = scaledClipPlane.y;
+				projection._33 = scaledClipPlane.z;
+				projection._43 = scaledClipPlane.w;
 
 				viewer.projectionMatrix = XMLoadFloat4x4(&projection);
 
