@@ -66,17 +66,6 @@ void DimEngine::Camera::SetClipPlane(XMVECTOR normal, XMVECTOR position, bool us
 	useClipPlane = usePlane;
 }
 
-//void DimEngine::Camera::SetClipPlane(XMFLOAT4 plane, bool usePlane)
-//{
-//	clipPlane = plane;
-//	useClipPlane = usePlane;
-//}
-
-//XMFLOAT4 DimEngine::Camera::GetClipPlane() const
-//{
-//	return clipPlane;
-//}
-
 std::pair<XMVECTOR, XMVECTOR> DimEngine::Camera::GetClipPlane() const
 {
 	return std::make_pair(clipPlaneNorm, clipPlanePos);

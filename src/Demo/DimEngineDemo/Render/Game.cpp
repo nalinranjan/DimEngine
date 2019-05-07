@@ -40,18 +40,10 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	wallTexture = nullptr;
 	rockTexture = nullptr;
 	
-	//portalTexture1 = nullptr;
-	//portalTexture2 = nullptr;
-
 
 	grassMaterial = nullptr;
 	wallMaterial = nullptr;
 	rockMaterial = nullptr;
-	
-	//portalMaterial1 = nullptr;
-	//portalMaterial2 = nullptr;
-	//portalMaterial3 = nullptr;
-	//portalMaterial4 = nullptr;
 	portalMaterial = nullptr;
 
 
@@ -160,13 +152,6 @@ Game::~Game()
 	if (rockTexture)
 		delete rockTexture;
 
-	//if (portalTexture1)
-	//	delete portalTexture1;
-
-	//if (portalTexture2)
-	//	delete portalTexture2;
-
-
 	if (grassMaterial)
 		delete grassMaterial;
 
@@ -176,18 +161,6 @@ Game::~Game()
 	if (rockMaterial)
 		delete rockMaterial;
 
-	//if (portalMaterial1)
-	//	delete portalMaterial1;
-
-	//if (portalMaterial2)
-	//	delete portalMaterial2;
-
-	//if (portalMaterial3)
-	//	delete portalMaterial3;
-
-	//if (portalMaterial4)
-	//	delete portalMaterial4;
-	
 	if (portalMaterial)
 		delete portalMaterial;
 
