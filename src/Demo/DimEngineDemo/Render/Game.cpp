@@ -387,6 +387,7 @@ void Game::Update(float deltaTime, float totalTime)
 		Quit();
 
 	Scene::GetCurrentScene()->Update(deltaTime, totalTime);
+	Scene::GetCurrentScene()->LateUpdate(deltaTime, totalTime);
 
 	PhysicsEngine* physicsEngine = PhysicsEngine::GetSingleton();
 	physicsEngine->UpdateBoundingVolumes();

@@ -2,7 +2,7 @@
 
 #include "../Core/GameObject.h"
 
-void Portal::Update(f32 deltaTime, f32 gameTime)
+void Portal::LateUpdate(f32 deltaTime, f32 gameTime)
 {
 
 	// Replace main camera with focused camera for recursive rendering

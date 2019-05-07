@@ -16,7 +16,7 @@ private:
 	Camera* viewCamera;
 	Portal* exit;
 
-	void Update(f32 deltaTime, f32 gameTime);
+	void LateUpdate(f32 deltaTime, f32 gameTime);
 
 
 public:
