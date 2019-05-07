@@ -2,6 +2,10 @@
 
 #include "../CameraController.h"
 
+
+#include "../Trigger.h"
+#include "../TriggerTarget.h"
+
 #include "Core/Global.h"
 #include "Core/Scene.h"
 
@@ -268,9 +272,10 @@ void Game::CreateScene()
 	cameraObject = new GameObject();
 	cameraObject->SetRotation(camRotX, camRotY, 0);
 	//cameraObject->AddComponent<Renderer>(rockMaterial, sphereMesh);
-	cameraObject->AddComponent<SphereCollider>();
+	cameraObject->AddComponent<SphereCollider>(0.5f);
 	cameraObject->AddComponent<CameraController>();
 	cameraObject->SetPosition(0, 0, 0);
+	cameraObject->AddTag("Player");
 
 	GameObject* go = new GameObject();
 	go->SetParent(cameraObject);
@@ -331,6 +336,18 @@ void Game::CreateScene()
 	tunnel1->SetLocalScale(2, 2, 5);
 	tunnel1->AddComponent<Renderer>(rockMaterial, tunnelMesh);
 
+	GameObject* wallCollider1L = new GameObject();
+	wallCollider1L->SetParent(tunnel1);
+	wallCollider1L->SetLocalPosition(0, 0, 0);
+	wallCollider1L->AddComponent<BoxCollider>(XMVECTOR{ 0.4, 8, 10 }, XMVECTOR{ -1.5,0,0 });
+	wallCollider1L->AddTag("Wall");
+
+	GameObject* wallCollider1R = new GameObject();
+	wallCollider1R->SetParent(tunnel1);
+	wallCollider1R->SetLocalPosition(0, 0, 0);
+	wallCollider1R->AddComponent<BoxCollider>(XMVECTOR{ 0.4, 8, 10 }, XMVECTOR{ 1.5,0,0 });
+	wallCollider1R->AddTag("Wall");
+
 	tunnel2 = new GameObject();
 	tunnel2->SetPosition(5, -2, 10);
 	tunnel2->SetLocalScale(2, 2, 10);
@@ -340,6 +357,46 @@ void Game::CreateScene()
 	cube->SetPosition(-15, 0, -1);
 	cube->AddComponent<Renderer>(grassMaterial, cubeMesh);
 
+
+	GameObject* wallCollider2L = new GameObject();
+	wallCollider2L->SetParent(tunnel2);
+	wallCollider2L->SetLocalPosition(0, 0, 0);
+	wallCollider2L->AddComponent<BoxCollider>(XMVECTOR{ 0.4, 8, 20 }, XMVECTOR{ 1.5,0,0 });
+	wallCollider2L->AddTag("Wall");
+
+
+	GameObject* wallCollider2R = new GameObject();
+	wallCollider2R->SetParent(tunnel2);
+	wallCollider2R->SetLocalPosition(0, 0, 0);
+	wallCollider2R->AddComponent<BoxCollider>(XMVECTOR{ 0.4, 8, 20 }, XMVECTOR{ -1.5,0,0 });
+	wallCollider2R->AddTag("Wall");
+
+
+
+	GameObject* button = new GameObject();
+	button->SetPosition(-4, -2, 2);
+	button->SetLocalScale(2, 2, 2);
+	button->AddComponent<BoxCollider>(XMVECTOR{ 2, 2, 2 }, XMVECTOR{ 0,0,0 });
+	button->AddTag("Wall");
+
+
+	GameObject* triggerBox = new GameObject();
+	triggerBox->SetPosition(-4, -2, 2);
+	triggerBox->SetLocalScale(2, 2, 2);
+	triggerBox->AddComponent<BoxCollider>(XMVECTOR{ 3, 3, 3}, XMVECTOR{ 0,0,0 });
+	triggerBox->AddComponent<Renderer>(rockMaterial, cubeMesh);
+	triggerBox->AddTag("TriggerBox");
+
+	GameObject* panel = new GameObject();
+	panel->SetPosition(-15, 0, 0);
+	panel->SetLocalScale(4, 5, 0.5);
+	//panel->AddComponent<BoxCollider>(XMVECTOR{ 1, 1, 1 }, XMVECTOR{ 0,0,0 });
+	panel->AddComponent<Renderer>(rockMaterial, cubeMesh);
+	panel->AddTag("Wall");
+	panel->AddTag("TriggerPanel");
+	panel->AddComponent<TriggerTarget>(XMVECTOR{ -15, 5, 0 });
+
+	triggerBox->AddComponent<Trigger>(panel->GetComponent<TriggerTarget>(), XMVECTOR{ -4, -2.5f, 2 });
 }
 
 __forceinline Portal* Game::__CreatePortal(Material* material, f32 x, f32 y, f32 z, f32 rx, f32 ry, f32 rz)
@@ -351,7 +408,8 @@ __forceinline Portal* Game::__CreatePortal(Material* material, f32 x, f32 y, f32
 	portalArea1->SetLocalRotation(0, 0, 0);
 	portalArea1->SetLocalScale(1.2f, 2.0f, 1);
 	auto portalRenderer = portalArea1->AddComponent<Renderer>(material, quadMesh);
-	portalArea1->AddComponent<BoxCollider>(2, 2, 0.1f);
+	portalArea1->AddComponent<BoxCollider>(XMVECTOR{ 2, 2, 0.1f }, XMVECTOR{ 0,0,0 });
+	portalArea1->AddTag("Portal");
 
 	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
 	renderingEngine->AddPortal(portalRenderer);

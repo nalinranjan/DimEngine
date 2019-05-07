@@ -84,7 +84,7 @@ void DimEngine::Physics::PhysicsEngine::UpdateBoundingVolumes()
 			if (!collider->boundingVolume)
 				collider->boundingVolume = new OrientedBoundingBox();
 
-			static_cast<OrientedBoundingBox*>(collider->boundingVolume)->SetData(gameObject->GetWorldMatrix(), static_cast<BoxCollider*>(collider)->GetSize());
+			static_cast<OrientedBoundingBox*>(collider->boundingVolume)->SetData(gameObject->GetWorldMatrix(), static_cast<BoxCollider*>(collider)->GetSize(), static_cast<BoxCollider*>(collider)->GetOffset());
 			break;
 
 

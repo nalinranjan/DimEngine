@@ -181,12 +181,16 @@ xcopy /y /d "..\..\Engine\$(IntDir)*.cso" "$(OutDir)"</Command>
     <ClInclude Include="Render\Game.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Trigger.h" />
+    <ClInclude Include="TriggerTarget.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CameraController.cpp" />
     <ClCompile Include="DimEngineDemo.cpp" />
     <ClCompile Include="Render\DXCore.cpp" />
     <ClCompile Include="Render\Game.cpp" />
+    <ClCompile Include="Trigger.cpp" />
+    <ClCompile Include="TriggerTarget.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="DimEngineDemo.ico" />
